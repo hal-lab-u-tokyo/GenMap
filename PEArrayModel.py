@@ -3,7 +3,7 @@ import copy
 
 ALU_node_exp = "ALU_{pos[0]}_{pos[1]}"
 SE_node_exp = "SE_{id}_{name}_{pos[0]}_{pos[1]}"
-CONST_node_exp = "Const_{index}"
+CONST_node_exp = "CONST_{index}"
 IN_PORT_node_exp = "IN_PORT_{index}"
 OUT_PORT_node_exp = "OUT_PORT_{index}"
 
@@ -25,18 +25,18 @@ class PEArrayModel:
 
     def __init__(self, conf):
         '''Constructor of this class
-        
+
         Args:
             conf (XML Element): Specification of the PE array
             It must contain following attributes
                 width: PE array width
                 height: PE array height
                 const_reg: the number of constant registers
-                input_port: the number of input port 
+                input_port: the number of input port
                 output_port: the number of output port
             And also, it must contain a child elements whose tag name is "PE" or "OUT_PORT".
 
-            "PE" Element will be composed of 
+            "PE" Element will be composed of
                 an "ALU" Element
                 "SE" Elements
             And also, it must have its coordinate as a attribute named "coord"
@@ -49,13 +49,13 @@ class PEArrayModel:
                 "operation" Elements
                 "input" Elements
 
-            
-            "SE" Element will be composed of 
+
+            "SE" Element will be composed of
                 "output" Elements
             And also, it must have its id as a attribute named "id"
             Example:
                 <SE id="0">...</SE>
-            
+
             "operation" Element has an inner text of the operation name supported by the ALU
             Example:
                 <operation>ADD</operation>
@@ -133,11 +133,11 @@ class PEArrayModel:
         else:
             self.__out_port_range = list(range(int(outport_str)))
 
-        # init operation list 
+        # init operation list
         self.__operation_list = [[[] for y in range(self.__height)] for x in range(self.__width)]
 
         # get PE configs
-        PEs = [pe for pe in conf if pe.tag == "PE"] 
+        PEs = [pe for pe in conf if pe.tag == "PE"]
 
         # check config number
         if len(PEs) != self.__width * self.__height:
@@ -212,9 +212,9 @@ class PEArrayModel:
                     if alu in self.__network.nodes():
                         if dst.find("ALU") == 0:
                             # set ALU input weigth
-                            self.__network.add_edge(alu, dst, weight=0)
+                            self.__network.add_edge(alu, dst)
                         else:
-                            self.__network.add_edge(alu, dst, weight=0)
+                            self.__network.add_edge(alu, dst)
 
                     else:
                         raise self.InvalidConfigError(alu + " is not exist")
@@ -230,9 +230,9 @@ class PEArrayModel:
                     if se in self.__network.nodes():
                         if dst.find("ALU") == 0:
                             # set ALU input weight
-                            self.__network.add_edge(se, dst, weight=0)
+                            self.__network.add_edge(se, dst)
                         else:
-                            self.__network.add_edge(se, dst, weight=0)
+                            self.__network.add_edge(se, dst)
                     else:
                         raise self.InvalidConfigError(se + " is not exist")
 
@@ -242,7 +242,7 @@ class PEArrayModel:
                     raise self.InvalidConfigError("missing index of const register connected to " + dst)
                 else:
                     if attr["index"] in self.__const_reg_range:
-                        self.__network.add_edge(CONST_node_exp.format(index=attr["index"]), dst, weight=0)
+                        self.__network.add_edge(CONST_node_exp.format(index=attr["index"]), dst)
                     else:
                         raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
 
@@ -252,7 +252,7 @@ class PEArrayModel:
                     raise self.InvalidConfigError("missing index of input port connected to " + dst)
                 else:
                     if attr["index"] in self.__in_port_range:
-                        self.__network.add_edge(IN_PORT_node_exp.format(index=attr["index"]), dst, weight=0)
+                        self.__network.add_edge(IN_PORT_node_exp.format(index=attr["index"]), dst)
                     else:
                         raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
             else:
@@ -276,7 +276,7 @@ class PEArrayModel:
 
         # get connection type
         con_type = input_connection.get("type")
-        if con_type is None: 
+        if con_type is None:
             raise self.InvalidConfigError("missing connection type connected to" + dst)
 
         # get coord of input_connection (if any)
@@ -331,9 +331,9 @@ class PEArrayModel:
                 Available types are "ALU", "SE", "Const", "IN_PORT" and "OUT_PORT"
             pos (tuple-like): position of the element)
                 It is necessary for "ALU" and "SE"
-            index (int): index of some elements 
+            index (int): index of some elements
                 Its is necessary for "Const", "IN_PORT" and "OUT_PORT"
-            se_id (int): id of the SE Elements  
+            se_id (int): id of the SE Elements
             link_name (str): name of output link name of the SE
 
         Return:
@@ -359,6 +359,58 @@ class PEArrayModel:
         else:
             return ""
 
+    def setInitEdgeWeight(self, weight_name, weight, edge_type = None):
+        """ Set initial weight to edges in the network model.
+
+            Args:
+                weight_name (str): a name of the weight
+                    it is used as a attribute name of networkx digraph
+                weight (int): weight value
+                edge_type (str): edge type
+                    if it is None, all edges are initilized with the value.
+                    The type name must be the same name as the Element name,
+                    and edge type is same as that of the predecessor node element.
+
+            Returns:
+                None
+        """
+
+        if edge_type is None:
+            nx.set_edge_attributes(self.__network, weight, weight_name)
+        else:
+            if edge_type == "ALU":
+                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("ALU") == 0}
+            elif edge_type == "SE":
+                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("SE") == 0}
+            elif edge_type == "Const":
+                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("CONST") == 0}
+            elif edge_type == "IN_PORT":
+                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("IN_PORT") == 0}
+            elif edge_type == "OUT_PORT":
+                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("OUT_PORT") == 0}
+
+            nx.set_edge_attributes(self.__network, edges)
+
     def getBBdomains(self):
+        """Returns body bias domains of the PE array.
+
+            Args: None
+
+            Returns:
+                dictionary: body bias domain information
+                    keys: domain name
+                    values: PE positions in the domain
+        """
         return self.__bb_domains
+
+    def getSize(self):
+        """ Returns PE array size.
+
+            Args: None
+
+            Returns:
+                tuple: width, height of the PE array
+        """
+
+        return (self.width, self.height)
 
