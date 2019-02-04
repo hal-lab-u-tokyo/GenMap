@@ -4,20 +4,25 @@ import networkx as nx
 class RouterBase(metaclass=ABCMeta):
     @staticmethod
     @abstractmethod
-    def comp_routing(CGRA, DFG, mapping, **kwargs):
+    def set_default_weights(CGRA):
         pass
 
     @staticmethod
     @abstractmethod
-    def const_routing(CGRA, DFG, **kwargs):
+    def comp_routing(CGRA, DFG, mapping, **info):
         pass
 
     @staticmethod
     @abstractmethod
-    def input_routing(CGRA, DFG, **kwargs):
+    def const_routing(CGRA, DFG, **info):
         pass
-    
+
     @staticmethod
     @abstractmethod
-    def output_routing(CGRA, DFG, **kwargs):
+    def input_routing(CGRA, DFG, **info):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def output_routing(CGRA, DFG, **info):
         pass
