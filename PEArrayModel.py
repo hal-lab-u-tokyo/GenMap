@@ -387,7 +387,7 @@ class PEArrayModel:
             elif edge_type == "IN_PORT":
                 edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("IN_PORT") == 0}
             elif edge_type == "OUT_PORT":
-                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("OUT_PORT") == 0}
+                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if v.find("OUT_PORT") == 0}
 
             nx.set_edge_attributes(self.__network, edges)
 
@@ -413,4 +413,8 @@ class PEArrayModel:
         """
 
         return (self.width, self.height)
+
+    @staticmethod
+    def isSE(node_name):
+        return node_name.find("SE") == 0
 
