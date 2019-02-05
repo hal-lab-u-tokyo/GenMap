@@ -414,7 +414,27 @@ class PEArrayModel:
 
         return (self.width, self.height)
 
+    def getConstRegs(self):
+        """Returns const register names of the network.
+        """
+        return [CONST_node_exp.format(index=i) for i in self.__const_reg_range]
+
+    def getInputPorts(self):
+        """Returns input port names of the network.
+        """
+        return [IN_PORT_node_exp.format(index=i) for i in self.__in_port_range]
+
     @staticmethod
     def isSE(node_name):
+        """Check whether the node is SE or not.
+
+            Args:
+                node_name (str): a name of node
+
+            Returns:
+                bool: if the node is SE, return True.
+                      otherwise return False.
+
+        """
         return node_name.find("SE") == 0
 
