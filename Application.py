@@ -104,6 +104,12 @@ class Application():
         remove_nodes = set(subg.nodes()) - (const_nodes | (op_nodes & const_successors))
         subg.remove_nodes_from(remove_nodes)
 
+        remove_edges = []
+        for (u, v) in subg.edges():
+            if u in const_successors and v in const_successors:
+                remove_edges.append((u, v))
+        subg.remove_edges_from(remove_edges)
+
         return subg
 
     def getInputSubGraph(self):
@@ -123,6 +129,11 @@ class Application():
         remove_nodes = set(subg.nodes()) - (input_nodes | (op_nodes & input_successors))
         subg.remove_nodes_from(remove_nodes)
 
+        remove_edges = []
+        for (u, v) in subg.edges():
+            if u in input_successors and v in input_successors:
+                remove_edges.append((u, v))
+        subg.remove_edges_from(remove_edges)
         return subg
 
     def getOutputSubGraph(self):
@@ -141,6 +152,12 @@ class Application():
 
         remove_nodes = set(subg.nodes()) - (output_nodes | (op_nodes & output_predecessors))
         subg.remove_nodes_from(remove_nodes)
+
+        remove_edges = []
+        for (u, v) in subg.edges():
+            if u in output_predecessors and v in output_predecessors:
+                remove_edges.append((u, v))
+        subg.remove_edges_from(remove_edges)
 
         return subg
 
