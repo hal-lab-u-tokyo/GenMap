@@ -29,7 +29,6 @@ class AStarRouter(RouterBase):
         out_deg = {k: v for k, v in sorted(out_deg.items(), key=lambda x: x[1])}
 
         # Astar Routing
-        fail_path_count = 0
         route_cost = 0
         for src_node in out_deg.keys():
             # get node element on the PE array
@@ -39,43 +38,11 @@ class AStarRouter(RouterBase):
             for suc_element in routed_graph.successors(src_alu):
                 routed_graph.edges[src_alu, suc_element]["weight"] = 1
 
+            # get destination alus
+            dest_alus = [CGRA.getNodeName("ALU", pos = mapping[dst_node]) for dst_node in comp_DFG.successors(src_node)]
+
             # route each path
-            shared_edges = set()
-            for dst_node in comp_DFG.successors(src_node):
-                # get one of destination node name
-                dst_alu = CGRA.getNodeName("ALU", pos = mapping[dst_node])
-
-                try:
-                    path_len = nx.astar_path_length(routed_graph, src_alu, dst_alu, weight = "weight")
-                    if path_len > ALU_OUT_WEIGTH:
-                        raise nx.exception.NetworkXNoPath
-                    else:
-                        route_cost += path_len
-                        path = nx.astar_path(routed_graph, src_alu, dst_alu, weight = "weight")
-                        print(path_len, path)
-                        for i in range(len(path) - 1):
-                            e = (path[i], path[i + 1])
-                            if CGRA.isSE(path[i + 1]):
-                                shared_edges.add(e)
-                                routed_graph.edges[e]["weight"] = 0
-                                # remove other input edges
-                                remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
-                                routed_graph.remove_edges_from(remove_edges)
-                            else:
-                                routed_graph.edges[e]["weight"] = USED_LINK_WEIGHT
-                                routed_graph.edges[e]["free"] = False
-
-                except nx.exception.NetworkXNoPath:
-                    print("Fail:", src_node, "->", dst_node)
-                    fail_path_count += 1
-                    route_cost += PENALTY_CONST
-
-            # update SE edges link cost
-            for e in shared_edges:
-                routed_graph.edges[e]["weight"] = USED_LINK_WEIGHT
-                routed_graph.edges[e]["free"] = False
-
-        print("fail route", fail_path_count)
+            route_cost += AStarRouter.single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
 
         return route_cost
 
@@ -190,4 +157,40 @@ class AStarRouter(RouterBase):
         else:
             return None
 
+    @staticmethod
+    def single_src_multi_dest_route(CGRA, graph, src, dsts):
+        # route each path
+        shared_edges = set()
+        route_cost = 0
+        for dst in dsts:
+            try:
+                path_len = nx.astar_path_length(graph, src, dst, weight = "weight")
+                if path_len > ALU_OUT_WEIGTH:
+                    raise nx.exception.NetworkXNoPath
+                else:
+                    route_cost += path_len
+                    path = nx.astar_path(graph, src, dst, weight = "weight")
+                    print(path_len, path)
+                    for i in range(len(path) - 1):
+                        e = (path[i], path[i + 1])
+                        if CGRA.isSE(path[i + 1]):
+                            shared_edges.add(e)
+                            graph.edges[e]["weight"] = 0
+                            # remove other input edges
+                            remove_edges = [(p, path[i + 1]) for p in graph.predecessors(path[i + 1]) if p != path[i]]
+                            graph.remove_edges_from(remove_edges)
+                        else:
+                            graph.edges[e]["weight"] = USED_LINK_WEIGHT
+                            graph.edges[e]["free"] = False
+
+            except nx.exception.NetworkXNoPath:
+                print("Fail:", src, "->", dst)
+                route_cost += PENALTY_CONST
+
+        # update SE edges link cost
+        for e in shared_edges:
+            graph.edges[e]["weight"] = USED_LINK_WEIGHT
+            graph.edges[e]["free"] = False
+
+        return route_cost
 
