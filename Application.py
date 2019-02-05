@@ -2,14 +2,14 @@ import networkx as nx
 import copy
 
 class Application():
-    
+
     def __init__(self):
         self.__DAG = nx.DiGraph()
         self.__Freq = 0.0 # MHz
 
     def read_dot(self, file):
         """set application data flow graph to this
-        
+
         Args:
             file: file path to application dot
 
@@ -54,17 +54,17 @@ class Application():
 
     def setFrequency(self, f):
         """set operation frequency.
-            
+
             Args:
                 f (float): Frequency
 
             Return: None
         """
         self.__Freq = float(f)
-        
+
     def getFrequency(self):
         """get operation frequency/
-    
+
             Args: None
 
             Return: float: frequecy
@@ -75,7 +75,7 @@ class Application():
     def getCompSubGraph(self):
         """get a sub-graph which is composed of only operation nodes
             It does not contain constants and in/out port
-    
+
             Args: None
 
             Return:
@@ -90,7 +90,7 @@ class Application():
     def getConstSubGraph(self):
         """get a sub-graph which is composed of const nodes and
             op nodes connected to const nodes
-    
+
             Args: None
 
             Return:
@@ -109,7 +109,7 @@ class Application():
     def getInputSubGraph(self):
         """get a sub-graph which is composed of input nodes and
             op nodes connected to input nodes
-    
+
             Args: None
 
             Return:
@@ -128,7 +128,7 @@ class Application():
     def getOutputSubGraph(self):
         """get a sub-graph which is composed of output nodes and
             op nodes connected to output nodes
-    
+
             Args: None
 
             Return:
