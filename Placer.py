@@ -3,7 +3,7 @@ import random
 import math
 
 
-class Initializer():
+class Placer():
 
     def __init__(self, iterations = 50, randomness = "Full"):
         """ Initializes this class
@@ -57,7 +57,10 @@ class Initializer():
         pos = {v: (x / max_x, y / max_y) for v, (x, y) in pos.items()}
 
         # make sink nodes upper side
-        pos = {v: (1 - x, 1- y) for v, (x, y) in pos.items()}
+        pos = {v: (x, 1 - y) for v, (x, y) in pos.items()}
+        # randomly flip x position
+        if random.randint(0, 1) == 0:
+            pos = {v: (1 - x, y) for v, (x, y) in pos.items()}
 
         # choose a rectangle pattern
         (map_width, map_height) = rect_pattern[random.randint(0, len(rect_pattern) - 1)]
