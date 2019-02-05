@@ -27,25 +27,41 @@ class AStarRouter(RouterBase):
         # Astar Routing
         fail_path_count = 0
         for src_node in out_deg.keys():
-            # get node name
+            # get node element on the PE array
             src_alu = CGRA.getNodeName("ALU", pos = mapping[src_node])
+
+            # remove high cost of alu out
+            for suc_element in PE_array.successors(src_alu):
+                PE_array.edges[src_alu, suc_element]["weight"] = 1
+
+            # route each path
+            shared_edges = set()
             for dst_node in DFG.successors(src_node):
+                # get one of destination node name
                 dst_alu = CGRA.getNodeName("ALU", pos = mapping[dst_node])
 
                 try:
                     path_len = nx.astar_path_length(PE_array, src_alu, dst_alu, weight = "weight")
-                    if path_len > ALU_OUT_WEIGTH * 2:
+                    if path_len > ALU_OUT_WEIGTH:
                         raise nx.exception.NetworkXNoPath
                     else:
                         path = nx.astar_path(PE_array, src_alu, dst_alu, weight = "weight")
                         print(path_len, path)
                         for i in range(len(path) - 1):
-                            e = (path[0], path[1])
-                            PE_array.edges[e]["weight"] = USED_LINK_WEIGHT
+                            e = (path[i], path[i + 1])
+                            if CGRA.isSE(path[i + 1]):
+                                shared_edges.add(e)
+                                PE_array.edges[e]["weight"] = 0
+                            else:
+                                PE_array.edges[e]["weight"] = USED_LINK_WEIGHT
                 except nx.exception.NetworkXNoPath:
+                    print("Fail:", src_node, "->", dst_node)
                     fail_path_count += 1
-        print("fail route", fail_path_count)
 
+                # update SE edges link cost
+                for e in shared_edges:
+                    PE_array.edges[e]["weight"] = USED_LINK_WEIGHT
+        print("fail route", fail_path_count)
 
 
     @staticmethod
