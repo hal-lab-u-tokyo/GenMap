@@ -161,6 +161,8 @@ class Application():
 
         return subg
 
+    def hasConst(self):
+        return len(nx.get_node_attributes(self.__DAG, "const").keys()) > 0
 
 # test
 if __name__ == "__main__":
