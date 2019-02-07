@@ -2,6 +2,9 @@ import networkx as nx
 import random
 import math
 
+from multiprocessing import Pool
+import multiprocessing as multi
+
 
 class Placer():
 
@@ -21,6 +24,26 @@ class Placer():
             raise ValueError("Invalid randomness type: " + randomness)
         else:
             self.__randomness = randomness
+
+    def generate_init_mappings(self, dag, width, height, count, proc_num=multi.cpu_count()):
+        """
+
+        """
+        mt_args = [(dag, width, height) for i in range(count)]
+        p = Pool(proc_num)
+        results = p.map(self.mt_wrapper, mt_args)
+        p.close()
+
+        init_mapping = []
+        for mapping in results:
+            if not mapping is None:
+                init_mapping.append(mapping)
+
+        return init_mapping
+
+
+    def mt_wrapper(self, args):
+        return self.make_position(*args)
 
     def make_position(self, dag, width, height):
         """ Makes nodes position on the PE array.
