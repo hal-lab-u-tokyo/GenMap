@@ -22,6 +22,8 @@ class PEArrayModel:
     # operation list supported by the PEs
     __operation_list = []
     __bb_domains = {}
+    __preg_positions = []
+    __se_lists = {}
 
     def __init__(self, conf):
         '''Constructor of this class
@@ -34,7 +36,7 @@ class PEArrayModel:
                 const_reg: the number of constant registers
                 input_port: the number of input port
                 output_port: the number of output port
-            And also, it must contain a child elements whose tag name is "PE" or "OUT_PORT".
+            And also, it must contain a child elements whose tag name is "PE", "PREG", or "OUT_PORT".
 
             "PE" Element will be composed of
                 an "ALU" Element
@@ -84,6 +86,13 @@ class PEArrayModel:
                 <input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 0)"/>
                 <input name="IN_SOUTH" type="IN_PORT" index="0" />
                 <input name="IN_CONST_A" type="Const" index="0"/>
+
+            "PREG" Elements are pipeline registers.
+            It must have a attribute "vpos" as a vetical position.
+            If vpos = y, it means the pipeline register is placed between (y - 1)th PE rows and yth PE rows.
+
+            "OUT_PORT" Element will be composed of "input" elements
+
         Raise:
             If there exist invalid configurations, it will raise
                 ValueError or InvalidConfigError
@@ -136,6 +145,28 @@ class PEArrayModel:
         # init operation list
         self.__operation_list = [[[] for y in range(self.__height)] for x in range(self.__width)]
 
+        # get PREG configs
+        pregs = [preg for preg in conf if preg.tag == "PREG"]
+        for preg in pregs:
+            vpos_str = preg.get("vpos")
+            if vpos_str is None:
+                raise self.InvalidConfigError("missing PREG vertical position")
+            elif vpos_str.isdigit() == False:
+                raise ValueError("Invalid PREG vertical position: " + vpos_str)
+            else:
+                self.__preg_positions.append(int(vpos_str))
+
+        if len(self.__preg_positions) == 0:
+            # no pipeline structure
+            self.__preg_positions.append(self.__height)
+
+        self.__preg_positions.sort()
+
+        # init SE list
+        for x in range(self.__width):
+            for y in range(self.__height):
+                self.__se_lists[(x,y)] = set()
+
         # get PE configs
         PEs = [pe for pe in conf if pe.tag == "PE"]
 
@@ -183,6 +214,8 @@ class PEArrayModel:
                         raise self.InvalidConfigError("missing output name of SE at ({0}, {1})".format((x, y)))
                     self.__network.add_node(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
                     connections[SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id)] = output.iter("input")
+                    self.__se_lists[(x, y)].add(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
+
 
         # add output connections
         for ele in conf:
@@ -199,6 +232,9 @@ class PEArrayModel:
         # make connections
         for dst, srcs in connections.items():
             self.__make_connection(dst, srcs)
+
+        # set node attributes
+        nx.set_node_attributes(self.__network, True, "free")
 
 
     def __make_connection(self, dst, srcs):
@@ -424,6 +460,50 @@ class PEArrayModel:
         """
         return [IN_PORT_node_exp.format(index=i) for i in self.__in_port_range]
 
+    def getOutputPorts(self):
+        """Returns output port names of the network.
+        """
+        return [OUT_PORT_node_exp.format(index=i) for i in self.__in_port_range]
+
+
+    def getFreeSEs(self, routed_graph, x_range=None, y_range=None):
+        """
+
+        """
+
+        rtn_list = []
+
+        # check range
+        if x_range is None:
+            x_range = range(self.__width)
+        if y_range is None:
+            y_range = range(self.__height)
+
+        for x in x_range:
+            for y in y_range:
+                for se in self.__se_lists[(x, y)]:
+                    if self.__network.nodes[se]["free"] == True:
+                        rtn_list.append(se)
+
+        return rtn_list
+
+    def getStageDomains(self):
+
+        stage = 0
+        rtn_list = [[] for stage in range(len(self.__preg_positions) + 1)]
+
+        for y in range(self.__height):
+            if stage < len(self.__preg_positions):
+                if self.__preg_positions[stage] <= y:
+                    stage += 1
+            # add ALU
+            rtn_list[stage].extend([ALU_node_exp.format(pos=(x, y)) for x in range(self.__width)])
+            # add SE
+            for x in range(self.__width):
+                rtn_list[stage].extend(self.__se_lists[(x, y)])
+
+        return rtn_list
+
     @staticmethod
     def isSE(node_name):
         """Check whether the node is SE or not.
@@ -437,4 +517,8 @@ class PEArrayModel:
 
         """
         return node_name.find("SE") == 0
+
+
+
+
 

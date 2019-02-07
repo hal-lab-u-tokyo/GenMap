@@ -1,4 +1,11 @@
 <PEArray width="12" height="8" const_reg="16" input_port="12" output_port="12">
+	<PREG vpos="1" />
+	<PREG vpos="2" />
+	<PREG vpos="3" />
+	<PREG vpos="4" />
+	<PREG vpos="5" />
+	<PREG vpos="6" />
+	<PREG vpos="7" />
 	<!-- ROW 00 -->
 	<PE coord="(0, 0)" bbdomain="domain0">
 		<ALU>
