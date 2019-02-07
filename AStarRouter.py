@@ -64,7 +64,7 @@ class AStarRouter(RouterBase):
             dest_alus = [CGRA.getNodeName("ALU", pos = mapping[dst_node]) for dst_node in comp_DFG.successors(src_node)]
 
             # route each path
-            route_cost += AStarRouter.single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
+            route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
 
         return route_cost
 
@@ -86,90 +86,96 @@ class AStarRouter(RouterBase):
         if len(const_DFG.nodes()) == 0:
             return 0
 
-        const_map = AStarRouter.const_mapping(CGRA, const_DFG, mapping, routed_graph)
+        const_map = AStarRouter.__resource_mapping(CGRA, CGRA.getConstRegs(), const_DFG, mapping, routed_graph)
         if const_map is None:
             raise AStarRouter.InfeasibleRouting
 
         route_cost = 0
         for c_reg, edges in const_map.items():
-            shared_edges = set()
             dst_alus = [CGRA.getNodeName("ALU", pos=mapping[dst_node]) for c, dst_node in edges]
-            route_cost += AStarRouter.single_src_multi_dest_route(CGRA, routed_graph, c_reg, dst_alus)
+            route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, c_reg, dst_alus)
 
         return route_cost
 
 
     @staticmethod
     def input_routing(CGRA, in_DFG, mapping, routed_graph, **info):
-        input_map = AStarRouter.input_mapping(CGRA, in_DFG, mapping, routed_graph)
-        print(input_map)
+        input_map = AStarRouter.__resource_mapping(CGRA, CGRA.getInputPorts(), in_DFG, mapping, routed_graph)
+        if input_map is None:
+            raise AStarRouter.InfeasibleRouting
+
+        route_cost = 0
+        for i_port, edges in input_map.items():
+            dst_alus = [CGRA.getNodeName("ALU", pos=mapping[dst_node]) for i, dst_node in edges]
+            route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, i_port, dst_alus)
+
+        return route_cost
 
     @staticmethod
     def output_routing(CGRA, out_DFG, mapping, routed_graph, **info):
         pass
 
     @staticmethod
-    def const_mapping(CGRA, const_DFG, mapping, routed_graph):
-        """Make const reg mapping.
+    def __resource_mapping(CGRA, resources, DFG, mapping, routed_graph):
+        """Decides resource mapping for const regs or input ports.
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
-                const_DFG (networkx DiGraph): A graph to be routed
+                resources (list-like): mapped node names in the PE array graph
+                DFG (networkx DiGraph): A graph to be routed
                 mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
+                    keys (str): operation node names of DFG
                     values (tuple): PE coordinates
                 routed_graph (networkx DiGraph): PE array graph
 
             Returns:
                 dict: const mapping
-                    keys (str): const reg name of routed_graph
-                    values (list): list of edges which are routed from the const reg
+                    keys (str): resource name of routed_graph
+                    values (list): list of edges which are routed from the resources
                     In case of failure, return None
         """
 
         # get const edges
-        const_edges = const_DFG.edges()
-        # get const regs
-        const_regs = CGRA.getConstRegs()
+        routed_edges = DFG.edges()
 
         # check validation
-        if len(set([c for c, v in const_edges])) > len(const_regs):
+        if len(set([r for r, v in routed_edges])) > len(resources):
             # Exceed available const reg number
             return None
 
         # calculate distance
-        dist_from_const_reg = {}
-        for c, v in const_edges:
-            dist_from_const_reg[(c, v)] = {}
-            for c_reg in const_regs:
+        dist_from_res = {}
+        for r, v in routed_edges:
+            dist_from_res[(r, v)] = {}
+            for res_node in resources:
                 alu = CGRA.getNodeName("ALU", pos=mapping[v])
                 try:
-                    dist = nx.astar_path_length(routed_graph, c_reg, alu)
+                    dist = nx.astar_path_length(routed_graph, res_node, alu)
                 except nx.exception.NetworkXNoPath:
                     dist = PENALTY_CONST
-                dist_from_const_reg[(c, v)][c_reg] = dist
+                dist_from_res[(r, v)][res_node] = dist
 
         # make pulp problem
-        prob = pulp.LpProblem("Make Const Mapping", pulp.LpMinimize)
+        prob = pulp.LpProblem("Make Resouece Mapping", pulp.LpMinimize)
 
         # make pulp variables
         # first index: edge, second index const reg node
-        isMap = pulp.LpVariable.dicts("MAP", (const_edges, const_regs), 0, 1, cat="Binary")
+        isMap = pulp.LpVariable.dicts("MAP", (routed_edges, resources), 0, 1, cat="Binary")
 
         # define problem
-        prob += pulp.lpSum([isMap[e][c] * dist_from_const_reg[e][c] for e in const_edges for c in const_regs])
+        prob += pulp.lpSum([isMap[e][r] * dist_from_res[e][r] for e in routed_edges for r in resources])
 
         # constraints
         #   to ensure each edge is mapped to a const reg
-        for e in const_edges:
-            prob += pulp.lpSum([isMap[e][c] for c in const_regs]) == 1
+        for e in routed_edges:
+            prob += pulp.lpSum([isMap[e][r] for r in resources]) == 1
         #   to prevent multiple values from being mapped to the same const reg
-        for e1, e2 in itertools.combinations(const_edges, 2):
-            for c in const_regs:
+        for e1, e2 in itertools.combinations(routed_edges, 2):
+            for r in resources:
                 if e1[0] == e2[0]: # if same value
-                    prob += isMap[e1][c] + isMap[e2][c] <= 2
+                    prob += isMap[e1][r] + isMap[e2][r] <= 2
                 else:
-                    prob += isMap[e1][c] + isMap[e2][c] <= 1
+                    prob += isMap[e1][r] + isMap[e2][r] <= 1
 
         # solve this ILP
         stat = prob.solve()
@@ -180,14 +186,14 @@ class AStarRouter(RouterBase):
             if result > PENALTY_CONST:
                 return None
             else:
-                const_mapping = {c: [e for e in const_edges if isMap[e][c].value() == 1.0] for c in const_regs}
-                return const_mapping
+                res_mapping = {r: [e for e in routed_edges if isMap[e][r].value() == 1.0] for r in resources}
+                return res_mapping
         else:
             return None
 
 
     @staticmethod
-    def single_src_multi_dest_route(CGRA, graph, src, dsts):
+    def __single_src_multi_dest_route(CGRA, graph, src, dsts):
         """Routes a single source to multiple destinations.
 
             Args:
@@ -237,6 +243,10 @@ class AStarRouter(RouterBase):
         for e in shared_edges:
             graph.edges[e]["weight"] = USED_LINK_WEIGHT
             graph.edges[e]["free"] = False
+
+        # update ALU out link cost
+        for v in graph.successors(src):
+            graph.edges[src, v]["weight"] = USED_LINK_WEIGHT
 
         return route_cost
 
