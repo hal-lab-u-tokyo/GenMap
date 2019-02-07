@@ -60,8 +60,9 @@ class AStarRouter(RouterBase):
             for suc_element in routed_graph.successors(src_alu):
                 routed_graph.edges[src_alu, suc_element]["weight"] = 1
 
-            # get destination alus
-            dest_alus = [CGRA.getNodeName("ALU", pos = mapping[dst_node]) for dst_node in comp_DFG.successors(src_node)]
+            # get destination alus in ascending order of manhattan distance from the src node
+            dest_alus = [CGRA.getNodeName("ALU", pos = mapping[dst_node]) for dst_node in \
+                     sorted(list(comp_DFG.successors(src_node)), key=lambda x: AStarRouter.__manhattan_dist(mapping[x], mapping[src_node])) ]
 
             # route each path
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
@@ -113,7 +114,28 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def output_routing(CGRA, out_DFG, mapping, routed_graph, **info):
-        pass
+        output_edges = out_DFG.edges()
+        print(output_edges)
+
+        out_port_nodes = CGRA.getOutputPorts()
+        print(out_port_nodes)
+
+        for v, o in output_edges:
+            alu = CGRA.getNodeName("ALU", pos=mapping[v])
+            print(alu)
+
+        for o_port in out_port_nodes:
+            print(alu, "->", o_port)
+            # print(len(list(nx.all_simple_paths(routed_graph, alu, o_port))))
+
+
+        # check pipeline structure
+        if "stage_domains" in info.keys():
+            stage_domains = info["stage_domains"]
+            if len(stage_domains) < 2:
+                stage_domains = None
+
+
 
     @staticmethod
     def __resource_mapping(CGRA, resources, DFG, mapping, routed_graph):
@@ -191,6 +213,9 @@ class AStarRouter(RouterBase):
         else:
             return None
 
+    @staticmethod
+    def __manhattan_dist(p1, p2):
+        return (abs(p1[0] - p2[0]), abs(p1[1] - p2[1]))
 
     @staticmethod
     def __single_src_multi_dest_route(CGRA, graph, src, dsts):
@@ -208,6 +233,7 @@ class AStarRouter(RouterBase):
         # route each path
         shared_edges = set()
         route_cost = 0
+
         for dst in dsts:
             try:
                 # get path length by using astar
