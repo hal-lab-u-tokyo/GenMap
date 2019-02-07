@@ -26,8 +26,18 @@ class Placer():
             self.__randomness = randomness
 
     def generate_init_mappings(self, dag, width, height, count, proc_num=multi.cpu_count()):
-        """
+        """Returns multiple initial mappings.
 
+            Args:
+                dga (networkx DiGraph): data-flow-graph
+                width (int): PE array width
+                height (int): PE array height
+                count (int): try count to generate mappings
+                Optional:
+                    proc_num (int): the number of process
+                                    Default is equal to cpu count
+            Returns:
+                list: a list of mappings
         """
         mt_args = [(dag, width, height) for i in range(count)]
         p = Pool(proc_num)
