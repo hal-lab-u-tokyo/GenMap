@@ -14,6 +14,14 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def set_default_weights(CGRA):
+        """Set default weight to network model.
+
+            Args:
+                CGRA: A model of the CGRA to be initialized
+
+            Returns: None
+
+        """
         CGRA.setInitEdgeWeight("weight", 1, "SE")
         CGRA.setInitEdgeWeight("weight", 0, "Const")
         CGRA.setInitEdgeWeight("weight", 0, "IN_PORT")
@@ -23,6 +31,20 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
+        """Routes a computation DFG on the PE array.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                comp_DFG (networkx DiGraph): A graph to be routed
+                mapping (dict): mapping of the DFG
+                    keys (str): node names of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): PE array graph
+
+            Returns:
+                int: routing cost
+        """
+
         # get out degree for each node
         out_deg = {v: comp_DFG.out_degree(v) for v in comp_DFG.nodes() if comp_DFG.out_degree(v) > 0 }
         # sort in ascending order
@@ -48,6 +70,22 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def const_routing(CGRA, const_DFG, mapping, routed_graph, **info):
+        """Routes a computation DFG on the PE array.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                const_DFG (networkx DiGraph): A graph to be routed
+                mapping (dict): mapping of the DFG
+                    keys (str): node names of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): PE array graph
+
+            Returns:
+                int: routing cost
+        """
+        if len(const_DFG.nodes()) == 0:
+            return 0
+
         const_map = AStarRouter.const_mapping(CGRA, const_DFG, mapping, routed_graph)
         if const_map is None:
             raise AStarRouter.InfeasibleRouting
@@ -55,49 +93,39 @@ class AStarRouter(RouterBase):
         route_cost = 0
         for c_reg, edges in const_map.items():
             shared_edges = set()
-            for c_reg_value, dst in edges:
-                dst_alu = CGRA.getNodeName("ALU", pos=mapping[dst])
-                try:
-                    path_len = nx.astar_path_length(routed_graph, c_reg, dst_alu, weight = "weight")
-                    if path_len > ALU_OUT_WEIGTH:
-                        raise nx.exception.NetworkXNoPath
-                    else:
-                        route_cost += path_len
-                        path = nx.astar_path(routed_graph, c_reg, dst_alu, weight = "weight")
-                        print(path_len, path)
-                        for i in range(len(path) - 1):
-                            e = (path[i], path[i + 1])
-                            if CGRA.isSE(path[i + 1]):
-                                shared_edges.add(e)
-                                routed_graph.edges[e]["weight"] = 0
-                                # remove other input edges
-                                remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
-                                routed_graph.remove_edges_from(remove_edges)
-                            else:
-                                routed_graph.edges[e]["weight"] = USED_LINK_WEIGHT
-                                routed_graph.edges[e]["free"] = False
-                except nx.exception.NetworkXNoPath:
-                    print("Fail:", src_node, "->", dst_node)
-                    fail_path_count += 1
-                    route_cost += PENALTY_CONST
+            dst_alus = [CGRA.getNodeName("ALU", pos=mapping[dst_node]) for c, dst_node in edges]
+            route_cost += AStarRouter.single_src_multi_dest_route(CGRA, routed_graph, c_reg, dst_alus)
 
-            # update SE edges link cost
-            for e in shared_edges:
-                routed_graph.edges[e]["weight"] = USED_LINK_WEIGHT
-                routed_graph.edges[e]["free"] = False
+        return route_cost
+
 
     @staticmethod
-    def input_routing(CGRA, in_DFG, **info):
-        pass
-        print(info)
+    def input_routing(CGRA, in_DFG, mapping, routed_graph, **info):
+        input_map = AStarRouter.input_mapping(CGRA, in_DFG, mapping, routed_graph)
+        print(input_map)
 
     @staticmethod
-    def output_routing(CGRA, out_DFG, **info):
+    def output_routing(CGRA, out_DFG, mapping, routed_graph, **info):
         pass
-        print(info)
 
     @staticmethod
     def const_mapping(CGRA, const_DFG, mapping, routed_graph):
+        """Make const reg mapping.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                const_DFG (networkx DiGraph): A graph to be routed
+                mapping (dict): mapping of the DFG
+                    keys (str): node names of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): PE array graph
+
+            Returns:
+                dict: const mapping
+                    keys (str): const reg name of routed_graph
+                    values (list): list of edges which are routed from the const reg
+                    In case of failure, return None
+        """
 
         # get const edges
         const_edges = const_DFG.edges()
@@ -106,7 +134,7 @@ class AStarRouter(RouterBase):
 
         # check validation
         if len(set([c for c, v in const_edges])) > len(const_regs):
-            print("Exceed avaiable const reg number")
+            # Exceed available const reg number
             return None
 
         # calculate distance
@@ -157,13 +185,26 @@ class AStarRouter(RouterBase):
         else:
             return None
 
+
     @staticmethod
     def single_src_multi_dest_route(CGRA, graph, src, dsts):
+        """Routes a single source to multiple destinations.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                graph (networkx DiGraph): A graph where the paths are routed
+                src (str): source node name on the inputed graph
+                dests (list-like): destination nodes on the inputed graph
+
+            Returns:
+                int: routing cost
+        """
         # route each path
         shared_edges = set()
         route_cost = 0
         for dst in dsts:
             try:
+                # get path length by using astar
                 path_len = nx.astar_path_length(graph, src, dst, weight = "weight")
                 if path_len > ALU_OUT_WEIGTH:
                     raise nx.exception.NetworkXNoPath
@@ -171,19 +212,24 @@ class AStarRouter(RouterBase):
                     route_cost += path_len
                     path = nx.astar_path(graph, src, dst, weight = "weight")
                     print(path_len, path)
+                    # set used flag to the links
                     for i in range(len(path) - 1):
                         e = (path[i], path[i + 1])
                         if CGRA.isSE(path[i + 1]):
+                            # if the link is provided by SE, set cost 0
+                            # for path sharing
                             shared_edges.add(e)
                             graph.edges[e]["weight"] = 0
                             # remove other input edges
                             remove_edges = [(p, path[i + 1]) for p in graph.predecessors(path[i + 1]) if p != path[i]]
                             graph.remove_edges_from(remove_edges)
                         else:
+                            # other than SE's
                             graph.edges[e]["weight"] = USED_LINK_WEIGHT
                             graph.edges[e]["free"] = False
 
             except nx.exception.NetworkXNoPath:
+                # there is no path
                 print("Fail:", src, "->", dst)
                 route_cost += PENALTY_CONST
 
