@@ -89,7 +89,7 @@ class AStarRouter(RouterBase):
 
         const_map = AStarRouter.__resource_mapping(CGRA, CGRA.getConstRegs(), const_DFG, mapping, routed_graph)
         if const_map is None:
-            raise AStarRouter.InfeasibleRouting
+            return PENALTY_CONST
 
         route_cost = 0
         for c_reg, edges in const_map.items():
@@ -103,7 +103,7 @@ class AStarRouter(RouterBase):
     def input_routing(CGRA, in_DFG, mapping, routed_graph, **info):
         input_map = AStarRouter.__resource_mapping(CGRA, CGRA.getInputPorts(), in_DFG, mapping, routed_graph)
         if input_map is None:
-            raise AStarRouter.InfeasibleRouting
+            return PENALTY_CONST
 
         route_cost = 0
         for i_port, edges in input_map.items():
@@ -114,27 +114,68 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def output_routing(CGRA, out_DFG, mapping, routed_graph, **info):
+        route_cost = 0
+
+        # get output edges
         output_edges = out_DFG.edges()
-        print(output_edges)
 
+        # get output node name
         out_port_nodes = CGRA.getOutputPorts()
-        print(out_port_nodes)
 
+        # get alu nodes connected to output port
+        alu_list = []
         for v, o in output_edges:
-            alu = CGRA.getNodeName("ALU", pos=mapping[v])
-            print(alu)
-
-        for o_port in out_port_nodes:
-            print(alu, "->", o_port)
-            # print(len(list(nx.all_simple_paths(routed_graph, alu, o_port))))
-
+            alu_list.append(CGRA.getNodeName("ALU", pos=mapping[v]))
 
         # check pipeline structure
+        path_extend_nodes = None
         if "stage_domains" in info.keys():
             stage_domains = info["stage_domains"]
-            if len(stage_domains) < 2:
-                stage_domains = None
+            if len(stage_domains) > 2:
+                last_stage_nodes = stage_domains[-1]
+                path_extend_nodes = [alu for alu in alu_list if not alu in last_stage_nodes]
+                free_last_stage_SEs = set(last_stage_nodes) & set(CGRA.getFreeSEs(routed_graph))
 
+        # dreedy output routing
+        for alu in alu_list:
+            # remove high cost of alu out
+            for suc_element in routed_graph.successors(alu):
+                routed_graph.edges[alu, suc_element]["weight"] = 1
+
+            src = alu
+            if src in path_extend_nodes:
+                # extend data path
+                path, cost = AStarRouter.__find_nearest_node(routed_graph, src, free_last_stage_SEs)
+                if path is None:
+                    return PENALTY_CONST
+                route_cost += cost
+                # update cost
+                for i in range(len(path) - 1):
+                    routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
+                    routed_graph.edges[path[i], path[i + 1]]["free"] = False
+                    routed_graph.nodes[path[i]]["free"] = False
+                free_last_stage_SEs -= set(path)
+                print("Extended paht", path)
+                # change source node, alu -> se
+                src = path[-1]
+
+            # output routing
+            path, cost = AStarRouter.__find_nearest_node(routed_graph, src, out_port_nodes)
+            if path is None:
+                return PENALTY_CONST
+
+            route_cost += cost
+            # update cost
+            for i in range(len(path) - 1):
+                routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
+                routed_graph.edges[path[i], path[i + 1]]["free"] = False
+                routed_graph.nodes[path[i]]["free"] = False
+            free_last_stage_SEs -= set(path)
+            print("out", path)
+
+            out_port_nodes.remove(path[-1])
+
+        return route_cost
 
 
     @staticmethod
@@ -218,6 +259,30 @@ class AStarRouter(RouterBase):
         return (abs(p1[0] - p2[0]), abs(p1[1] - p2[1]))
 
     @staticmethod
+    def __find_nearest_node(graph, src, dsts):
+        """
+
+            Returns:
+                (list, int): path, cost
+        """
+        min_length = PENALTY_CONST
+        nearest_node = None
+        # find a nearest node greedy
+        for dst in dsts:
+            try:
+                path_len = nx.astar_path_length(graph, src, dst, weight="weight")
+                if path_len < min_length:
+                    min_length = path_len
+                    nearest_node = dst
+            except nx.exception.NetworkXNoPath:
+                continue
+
+        if nearest_node is None:
+            return None, PENALTY_CONST
+        else:
+            return nx.astar_path(graph, src, nearest_node, weight="weight"), min_length
+
+    @staticmethod
     def __single_src_multi_dest_route(CGRA, graph, src, dsts):
         """Routes a single source to multiple destinations.
 
@@ -269,6 +334,7 @@ class AStarRouter(RouterBase):
         for e in shared_edges:
             graph.edges[e]["weight"] = USED_LINK_WEIGHT
             graph.edges[e]["free"] = False
+            graph.nodes[e[1]]["free"] = False
 
         # update ALU out link cost
         for v in graph.successors(src):
@@ -276,3 +342,9 @@ class AStarRouter(RouterBase):
 
         return route_cost
 
+    @staticmethod
+    def clean_graph(graph):
+        remove_edges = [e for e in graph.edges() if graph.edges[e]["free"] == True]
+        graph.remove_edges_from(remove_edges)
+        remove_nodes = [v for v in graph.nodes() if graph.in_degree(v) == 0]
+        graph.remove_nodes_from(remove_nodes)
