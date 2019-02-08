@@ -45,9 +45,12 @@ class Placer():
         p.close()
 
         init_mapping = []
+        init_hashable_mapping = set() # for checking dupulication
         for mapping in results:
             if not mapping is None:
-                init_mapping.append(mapping)
+                if not mapping.values() in init_hashable_mapping:
+                    init_mapping.append(mapping)
+                    init_hashable_mapping.add(mapping.values())
 
         return init_mapping
 
