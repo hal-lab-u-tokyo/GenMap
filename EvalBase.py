@@ -1,5 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
-class EstimationBase(metaclass=ABCMeta):
+class EvalBase(metaclass=ABCMeta):
     @staticmethod
     @abstractmethod
+    def eval(CGRA, individual, **info):
+        pass
