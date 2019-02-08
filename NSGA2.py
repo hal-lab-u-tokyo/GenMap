@@ -12,8 +12,11 @@ from Placer import Placer
 class NSGA2():
 
     def __init__(self):
-
+        self.pool = None
         self.__toolbox = base.Toolbox()
+
+    def __getstate__(self):
+        return {"pool": self}
 
     def setup(self, CGRA, app, router, eval_list, proc_num = multiprocessing.cpu_count()):
         for evl in eval_list:
@@ -37,18 +40,16 @@ class NSGA2():
         creator.create("Fitness", base.Fitness, weights=tuple([-1.0 if evl.isMinimize() else 1.0 for evl in eval_list]))
         creator.create("Individual", Individual, fitness=creator.Fitness)
 
-        # self.__pool = multiprocessing.Pool(proc_num)
-        # self.__toolbox.register("map", self.__pool.map)
         self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
-        self.__toolbox.register("evaluate", self.__eval_objectives, eval_list, CGRA, app, router)
+        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, CGRA, app, router)
         self.__toolbox.register("mate", Individual.cxSet)
         self.__toolbox.register("mutate", Individual.mutSet)
         self.__toolbox.register("select", tools.selNSGA2)
 
         return True
 
-    def __eval_objectives(self, eval_list, CGRA, app, router, individual):
+    def eval_objectives(self, eval_list, CGRA, app, router, individual):
         self.__doRouting(CGRA, app, router, individual)
         return [obj.eval(CGRA, individual) for obj in eval_list]
 
@@ -63,8 +64,12 @@ class NSGA2():
         individual.routing_cost = cost
 
     def runOptimization(self):
+        self.pool = multiprocessing.Pool(1)
+        self.__toolbox.register("map", self.pool.map)
+
         pop = self.__toolbox.population(n=100)
         print(len(pop))
         fitnesses = list(self.__toolbox.map(self.__toolbox.evaluate, pop))
-
+        for ind, fit in zip(pop, fitnesses):
+            ind.fitness.values = fit
         print(fitnesses)
