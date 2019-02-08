@@ -128,7 +128,8 @@ class AStarRouter(RouterBase):
             alu_list.append(CGRA.getNodeName("ALU", pos=mapping[v]))
 
         # check pipeline structure
-        path_extend_nodes = None
+        path_extend_nodes = []
+        free_last_stage_SEs = set()
         if "stage_domains" in info.keys():
             stage_domains = info["stage_domains"]
             if len(stage_domains) > 2:

@@ -448,7 +448,7 @@ class PEArrayModel:
                 tuple: width, height of the PE array
         """
 
-        return (self.width, self.height)
+        return (self.__width, self.__height)
 
     def getConstRegs(self):
         """Returns const register names of the network.

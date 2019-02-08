@@ -13,9 +13,7 @@ class Individual():
         else:
             self.preg = []
         self.routed_graph = CGRA.getNetwork()
-
-    def set_cost(self, cost):
-        self.cost = cost
+        self.routing_cost = 0
 
     def cxSet(self, other):
         child1 = Individual(self.__model)
