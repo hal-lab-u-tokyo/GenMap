@@ -27,6 +27,10 @@ class Individual():
         # initialize each variable
         self.routing_cost = 0
         self.valid = False
+        self.satisfy = False
+
+    def __eq__(self, other):
+        return self.mapping == other.mapping and self.preg == other.preg
 
     def mapping_compaction(self):
         """
@@ -68,17 +72,27 @@ class Individual():
         op_nodes = list(father.mapping.keys())
 
         # crossover operation mapping
+        mother_former = [mother.mapping[op_nodes[i]] for i in range(cx_point)]
+        father_former = [father.mapping[op_nodes[i]] for i in range(cx_point)]
         for idx in range(cx_point, len(op_nodes)):
             op = op_nodes[idx]
-            # if it does not bring about node duplication, change the node position
-            if not mother.mapping[op] in father.mapping.values():
+            if not mother.mapping[op] in father_former:
                 child1.mapping[op] = mother.mapping[op]
-            if not father.mapping[op] in mother.mapping.values():
+            if not father.mapping[op] in mother_former:
                 child2.mapping[op] = father.mapping[op]
 
-        # compaction
-        child1.mapping_compaction()
-        child2.mapping_compaction()
+        # duplication
+        if len(child1.mapping.values()) != len(set(child1.mapping.values())):
+            child1.mapping = father.mapping
+        else:
+            # compaction
+            child1.mapping_compaction()
+
+        if len(child2.mapping.values()) != len(set(child2.mapping.values())):
+            child2.mapping = mother.mapping
+        else:
+            # compaction
+            child2.mapping_compaction()
 
         # crossover pipeline regs if it has its configuration
         if len(father.preg) != 0:
@@ -96,12 +110,14 @@ class Individual():
         if random.random() <= LSPB:
             # Local Search (Swapping)
             swap_op1, swap_op2 = random.sample(list(ind.mapping.keys()), 2)
+            tmp = ind.mapping[swap_op1]
             ind.mapping[swap_op1] = ind.mapping[swap_op2]
-            ind.mapping[swap_op2] = ind.mapping[swap_op1]
+            ind.mapping[swap_op2] = tmp
             if len(ind.preg) > 1:
                 swap_idx1, swap_idx2 = random.sample(range(len(ind.preg)), 2)
+                tmp = ind.preg[swap_idx1]
                 ind.preg[swap_idx1] = ind.preg[swap_idx2]
-                ind.preg[swap_idx2] = ind.preg[swap_idx1]
+                ind.preg[swap_idx2] = tmp
         else:
             mut_op = random.choice(list(ind.mapping.keys()))
             width, height = ind.model.getSize()
