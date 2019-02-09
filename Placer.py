@@ -39,7 +39,7 @@ class Placer():
             Returns:
                 list: a list of mappings
         """
-        mt_args = [(dag, width, height) for i in range(count)]
+        mt_args = [(dag, random.randint(1, width), height) for i in range(count)]
         p = Pool(proc_num)
         results = p.map(self.mt_wrapper, mt_args)
         p.close()
@@ -80,7 +80,7 @@ class Placer():
         # check dag size
         node_num = len(dag.nodes())
         if node_num > width * height:
-            raise ValueError("Too big data-flow-graph to map the PE array ({0}x{1})".format(width, height))
+            return None
 
         # enumerate possible rectangles
         rect_pattern = [(w, h) for w in range(1, width + 1) for h in range(1, height + 1) if w * h > node_num]
@@ -111,8 +111,9 @@ class Placer():
             # check duplication
             if len(list(mapping.values())) == len(set(mapping.values())):
                 # check dependency
-                if self.__if_keep_dependency(dag, mapping):
-                    break
+                # if self.__if_keep_dependency(dag, mapping):
+                #     break
+                break
         else:
             return None
 

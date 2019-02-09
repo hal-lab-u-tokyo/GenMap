@@ -25,7 +25,7 @@ class NSGA2():
         self.__params = {"NGEN": 20, "MAX_STALL": 100, "INIT_POP_SIZE": 300, \
                         "LAMBDA": 100, "MU": 45, "RNDMU": 4, "CXPB": 0.7,\
                         "MUTPB": 0.3, "MUTELPB": 0.5}
-        self.__pop = []
+        self.pop = []
 
         # check if hypervolume is available
         self.__hv_logging = True
@@ -81,7 +81,7 @@ class NSGA2():
         placer = Placer(iterations = 400, randomness = "Full")
 
         # make initial mappings
-        init_maps = placer.generate_init_mappings(comp_dfg, width, height, count = 200)
+        init_maps = placer.generate_init_mappings(comp_dfg, width, height, count = 400)
 
         # check if mapping initialization successed
         if len(init_maps) < 1:
@@ -159,19 +159,17 @@ class NSGA2():
             router.clean_graph(g)
             individual.valid = True
 
-    def algo_wrapper(self):
-        return algorithms.varOr()
 
     def runOptimization(self):
         # hall of fame
         hof = tools.ParetoFront()
 
         # generate first population
-        self.__pop = self.__toolbox.population(n=self.__params["INIT_POP_SIZE"])
+        self.pop = self.__toolbox.population(n=self.__params["INIT_POP_SIZE"])
 
         # evaluate the population
-        fitnesses, self.__pop = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, self.__pop)))
-        for ind, fit in zip(self.__pop, fitnesses):
+        fitnesses, self.pop = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, self.pop)))
+        for ind, fit in zip(self.pop, fitnesses):
             ind.fitness.values = fit
         print(fitnesses)
 
@@ -187,7 +185,7 @@ class NSGA2():
             print("generation:", gen_count)
 
             # make offspring
-            offspring = algorithms.varOr(self.__pop, self.__toolbox, self.__params["LAMBDA"], \
+            offspring = algorithms.varOr(self.pop, self.__toolbox, self.__params["LAMBDA"], \
                                          self.__params["CXPB"], self.__params["MUTPB"])
 
             # Evaluate the individuals of the offspring
@@ -197,8 +195,8 @@ class NSGA2():
             print(fitnesses)
 
             # make next population
-            self.__pop = self.__toolbox.select(self.__pop + offspring , self.__params["MU"])
-            hof.update(self.__pop)
+            self.pop = self.__toolbox.select(self.pop + offspring , self.__params["MU"])
+            hof.update(self.pop)
 
             # check if there is an improvement
             if len(hof) == prev_hof_num:
@@ -222,7 +220,7 @@ class NSGA2():
             fitnesses, rnd_ind = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, rnd_ind)))
             for ind, fit in zip(rnd_ind, fitnesses):
                 ind.fitness.values = fit
-            self.__pop += rnd_ind
+            self.pop += rnd_ind
 
             print(len(hof))
 
