@@ -13,15 +13,11 @@ class AStarRouter(RouterBase):
         pass
 
     @staticmethod
+    def get_penalty_cost():
+        return PENALTY_CONST
+
+    @staticmethod
     def set_default_weights(CGRA):
-        """Set default weight to network model.
-
-            Args:
-                CGRA: A model of the CGRA to be initialized
-
-            Returns: None
-
-        """
         CGRA.setInitEdgeWeight("weight", 1, "SE")
         CGRA.setInitEdgeWeight("weight", 0, "Const")
         CGRA.setInitEdgeWeight("weight", 0, "IN_PORT")
@@ -31,19 +27,6 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
-        """Routes a computation DFG on the PE array.
-
-            Args:
-                CGRA (PEArrayModel): A model of the CGRA
-                comp_DFG (networkx DiGraph): A graph to be routed
-                mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
-                    values (tuple): PE coordinates
-                routed_graph (networkx DiGraph): PE array graph
-
-            Returns:
-                int: routing cost
-        """
 
         # get out degree for each node
         out_deg = {v: comp_DFG.out_degree(v) for v in comp_DFG.nodes() if comp_DFG.out_degree(v) > 0 }
@@ -71,19 +54,6 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def const_routing(CGRA, const_DFG, mapping, routed_graph, **info):
-        """Routes a computation DFG on the PE array.
-
-            Args:
-                CGRA (PEArrayModel): A model of the CGRA
-                const_DFG (networkx DiGraph): A graph to be routed
-                mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
-                    values (tuple): PE coordinates
-                routed_graph (networkx DiGraph): PE array graph
-
-            Returns:
-                int: routing cost
-        """
         if len(const_DFG.nodes()) == 0:
             return 0
 
@@ -114,6 +84,21 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def output_routing(CGRA, out_DFG, mapping, routed_graph, **info):
+        """Routes a computation DFG on the PE array.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                out_DFG (networkx DiGraph): A graph to be routed
+                mapping (dict): mapping of the DFG
+                    keys (str): node names of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): PE array graph
+                Optional:
+                    stage_domains (list-like): nodes-list for each pipeline stage
+
+            Returns:
+                int: routing cost
+        """
         route_cost = 0
 
         # get output edges
@@ -156,7 +141,7 @@ class AStarRouter(RouterBase):
                     routed_graph.edges[path[i], path[i + 1]]["free"] = False
                     routed_graph.nodes[path[i]]["free"] = False
                 free_last_stage_SEs -= set(path)
-                print("Extended paht", path)
+                # print("Extended paht", path)
                 # change source node, alu -> se
                 src = path[-1]
 
@@ -172,7 +157,7 @@ class AStarRouter(RouterBase):
                 routed_graph.edges[path[i], path[i + 1]]["free"] = False
                 routed_graph.nodes[path[i]]["free"] = False
             free_last_stage_SEs -= set(path)
-            print("out", path)
+            # print("out", path)
 
             out_port_nodes.remove(path[-1])
 
@@ -257,14 +242,19 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def __manhattan_dist(p1, p2):
+        """Return manhattan distance between p1 and p2"""
         return (abs(p1[0] - p2[0]), abs(p1[1] - p2[1]))
 
     @staticmethod
     def __find_nearest_node(graph, src, dsts):
-        """
+        """Find the nearset node for src from dsts.
+
+            Args:
+                src (str): source node
+                dsts (list-like): destination nodes
 
             Returns:
-                (list, int): path, cost
+                    (list, int): path, cost
         """
         min_length = PENALTY_CONST
         nearest_node = None
@@ -309,7 +299,7 @@ class AStarRouter(RouterBase):
                 else:
                     route_cost += path_len
                     path = nx.astar_path(graph, src, dst, weight = "weight")
-                    print(path_len, path)
+                    # print(path_len, path)
                     # set used flag to the links
                     for i in range(len(path) - 1):
                         e = (path[i], path[i + 1])
@@ -328,7 +318,7 @@ class AStarRouter(RouterBase):
 
             except nx.exception.NetworkXNoPath:
                 # there is no path
-                print("Fail:", src, "->", dst)
+                # print("Fail:", src, "->", dst)
                 route_cost += PENALTY_CONST
 
         # update SE edges link cost
@@ -345,6 +335,7 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def clean_graph(graph):
+        """Cleaning graph"""
         remove_edges = [e for e in graph.edges() if graph.edges[e]["free"] == True]
         graph.remove_edges_from(remove_edges)
         remove_nodes = [v for v in graph.nodes() if graph.in_degree(v) == 0]

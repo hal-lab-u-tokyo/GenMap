@@ -47,6 +47,7 @@ class Placer():
         init_mapping = []
         init_hashable_mapping = set() # for checking dupulication
         for mapping in results:
+            # remove invalid results
             if not mapping is None:
                 if not mapping.values() in init_hashable_mapping:
                     init_mapping.append(mapping)
@@ -119,6 +120,16 @@ class Placer():
 
     @staticmethod
     def __if_keep_dependency(dag, mapping):
+        """Check dependency between operations.
+
+            Args:
+                dag (networkx digraph): data-flow-graph to be mapped
+
+            mapping (dict): operation mapping
+                                keys: node name
+                                values: PE coordinates where the nodes are mapped
+
+        """
         valid = True
         for u, v in dag.edges():
             if mapping[u][1] > mapping[v][1]:
