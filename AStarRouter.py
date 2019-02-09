@@ -338,5 +338,5 @@ class AStarRouter(RouterBase):
         """Cleaning graph"""
         remove_edges = [e for e in graph.edges() if graph.edges[e]["free"] == True]
         graph.remove_edges_from(remove_edges)
-        remove_nodes = [v for v in graph.nodes() if graph.in_degree(v) == 0]
+        remove_nodes = [v for v in graph.nodes() if graph.in_degree(v) == 0 and graph.out_degree(v) == 0]
         graph.remove_nodes_from(remove_nodes)
