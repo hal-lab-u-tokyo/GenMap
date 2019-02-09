@@ -5,6 +5,7 @@ from deap import creator
 import multiprocessing
 import numpy
 import copy
+from time import time
 
 from Individual import Individual
 from EvalBase import EvalBase
@@ -12,7 +13,6 @@ from RouterBase import RouterBase
 from Placer import Placer
 
 class NSGA2():
-
     def __init__(self, config = None):
         """Constructor of the NSGA2 class.
 
@@ -25,6 +25,7 @@ class NSGA2():
         self.__params = {"NGEN": 20, "MAX_STALL": 100, "INIT_POP_SIZE": 300, \
                         "LAMBDA": 100, "MU": 45, "RNDMU": 4, "CXPB": 0.7,\
                         "MUTPB": 0.3, "MUTELPB": 0.5}
+        self.__pop = []
 
         # check if hypervolume is available
         self.__hv_logging = True
@@ -38,6 +39,7 @@ class NSGA2():
     def __getstate__(self):
         # make this instance hashable for pickle (needed to use multiprocessing)
         return {"pool": self}
+
 
     def setup(self, CGRA, app, router, eval_list, proc_num = multiprocessing.cpu_count()):
         """Setup NSGA2 optimization
@@ -157,17 +159,19 @@ class NSGA2():
             router.clean_graph(g)
             individual.valid = True
 
+    def algo_wrapper(self):
+        return algorithms.varOr()
 
     def runOptimization(self):
         # hall of fame
         hof = tools.ParetoFront()
 
         # generate first population
-        pop = self.__toolbox.population(n=self.__params["INIT_POP_SIZE"])
+        self.__pop = self.__toolbox.population(n=self.__params["INIT_POP_SIZE"])
 
         # evaluate the population
-        fitnesses, pop = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, pop)))
-        for ind, fit in zip(pop, fitnesses):
+        fitnesses, self.__pop = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, self.__pop)))
+        for ind, fit in zip(self.__pop, fitnesses):
             ind.fitness.values = fit
         print(fitnesses)
 
@@ -183,8 +187,8 @@ class NSGA2():
             print("generation:", gen_count)
 
             # make offspring
-            offspring = algorithms.varOr(pop, self.__toolbox, self.__params["LAMBDA"], \
-                                            self.__params["CXPB"], self.__params["MUTPB"])
+            offspring = algorithms.varOr(self.__pop, self.__toolbox, self.__params["LAMBDA"], \
+                                         self.__params["CXPB"], self.__params["MUTPB"])
 
             # Evaluate the individuals of the offspring
             fitnesses, offspring = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, offspring)))
@@ -193,8 +197,8 @@ class NSGA2():
             print(fitnesses)
 
             # make next population
-            pop = self.__toolbox.select(pop + offspring , self.__params["MU"])
-            hof.update(pop)
+            self.__pop = self.__toolbox.select(self.__pop + offspring , self.__params["MU"])
+            hof.update(self.__pop)
 
             # check if there is an improvement
             if len(hof) == prev_hof_num:
@@ -218,7 +222,7 @@ class NSGA2():
             fitnesses, rnd_ind = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, rnd_ind)))
             for ind, fit in zip(rnd_ind, fitnesses):
                 ind.fitness.values = fit
-            pop += rnd_ind
+            self.__pop += rnd_ind
 
             print(len(hof))
 
