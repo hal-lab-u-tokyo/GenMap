@@ -23,7 +23,6 @@ class AStarRouter(RouterBase):
         CGRA.setInitEdgeAttr("weight", 0, "IN_PORT")
         CGRA.setInitEdgeAttr("weight", 0, "OUT_PORT")
         CGRA.setInitEdgeAttr("weight", ALU_OUT_WEIGTH, "ALU")
-        CGRA.setInitEdgeAttr("free", True)
 
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
@@ -50,6 +49,7 @@ class AStarRouter(RouterBase):
             # route each path
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
 
+
         return route_cost
 
     @staticmethod
@@ -60,6 +60,11 @@ class AStarRouter(RouterBase):
         const_map = AStarRouter.__resource_mapping(CGRA, CGRA.getConstRegs(), const_DFG, mapping, routed_graph)
         if const_map is None:
             return PENALTY_CONST
+        else:
+            # save const mapping
+            nx.set_node_attributes(routed_graph, {c_reg: edges[0][0] \
+                                    for c_reg, edges in const_map.items() if len(edges) > 0},\
+                                     "value")
 
         route_cost = 0
         for c_reg, edges in const_map.items():
@@ -74,6 +79,11 @@ class AStarRouter(RouterBase):
         input_map = AStarRouter.__resource_mapping(CGRA, CGRA.getInputPorts(), in_DFG, mapping, routed_graph)
         if input_map is None:
             return PENALTY_CONST
+        else:
+            # save input mapping
+            nx.set_node_attributes(routed_graph, {i_port: edges[0][0] \
+                                    for i_port, edges in input_map.items() if len(edges) > 0},\
+                                     "map")
 
         route_cost = 0
         for i_port, edges in input_map.items():
@@ -135,11 +145,14 @@ class AStarRouter(RouterBase):
                 if path is None:
                     return PENALTY_CONST
                 route_cost += cost
-                # update cost
+
+                # update cost and used flag
                 for i in range(len(path) - 1):
                     routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
                     routed_graph.edges[path[i], path[i + 1]]["free"] = False
                     routed_graph.nodes[path[i]]["free"] = False
+                routed_graph.nodes[path[-1]]["free"] = False
+
                 free_last_stage_SEs -= set(path)
                 # print("Extended paht", path)
                 # change source node, alu -> se
@@ -151,11 +164,13 @@ class AStarRouter(RouterBase):
                 return PENALTY_CONST
 
             route_cost += cost
-            # update cost
+
+            # update cost and used flags
             for i in range(len(path) - 1):
                 routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
                 routed_graph.edges[path[i], path[i + 1]]["free"] = False
                 routed_graph.nodes[path[i]]["free"] = False
+            routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
             # print("out", path)
 
@@ -290,6 +305,9 @@ class AStarRouter(RouterBase):
         shared_edges = set()
         route_cost = 0
 
+        if len(dsts) == 0:
+            return 0
+
         for dst in dsts:
             try:
                 # get path length by using astar
@@ -321,15 +339,19 @@ class AStarRouter(RouterBase):
                 # print("Fail:", src, "->", dst)
                 route_cost += PENALTY_CONST
 
-        # update SE edges link cost
+        # update SE edges link cost and used flag
         for e in shared_edges:
             graph.edges[e]["weight"] = USED_LINK_WEIGHT
             graph.edges[e]["free"] = False
             graph.nodes[e[1]]["free"] = False
 
-        # update ALU out link cost
+        # update ALU out link cost and used flag
         for v in graph.successors(src):
             graph.edges[src, v]["weight"] = USED_LINK_WEIGHT
+        graph.nodes[src]["free"] = False
+        for v in dsts:
+            graph.nodes[v]["free"] = False
+
 
         return route_cost
 
@@ -338,5 +360,6 @@ class AStarRouter(RouterBase):
         """Cleaning graph"""
         remove_edges = [e for e in graph.edges() if graph.edges[e]["free"] == True]
         graph.remove_edges_from(remove_edges)
-        remove_nodes = [v for v in graph.nodes() if graph.in_degree(v) == 0 and graph.out_degree(v) == 0]
+        remove_nodes = [v for v in graph.nodes() if graph.nodes[v]["free"] == True]
+        # remove_nodes = [v for v in graph.nodes() if graph.in_degree(v) == 0 and graph.out_degree(v) == 0]
         graph.remove_nodes_from(remove_nodes)

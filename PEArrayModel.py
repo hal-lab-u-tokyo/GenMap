@@ -235,6 +235,8 @@ class PEArrayModel:
 
         # set node attributes
         nx.set_node_attributes(self.__network, True, "free")
+        # set edge attributes
+        self.setInitEdgeAttr("free", True)
 
 
     def __make_connection(self, dst, srcs):
