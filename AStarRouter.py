@@ -18,12 +18,12 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def set_default_weights(CGRA):
-        CGRA.setInitEdgeWeight("weight", 1, "SE")
-        CGRA.setInitEdgeWeight("weight", 0, "Const")
-        CGRA.setInitEdgeWeight("weight", 0, "IN_PORT")
-        CGRA.setInitEdgeWeight("weight", 0, "OUT_PORT")
-        CGRA.setInitEdgeWeight("weight", ALU_OUT_WEIGTH, "ALU")
-        CGRA.setInitEdgeWeight("free", True)
+        CGRA.setInitEdgeAttr("weight", 1, "SE")
+        CGRA.setInitEdgeAttr("weight", 0, "Const")
+        CGRA.setInitEdgeAttr("weight", 0, "IN_PORT")
+        CGRA.setInitEdgeAttr("weight", 0, "OUT_PORT")
+        CGRA.setInitEdgeAttr("weight", ALU_OUT_WEIGTH, "ALU")
+        CGRA.setInitEdgeAttr("free", True)
 
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):

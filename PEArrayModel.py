@@ -395,13 +395,13 @@ class PEArrayModel:
         else:
             return ""
 
-    def setInitEdgeWeight(self, weight_name, weight, edge_type = None):
-        """ Set initial weight to edges in the network model.
+    def setInitEdgeAttr(self, attr_name, attr, edge_type = None):
+        """ Set initial attributes to edges in the network model.
 
             Args:
-                weight_name (str): a name of the weight
+                attr_name (str): a name of the attr
                     it is used as a attribute name of networkx digraph
-                weight (int): weight value
+                attr (int): attr value
                 edge_type (str): edge type
                     if it is None, all edges are initilized with the value.
                     The type name must be the same name as the Element name,
@@ -412,18 +412,18 @@ class PEArrayModel:
         """
 
         if edge_type is None:
-            nx.set_edge_attributes(self.__network, weight, weight_name)
+            nx.set_edge_attributes(self.__network, attr, attr_name)
         else:
             if edge_type == "ALU":
-                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("ALU") == 0}
+                edges = {(u, v): {attr_name: attr} for u, v in self.__network.edges() if u.find("ALU") == 0}
             elif edge_type == "SE":
-                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("SE") == 0}
+                edges = {(u, v): {attr_name: attr} for u, v in self.__network.edges() if u.find("SE") == 0}
             elif edge_type == "Const":
-                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("CONST") == 0}
+                edges = {(u, v): {attr_name: attr} for u, v in self.__network.edges() if u.find("CONST") == 0}
             elif edge_type == "IN_PORT":
-                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if u.find("IN_PORT") == 0}
+                edges = {(u, v): {attr_name: attr} for u, v in self.__network.edges() if u.find("IN_PORT") == 0}
             elif edge_type == "OUT_PORT":
-                edges = {(u, v): {weight_name: weight} for u, v in self.__network.edges() if v.find("OUT_PORT") == 0}
+                edges = {(u, v): {attr_name: attr} for u, v in self.__network.edges() if v.find("OUT_PORT") == 0}
 
             nx.set_edge_attributes(self.__network, edges)
 
