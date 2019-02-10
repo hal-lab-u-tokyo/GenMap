@@ -19,7 +19,7 @@ class Individual():
             self.mapping = []
         if not preg_num is None:
             # generate preg configuration randomly
-            self.preg = [random.randint(0, 1) for i in range(preg_num)]
+            self.preg = [random.randint(0, 1) == 0 for i in range(preg_num)]
         else:
             self.preg = []
         # get network model

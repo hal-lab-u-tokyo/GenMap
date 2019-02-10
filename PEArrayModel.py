@@ -489,14 +489,18 @@ class PEArrayModel:
 
         return rtn_list
 
-    def getStageDomains(self):
+    def getStageDomains(self, preg_config):
 
         stage = 0
-        rtn_list = [[] for stage in range(len(self.__preg_positions) + 1)]
+        rtn_list = [[] for stage in range(sum(preg_config) + 1)]
 
+        # activated preg positions
+        active_preg_positions = [self.__preg_positions[i] for i in range(len(self.__preg_positions)) if preg_config[i] == True]
+
+        # get nodes for each stage
         for y in range(self.__height):
-            if stage < len(self.__preg_positions):
-                if self.__preg_positions[stage] <= y:
+            if stage < len(active_preg_positions):
+                if active_preg_positions[stage] <= y:
                     stage += 1
             # add ALU
             rtn_list[stage].extend([ALU_node_exp.format(pos=(x, y)) for x in range(self.__width)])
