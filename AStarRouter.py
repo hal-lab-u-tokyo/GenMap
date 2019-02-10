@@ -127,7 +127,7 @@ class AStarRouter(RouterBase):
         free_last_stage_SEs = set()
         if "stage_domains" in info.keys():
             stage_domains = info["stage_domains"]
-            if len(stage_domains) > 2:
+            if len(stage_domains) > 1:
                 last_stage_nodes = stage_domains[-1]
                 path_extend_nodes = [alu for alu in alu_list if not alu in last_stage_nodes]
                 free_last_stage_SEs = set(last_stage_nodes) & set(CGRA.getFreeSEs(routed_graph))
@@ -157,7 +157,7 @@ class AStarRouter(RouterBase):
                 routed_graph.nodes[path[-1]]["free"] = False
 
                 free_last_stage_SEs -= set(path)
-                print("Extended paht", path)
+                # print("Extended paht", path)
                 # change source node, alu -> se
                 src = path[-1]
 
@@ -178,7 +178,7 @@ class AStarRouter(RouterBase):
                 routed_graph.remove_edges_from(remove_edges)
             routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
-            print("out", path)
+            # print("out", path)
 
             out_port_nodes.remove(path[-1])
 
