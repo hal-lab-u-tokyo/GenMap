@@ -116,7 +116,7 @@ class NSGA2():
         # routing the mapping
         self.__doRouting(CGRA, app, router, individual)
         # evaluate each objectives
-        return [obj.eval(CGRA, individual) for obj in eval_list], individual
+        return [obj.eval(CGRA, app, individual) for obj in eval_list], individual
 
     def __doRouting(self, CGRA, app, router, individual):
         # check if routing is necessary
