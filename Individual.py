@@ -28,9 +28,34 @@ class Individual():
         self.routing_cost = 0
         self.valid = False
         self.satisfy = False
+        # user data
+        self.__userData = {}
 
     def __eq__(self, other):
         return self.mapping == other.mapping and self.preg == other.preg
+
+    def saveEvaluatedData(self, key, data):
+        """Save any evaluated data.
+
+            Args:
+                key: dictionary key for save data
+                data: save data
+        """
+        self.__userData[key] = data
+
+    def getEvaluatedData(self, key):
+        """Return saved data.
+
+            Args:
+                key: dictionary key for save data
+
+            Returns:
+                Saved data type: saved data (if exist, else return None)
+        """
+        if key in self.__userData.keys():
+            return self.__userData[key]
+        else:
+            return None
 
     def mapping_compaction(self):
         """
