@@ -83,7 +83,7 @@ class Placer():
             return None
 
         # enumerate possible rectangles
-        rect_pattern = [(w, h) for w in range(1, width + 1) for h in range(1, height + 1) if w * h > node_num]
+        rect_pattern = [(w, h) for w in range(1, width + 1) for h in range(1, height + 1) if w * h >= node_num]
 
         # graph layout by dot's algorithm
         pos = nx.nx_pydot.graphviz_layout(dag, prog="dot")
