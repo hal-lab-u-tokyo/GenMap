@@ -2,12 +2,13 @@ from abc import ABCMeta, abstractmethod
 
 class EvalBase(metaclass=ABCMeta):
     @abstractmethod
-    def eval(self, CGRA, individual, **info):
+    def eval(self, CGRA, app, individual, **info):
         """Return mapping width.
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
-                individual (Individual): an individual to be evaluated
+                app (Application): An application to be optimized
+                individual (Individual): An individual to be evaluated
 
             Returns:
                 int: mapping width
