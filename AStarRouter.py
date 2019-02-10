@@ -132,7 +132,7 @@ class AStarRouter(RouterBase):
                 path_extend_nodes = [alu for alu in alu_list if not alu in last_stage_nodes]
                 free_last_stage_SEs = set(last_stage_nodes) & set(CGRA.getFreeSEs(routed_graph))
 
-        # dreedy output routing
+        # greedy output routing
         for alu in alu_list:
             # remove high cost of alu out
             for suc_element in routed_graph.successors(alu):
@@ -151,10 +151,13 @@ class AStarRouter(RouterBase):
                     routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
                     routed_graph.edges[path[i], path[i + 1]]["free"] = False
                     routed_graph.nodes[path[i]]["free"] = False
+                    # remove other input edges
+                    remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
+                    routed_graph.remove_edges_from(remove_edges)
                 routed_graph.nodes[path[-1]]["free"] = False
 
                 free_last_stage_SEs -= set(path)
-                # print("Extended paht", path)
+                print("Extended paht", path)
                 # change source node, alu -> se
                 src = path[-1]
 
@@ -170,9 +173,12 @@ class AStarRouter(RouterBase):
                 routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
                 routed_graph.edges[path[i], path[i + 1]]["free"] = False
                 routed_graph.nodes[path[i]]["free"] = False
+                # remove other input edges
+                remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
+                routed_graph.remove_edges_from(remove_edges)
             routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
-            # print("out", path)
+            print("out", path)
 
             out_port_nodes.remove(path[-1])
 
