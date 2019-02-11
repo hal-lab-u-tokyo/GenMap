@@ -525,6 +525,33 @@ class PEArrayModel:
         return node_name.find("SE") == 0
 
 
+    @staticmethod
+    def isALU(node_name):
+        """Check whether the node is SE or not.
 
+            Args:
+                node_name (str): a name of node
 
+            Returns:
+                bool: if the node is ALU, return True.
+                      otherwise return False.
+
+        """
+        return node_name.find("ALU") == 0
+
+    def getOperationList(self, coord):
+        """Returns operation list supported by an ALU.
+
+            Args:
+                coord (int, int): a coordinate of the ALU.
+
+            Returns:
+                list: the operation list.
+                      If the coordinate is out of range, return empty list.
+        """
+        (x, y) = coord
+        if x < 0 or x >= self.__width or y < 0 or y >= self.__height:
+            return []
+        else:
+            return self.__operation_list[x][y]
 
