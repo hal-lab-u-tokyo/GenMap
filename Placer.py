@@ -19,7 +19,7 @@ class Placer():
                                   if is is "Partial", then partilly randomly.
         """
 
-        self.__iterations = 50
+        self.__iterations = iterations
         if not randomness in ["Full", "Partial"]:
             raise ValueError("Invalid randomness type: " + randomness)
         else:
