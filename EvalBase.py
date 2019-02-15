@@ -1,8 +1,9 @@
 from abc import ABCMeta, abstractmethod
 
 class EvalBase(metaclass=ABCMeta):
+    @staticmethod
     @abstractmethod
-    def eval(self, CGRA, app, individual, **info):
+    def eval(CGRA, app, individual, **info):
         """Return mapping width.
 
             Args:
@@ -15,8 +16,17 @@ class EvalBase(metaclass=ABCMeta):
         """
         pass
 
+    @staticmethod
     @abstractmethod
-    def isMinimize(self):
+    def isMinimize():
         """Returns whether this objective should be minimize.
+        """
+        pass
+
+
+    @staticmethod
+    @abstractmethod
+    def name():
+        """Returns the evaluation name
         """
         pass

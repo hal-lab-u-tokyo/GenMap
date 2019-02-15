@@ -65,11 +65,11 @@ class NSGA2():
 
         # check instance
         for evl in eval_list:
-            if not isinstance(evl, EvalBase):
-                raise TypeError(type(evl).__name__ + "is not EvalBase class")
+            if not issubclass(evl, EvalBase):
+                raise TypeError(evl.__name__ + "is not EvalBase class")
 
-        if not isinstance(router, RouterBase):
-            raise TypeError(type(router).__name__ + "is not RouterBase class")
+        if not issubclass(router, RouterBase):
+            raise TypeError(router.__name__ + "is not RouterBase class")
 
         # initilize weights of network model
         router.set_default_weights(CGRA)
@@ -118,8 +118,8 @@ class NSGA2():
         self.progress = tqdm(total=self.__params["INIT_POP_SIZE"], dynamic_ncols=True)
 
         # status display
-        self.status_disp = [tqdm(total = 0, dynamic_ncols=True, desc=type(ev).__name__, bar_format="{desc}: {postfix}")\
-                            for ev in eval_list]
+        self.status_disp = [tqdm(total = 0, dynamic_ncols=True, desc=eval_cls.name(), bar_format="{desc}: {postfix}")\
+                            for eval_cls in eval_list]
 
         return True
 
@@ -142,7 +142,7 @@ class NSGA2():
         # routing the mapping
         self.__doRouting(CGRA, app, router, individual)
         # evaluate each objectives
-        return [obj.eval(CGRA, app, individual) for obj in eval_list], individual
+        return [eval_cls.eval(CGRA, app, individual) for eval_cls in eval_list], individual
 
     def __doRouting(self, CGRA, app, router, individual):
         """
