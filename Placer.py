@@ -120,6 +120,40 @@ class Placer():
         return mapping
 
     @staticmethod
+    def make_random_mappings(dag, width, height, size):
+        # validate input dag
+        if nx.is_directed_acyclic_graph(dag) == False:
+            raise ValueError("Input data-flow-graph is not DAG")
+
+        # check dag size
+        node_num = len(dag.nodes())
+        if node_num > width * height:
+            return None
+
+        # enumerate possible rectangles
+        rect_pattern = [(w, h) for w in range(1, width + 1) for h in range(1, height + 1) if w * h >= node_num]
+
+        rtn_list = []
+        for i in range(size):
+            if random.randint(0, 1) == 0:
+                topological_sort_enable = True
+            else:
+                topological_sort_enable = False
+
+            (map_width, map_height) = rect_pattern[random.randint(0, len(rect_pattern) - 1)]
+
+            positions = random.sample([(x, y) for x in range(map_width) for y in range(map_height)], node_num)
+
+            if topological_sort_enable:
+                positions = sorted(positions, key=lambda x: x[0]**2 + x[1] ** 2)
+                rtn_list.append({k: v for k, v in zip(list(nx.topological_sort(dag)), positions)})
+            else:
+                rtn_list.append({k: v for k, v in zip(dag.nodes(), positions)})
+
+        return rtn_list
+
+
+    @staticmethod
     def __if_keep_dependency(dag, mapping):
         """Check dependency between operations.
 

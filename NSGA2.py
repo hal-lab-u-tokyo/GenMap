@@ -6,6 +6,7 @@ import multiprocessing
 import numpy
 import copy
 from time import time
+from tqdm import tqdm
 
 from Individual import Individual
 from EvalBase import EvalBase
@@ -22,10 +23,12 @@ class NSGA2():
         """
         # initilize toolbox
         self.__toolbox = base.Toolbox()
-        self.__params = {"NGEN": 20, "MAX_STALL": 100, "INIT_POP_SIZE": 300, \
-                        "LAMBDA": 100, "MU": 45, "RNDMU": 4, "CXPB": 0.7,\
+        self.__params = {"NGEN": 500, "MAX_STALL": 100, "INIT_POP_SIZE": 300, \
+                        "LAMBDA": 100, "MU": 45, "RNDMU": 10, "CXPB": 0.7,\
                         "MUTPB": 0.3, "MUTELPB": 0.5}
         self.pop = []
+        self.__placer = None
+        self.__random_pop_args = []
 
         # check if hypervolume is available
         self.__hv_logging = True
@@ -78,10 +81,12 @@ class NSGA2():
         comp_dfg = app.getCompSubGraph()
 
         # generate initial placer
-        placer = Placer(iterations = 400, randomness = "Full")
+        self.__placer = Placer(iterations = 100, randomness = "Full")
 
         # make initial mappings
-        init_maps = placer.generate_init_mappings(comp_dfg, width, height, count = 400)
+        init_maps = self.__placer.generate_init_mappings(comp_dfg, width, height, count = 200)
+
+        self.__random_pop_args = [comp_dfg, width, height, 100]
 
         # check if mapping initialization successed
         if len(init_maps) < 1:
@@ -98,27 +103,51 @@ class NSGA2():
         # register each chromosome operation
         self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
+        self.__toolbox.register("random_individual", creator.Individual, CGRA)
         self.__toolbox.register("evaluate", self.eval_objectives, eval_list, CGRA, app, router)
         self.__toolbox.register("mate", Individual.cxSet)
-        self.__toolbox.register("mutate", Individual.mutSet)
+        self.__toolbox.register("mutate", Individual.mutSet, 0.5)
         self.__toolbox.register("select", tools.selNSGA2)
 
         # set statics method
-        stats = tools.Statistics(key=lambda ind: ind.fitness.values)
-        stats.register("avg", numpy.mean)
-        stats.register("std", numpy.std)
-        stats.register("min", numpy.min)
-        stats.register("max", numpy.max)
+        self.stats = tools.Statistics(key=lambda ind: ind.fitness.values)
+        self.stats.register("min", numpy.min, axis=0)
+        self.stats.register("max", numpy.max, axis=0)
+
+         # progress bar
+        self.progress = tqdm(total=self.__params["INIT_POP_SIZE"], dynamic_ncols=True)
+
+        # status display
+        self.status_disp = [tqdm(total = 0, dynamic_ncols=True, desc=type(ev).__name__, bar_format="{desc}: {postfix}")\
+                            for ev in eval_list]
 
         return True
 
+    def random_population(self, n):
+        """ Generate rondom mapping as a population.
+
+            Args:
+                n (int): the number of the population
+
+            Returns:
+                list: a mapping list
+
+        """
+        random_mappings = self.__placer.make_random_mappings(*self.__random_pop_args)
+        return [self.__toolbox.random_individual(random_mappings) for i in range(n)]
+
     def eval_objectives(self, eval_list, CGRA, app, router, individual):
+        """ Executes evaluation for each objective
+        """
         # routing the mapping
         self.__doRouting(CGRA, app, router, individual)
         # evaluate each objectives
         return [obj.eval(CGRA, app, individual) for obj in eval_list], individual
 
     def __doRouting(self, CGRA, app, router, individual):
+        """
+            Execute routing
+        """
         # check if routing is necessary
         if individual.valid:
             return
@@ -171,7 +200,6 @@ class NSGA2():
         fitnesses, self.pop = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, self.pop)))
         for ind, fit in zip(self.pop, fitnesses):
             ind.fitness.values = fit
-        print(fitnesses)
 
         # start evolution
         gen_count = 0
@@ -181,8 +209,9 @@ class NSGA2():
 
         # Repeat evolution
         while gen_count < self.__params["NGEN"] and stall_count < self.__params["MAX_STALL"]:
+            # show generation count
             gen_count = gen_count + 1
-            print("generation:", gen_count)
+            self.progress.set_description("Generation {0}".format(gen_count))
 
             # make offspring
             offspring = algorithms.varOr(self.pop, self.__toolbox, self.__params["LAMBDA"], \
@@ -192,7 +221,6 @@ class NSGA2():
             fitnesses, offspring = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, offspring)))
             for ind, fit in zip(offspring, fitnesses):
                 ind.fitness.values = fit
-            print(fitnesses)
 
             # make next population
             self.pop = self.__toolbox.select(self.pop + offspring , self.__params["MU"])
@@ -216,13 +244,18 @@ class NSGA2():
                 hypervolume_log = [self.hypervolume(fit).compute(ref_point) for fit in fitness_hof_log]
 
             # Adding random individuals to the population (attempt to avoid local optimum)
-            rnd_ind = self.__toolbox.population(n=self.__params["RNDMU"])
+            rnd_ind = self.random_population(self.__params["RNDMU"])
             fitnesses, rnd_ind = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, rnd_ind)))
             for ind, fit in zip(rnd_ind, fitnesses):
                 ind.fitness.values = fit
             self.pop += rnd_ind
 
-            print(len(hof))
+            # update status
+            self.progress.set_postfix(hof_len=len(hof), stall=stall_count)
+            self.progress.update(1)
+            stats = self.stats.compile(hof)
+            for i in range(len(stats["min"])):
+                self.status_disp[i].set_postfix(min=stats["min"][i], max=stats["max"][i])
 
         self.__pool.close()
         self.__pool.join()

@@ -106,15 +106,22 @@ class Individual():
             if not father.mapping[op] in mother_former:
                 child2.mapping[op] = father.mapping[op]
 
-        # duplication
+        # check dupulication of child1's mapping
         if len(child1.mapping.values()) != len(set(child1.mapping.values())):
-            child1.mapping = father.mapping
+            # try to eliminate the duplicated nodes
+            if child1.eliminate_duplication() == False:
+                # if fail the elimination, restore the mapping from father
+                child1.mapping = copy.deepcopy(father.mapping)
         else:
             # compaction
             child1.mapping_compaction()
 
+        # check dupulication of child1's mapping
         if len(child2.mapping.values()) != len(set(child2.mapping.values())):
-            child2.mapping = mother.mapping
+            # try to eliminate the duplicated nodes
+            if child2.eliminate_duplication() == False:
+                # if fail the elimination, restore the mapping from father
+                child2.mapping = copy.deepcopy(mother.mapping)
         else:
             # compaction
             child2.mapping_compaction()
@@ -129,10 +136,64 @@ class Individual():
 
         return child1, child2
 
+    def eliminate_duplication(self):
+        """Try to eliminate duplicated mapping nodes
+
+            Args: None
+
+            Returns:
+                bool: If there is a duplication-free mapping, returns True.
+                      Otherwise, returns False
+        """
+        # get duplicated nodes
+        mapping_list = list(self.mapping.values())
+        duplicated_nodes = {k: v for k, v in self.mapping.items() if mapping_list.count(v) > 1}
+        # sort the nodes randomly
+        keys = list(duplicated_nodes.keys())
+        random.shuffle(keys)
+        duplicated_nodes = {k: duplicated_nodes[k] for k in keys}
+
+        new_mapping = copy.deepcopy(self.mapping)
+
+        for op, coord in duplicated_nodes.items():
+            if list(new_mapping.values()).count(coord) == 1:
+                continue
+            else:
+                # move the node to neighbor PE
+                x, y = coord
+                bound_x, bound_y = self.model.getSize()
+                if y + 1 < bound_y and not (x, y + 1) in new_mapping.values():
+                    # move to upper
+                    new_mapping[op] = (x, y + 1)
+                elif y - 1 >= 0 and not (x, y - 1) in new_mapping.values():
+                    # move to lower
+                    new_mapping[op] = (x, y - 1)
+                elif x - 1 >= 0 and not (x - 1, y) in new_mapping.values():
+                    # move to left
+                    new_mapping[op] = (x - 1, y)
+                elif x < bound_x and not (x + 1, y) in new_mapping.values():
+                    # move to right
+                    new_mapping[op] = (x + 1, y)
+                else:
+                    # fail to move
+                    return False
+
+        # update the mapping
+        self.mapping = new_mapping
+        return True
+
     @staticmethod
-    def mutSet(ind):
-        LSPB = 0.5
-        if random.random() <= LSPB:
+    def mutSet(local_search_prob, ind):
+        """Mutation operation.
+
+            Args:
+                local_search_prob (float): local search probability
+                ind: An Individual instance to mutate
+
+            Returns:
+                Individual: mutated individual
+        """
+        if random.random() <= local_search_prob:
             # Local Search (Swapping)
             swap_op1, swap_op2 = random.sample(list(ind.mapping.keys()), 2)
             tmp = ind.mapping[swap_op1]
@@ -144,15 +205,25 @@ class Individual():
                 ind.preg[swap_idx1] = ind.preg[swap_idx2]
                 ind.preg[swap_idx2] = tmp
         else:
+            # Global Search (Change the configuration)
             mut_op = random.choice(list(ind.mapping.keys()))
             width, height = ind.model.getSize()
+            # get free coordinate
             new_coord = (random.randint(0, width - 1), random.randint(0, height - 1))
             while new_coord in ind.mapping.values():
                 new_coord = (random.randint(0, width - 1), random.randint(0, height - 1))
 
+            # update the coordinate
             ind.mapping[mut_op] = new_coord
 
+            # preg config
+            if len(ind.preg) != 0:
+                preg_idx = random.randint(0, len(ind.preg) - 1)
+                ind.preg[preg_idx] = not(preg_idx[preg_idx])
+
+        # make it invaliad
         ind.valid = False
+        # init graph
         ind.routed_graph = ind.model.getNetwork()
 
         return ind,
