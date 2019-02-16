@@ -112,7 +112,8 @@ class NSGA2():
         init_maps = self.__placer.generate_init_mappings(comp_dfg, width, height, \
                                                         count = self.__params["Initial place count"])
 
-        self.__random_pop_args = [comp_dfg, width, height, self.__params["Random place count"]]
+        self.__random_pop_args = [comp_dfg, width, height, self.__params["Random place count"],\
+                                    self.__params["Topological sort probability"]]
 
         # check if mapping initialization successed
         if len(init_maps) < 1:
@@ -219,6 +220,7 @@ class NSGA2():
         # hall of fame
         hof = tools.ParetoFront()
 
+        self.progress.set_description("Initilizing")
         # generate first population
         self.pop = self.__toolbox.population(n=self.__params["Initial population size"])
 
@@ -293,9 +295,8 @@ class NSGA2():
             hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
             ref_point = hv.refpoint(offset=0.1)   # Define global reference point
             hypervolume_log = [self.hypervolume(fit).compute(ref_point) for fit in fitness_hof_log]
-
-        if hypervolume_log is None:
-            return hof, None
-        else:
             return hof, hypervolume_log
+        else:
+            return hof, None
+
 

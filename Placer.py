@@ -120,7 +120,7 @@ class Placer():
         return mapping
 
     @staticmethod
-    def make_random_mappings(dag, width, height, size):
+    def make_random_mappings(dag, width, height, size, sort_prob = 0.5):
         # validate input dag
         if nx.is_directed_acyclic_graph(dag) == False:
             raise ValueError("Input data-flow-graph is not DAG")
@@ -135,7 +135,7 @@ class Placer():
 
         rtn_list = []
         for i in range(size):
-            if random.randint(0, 1) == 0:
+            if random.random() < sort_prob:
                 topological_sort_enable = True
             else:
                 topological_sort_enable = False
