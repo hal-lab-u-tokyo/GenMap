@@ -137,7 +137,7 @@ class NSGA2():
         self.stats.register("max", numpy.max, axis=0)
 
          # progress bar
-        self.progress = tqdm(total=self.__params["Initial population size"], dynamic_ncols=True)
+        self.progress = tqdm(total=self.__params["Maximum generation"], dynamic_ncols=True)
 
         # status display
         self.status_disp = [tqdm(total = 0, dynamic_ncols=True, desc=eval_cls.name(), bar_format="{desc}: {postfix}")\
@@ -282,6 +282,8 @@ class NSGA2():
 
         self.__pool.close()
         self.__pool.join()
+        if self.__params["Maximum generation"] > gen_count:
+            self.progress.update(self.__params["Maximum generation"] - gen_count)
         self.progress.close()
         for disp in self.status_disp:
             disp.close()
