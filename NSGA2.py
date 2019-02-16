@@ -88,6 +88,10 @@ class NSGA2():
             if not issubclass(evl, EvalBase):
                 raise TypeError(evl.__name__ + "is not EvalBase class")
 
+        # uni-objective optimization
+        if len(eval_list) == 1:
+            self.__hv_logging = False
+
         if not issubclass(router, RouterBase):
             raise TypeError(router.__name__ + "is not RouterBase class")
 
@@ -259,13 +263,6 @@ class NSGA2():
             # logging hof
             hof_log.append(copy.deepcopy(hof))
 
-            # Hypervolume evolution (if possible)
-            if self.__hv_logging:
-                fitness_hof_log = [[ind.fitness.values for ind in hof] for hof in hof_log]
-                hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
-                ref_point = hv.refpoint(offset=0.1)   # Define global reference point
-                hypervolume_log = [self.hypervolume(fit).compute(ref_point) for fit in fitness_hof_log]
-
             # Adding random individuals to the population (attempt to avoid local optimum)
             rnd_ind = self.random_population(self.__params["Random population size"])
             fitnesses, rnd_ind = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, rnd_ind)))
@@ -289,6 +286,13 @@ class NSGA2():
             disp.close()
 
         print("\n\nFinish optimization")
+
+        # Hypervolume evolution (if possible)
+        if self.__hv_logging:
+            fitness_hof_log = [[ind.fitness.values for ind in hof] for hof in hof_log]
+            hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
+            ref_point = hv.refpoint(offset=0.1)   # Define global reference point
+            hypervolume_log = [self.hypervolume(fit).compute(ref_point) for fit in fitness_hof_log]
 
         if hypervolume_log is None:
             return hof, None
