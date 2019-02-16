@@ -1,0 +1,14 @@
+<Config>
+	<parameter name="Maximum generation" >500</parameter>
+	<parameter name="Maximum stall" >100</parameter>
+	<parameter name="Initial population size" >300</parameter>
+	<parameter name="Offspring size" >100</parameter>
+	<parameter name="Select size" >45</parameter>
+	<parameter name="Random population size" >10</parameter>
+	<parameter name="Crossover probability" >0.7</parameter>
+	<parameter name="Mutation probability" >0.3</parameter>
+	<parameter name="Local mulatation probability" >0.5</parameter>
+	<parameter name="Initial place iteration" >100</parameter>
+	<parameter name="Initial place count" >200</parameter>
+	<parameter name="Random place count" >100</parameter>
+</Config>

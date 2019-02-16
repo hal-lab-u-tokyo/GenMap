@@ -14,18 +14,38 @@ from RouterBase import RouterBase
 from Placer import Placer
 
 class NSGA2():
-    def __init__(self, config = None):
+    def __init__(self, config):
         """Constructor of the NSGA2 class.
 
-            Optional args:
+            Args:
                 config (XML Element): a configuration of optimization parameters
 
         """
         # initilize toolbox
         self.__toolbox = base.Toolbox()
-        self.__params = {"NGEN": 500, "MAX_STALL": 100, "INIT_POP_SIZE": 300, \
-                        "LAMBDA": 100, "MU": 45, "RNDMU": 10, "CXPB": 0.7,\
-                        "MUTPB": 0.3, "MUTELPB": 0.5}
+
+        # get parameters
+        self.__params = {}
+        for param in config.iter("parameter"):
+            if "name" in param.attrib:
+                if not param.text is None:
+                    try:
+                        value = int(param.text)
+                    except ValueError:
+                        try:
+                            value = float(param.text)
+                        except ValueError:
+                            raise ValueError("Invalid parameter: " + param.text)
+                    self.__params[param.attrib["name"]] = value
+                else:
+                    raise ValueError("missing parameter value for " + param.attrib["name"])
+            else:
+                raise ValueError("missing parameter name")
+
+
+        # self.__params = {"NGEN": 500, "MAX_STALL": 100, "INIT_POP_SIZE": 300, \
+        #                 "LAMBDA": 100, "MU": 45, "RNDMU": 10, "CXPB": 0.7,\
+        #                 "MUTPB": 0.3, "MUTELPB": 0.5}
         self.pop = []
         self.__placer = None
         self.__random_pop_args = []
@@ -81,12 +101,14 @@ class NSGA2():
         comp_dfg = app.getCompSubGraph()
 
         # generate initial placer
-        self.__placer = Placer(iterations = 100, randomness = "Full")
+        self.__placer = Placer(iterations = self.__params["Initial place iteration"], \
+                                randomness = "Full")
 
         # make initial mappings
-        init_maps = self.__placer.generate_init_mappings(comp_dfg, width, height, count = 200)
+        init_maps = self.__placer.generate_init_mappings(comp_dfg, width, height, \
+                                                        count = self.__params["Initial place count"])
 
-        self.__random_pop_args = [comp_dfg, width, height, 100]
+        self.__random_pop_args = [comp_dfg, width, height, self.__params["Random place count"]]
 
         # check if mapping initialization successed
         if len(init_maps) < 1:
@@ -115,7 +137,7 @@ class NSGA2():
         self.stats.register("max", numpy.max, axis=0)
 
          # progress bar
-        self.progress = tqdm(total=self.__params["INIT_POP_SIZE"], dynamic_ncols=True)
+        self.progress = tqdm(total=self.__params["Initial population size"], dynamic_ncols=True)
 
         # status display
         self.status_disp = [tqdm(total = 0, dynamic_ncols=True, desc=eval_cls.name(), bar_format="{desc}: {postfix}")\
@@ -194,7 +216,7 @@ class NSGA2():
         hof = tools.ParetoFront()
 
         # generate first population
-        self.pop = self.__toolbox.population(n=self.__params["INIT_POP_SIZE"])
+        self.pop = self.__toolbox.population(n=self.__params["Initial population size"])
 
         # evaluate the population
         fitnesses, self.pop = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, self.pop)))
@@ -208,14 +230,15 @@ class NSGA2():
         hof_log = []
 
         # Repeat evolution
-        while gen_count < self.__params["NGEN"] and stall_count < self.__params["MAX_STALL"]:
+        while gen_count < self.__params["Maximum generation"] and stall_count < self.__params["Maximum stall"]:
             # show generation count
             gen_count = gen_count + 1
             self.progress.set_description("Generation {0}".format(gen_count))
 
             # make offspring
-            offspring = algorithms.varOr(self.pop, self.__toolbox, self.__params["LAMBDA"], \
-                                         self.__params["CXPB"], self.__params["MUTPB"])
+            offspring = algorithms.varOr(self.pop, self.__toolbox, self.__params["Offspring size"], \
+                                         self.__params["Crossover probability"],\
+                                         self.__params["Mutation probability"])
 
             # Evaluate the individuals of the offspring
             fitnesses, offspring = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, offspring)))
@@ -223,7 +246,7 @@ class NSGA2():
                 ind.fitness.values = fit
 
             # make next population
-            self.pop = self.__toolbox.select(self.pop + offspring , self.__params["MU"])
+            self.pop = self.__toolbox.select(self.pop + offspring , self.__params["Select size"])
             hof.update(self.pop)
 
             # check if there is an improvement
@@ -244,7 +267,7 @@ class NSGA2():
                 hypervolume_log = [self.hypervolume(fit).compute(ref_point) for fit in fitness_hof_log]
 
             # Adding random individuals to the population (attempt to avoid local optimum)
-            rnd_ind = self.random_population(self.__params["RNDMU"])
+            rnd_ind = self.random_population(self.__params["Random population size"])
             fitnesses, rnd_ind = (list(l) for l in zip(*self.__toolbox.map(self.__toolbox.evaluate, rnd_ind)))
             for ind, fit in zip(rnd_ind, fitnesses):
                 ind.fitness.values = fit
@@ -259,6 +282,14 @@ class NSGA2():
 
         self.__pool.close()
         self.__pool.join()
+        self.progress.close()
+        for disp in self.status_disp:
+            disp.close()
 
-        return hof
+        print("\n\nFinish optimization")
+
+        if hypervolume_log is None:
+            return hof, None
+        else:
+            return hof, hypervolume_log
 
