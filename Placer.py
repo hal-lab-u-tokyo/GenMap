@@ -145,7 +145,12 @@ class Placer():
             positions = random.sample([(x, y) for x in range(map_width) for y in range(map_height)], node_num)
 
             if topological_sort_enable:
-                positions = sorted(positions, key=lambda x: x[0]**2 + x[1] ** 2)
+                if random.randint(0, 1) == 0
+                    origin = (0, 0)
+                else:
+                    origin = (map_width - 1, 0)
+                positions = sorted(positions, key=lambda x: \
+                                    (x[0] - origin[0])**2 + (x[1] - origin[1]) ** 2)
                 rtn_list.append({k: v for k, v in zip(list(nx.topological_sort(dag)), positions)})
             else:
                 rtn_list.append({k: v for k, v in zip(dag.nodes(), positions)})
