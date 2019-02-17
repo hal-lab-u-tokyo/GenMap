@@ -171,7 +171,7 @@ class Individual():
                 elif x - 1 >= 0 and not (x - 1, y) in new_mapping.values():
                     # move to left
                     new_mapping[op] = (x - 1, y)
-                elif x < bound_x and not (x + 1, y) in new_mapping.values():
+                elif x + 1 < bound_x and not (x + 1, y) in new_mapping.values():
                     # move to right
                     new_mapping[op] = (x + 1, y)
                 else:
