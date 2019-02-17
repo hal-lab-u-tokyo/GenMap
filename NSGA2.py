@@ -257,7 +257,12 @@ class NSGA2():
 
             # check if there is an improvement
             if len(hof) == prev_hof_num:
-                stall_count += 1
+                if set([ind.fitness.values for ind in hof]) == \
+                    set([ind.fitness.values for ind in hof_log[-1]]):
+                    # no fitness improvement
+                    stall_count += 1
+                else:
+                    stall_count = 0
             else:
                 stall_count = 0
             prev_hof_num = len(hof)
