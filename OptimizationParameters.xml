@@ -12,4 +12,4 @@
 	<parameter name="Initial place count" >200</parameter>
 	<parameter name="Random place count" >100</parameter>
 	<parameter name="Topological sort probability" >0.0</parameter>
-	</Config>
+</Config>

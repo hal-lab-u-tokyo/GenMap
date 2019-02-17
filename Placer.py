@@ -145,7 +145,7 @@ class Placer():
             positions = random.sample([(x, y) for x in range(map_width) for y in range(map_height)], node_num)
 
             if topological_sort_enable:
-                if random.randint(0, 1) == 0
+                if random.randint(0, 1) == 0:
                     origin = (0, 0)
                 else:
                     origin = (map_width - 1, 0)
