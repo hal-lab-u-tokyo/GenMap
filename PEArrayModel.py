@@ -390,12 +390,13 @@ class PEArrayModel:
         elif etype == "OUT_PORT" and not index is None:
             node_name = OUT_PORT_node_exp.format(index=index)
         else:
-            node_name = ""
+            raise ValueError("Known node type: " + etype)
 
         if self.__network.has_node(node_name):
             return node_name
         else:
-            return ""
+            raise TypeError(node_name + " does not exist")
+
 
     def setInitEdgeAttr(self, attr_name, attr, edge_type = None):
         """ Set initial attributes to edges in the network model.
