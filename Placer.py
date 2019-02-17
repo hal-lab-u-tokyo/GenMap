@@ -121,6 +121,21 @@ class Placer():
 
     @staticmethod
     def make_random_mappings(dag, width, height, size, sort_prob = 0.5):
+        """ Generate random mappings
+
+            Args:
+                dga (networkx DiGraph): data-flow-graph
+                width (int): PE array width
+                height (int): PE array height
+                size (int): The number of mappings to be generated
+                Option:
+                    sort_prob (float): topological sort probability.
+
+            Returns:
+                list: generated mappings
+
+        """
+
         # validate input dag
         if nx.is_directed_acyclic_graph(dag) == False:
             raise ValueError("Input data-flow-graph is not DAG")
