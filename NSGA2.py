@@ -64,7 +64,7 @@ class NSGA2():
         return {"pool": self}
 
 
-    def setup(self, CGRA, app, router, eval_list, proc_num = multiprocessing.cpu_count()):
+    def setup(self, CGRA, app, sim_params, router, eval_list, proc_num = multiprocessing.cpu_count()):
         """Setup NSGA2 optimization
 
             Args:
@@ -131,7 +131,7 @@ class NSGA2():
         self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
         self.__toolbox.register("random_individual", creator.Individual, CGRA)
-        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, CGRA, app, router)
+        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, CGRA, app, None, router)
         self.__toolbox.register("mate", Individual.cxSet)
         self.__toolbox.register("mutate", Individual.mutSet, 0.5)
         self.__toolbox.register("select", tools.selNSGA2)
@@ -163,13 +163,13 @@ class NSGA2():
         random_mappings = self.__placer.make_random_mappings(*self.__random_pop_args)
         return [self.__toolbox.random_individual(random_mappings) for i in range(n)]
 
-    def eval_objectives(self, eval_list, CGRA, app, router, individual):
+    def eval_objectives(self, eval_list, CGRA, app, sim_params, router, individual):
         """ Executes evaluation for each objective
         """
         # routing the mapping
         self.__doRouting(CGRA, app, router, individual)
         # evaluate each objectives
-        return [eval_cls.eval(CGRA, app, individual) for eval_cls in eval_list], individual
+        return [eval_cls.eval(CGRA, app, sim_params, individual) for eval_cls in eval_list], individual
 
     def __doRouting(self, CGRA, app, router, individual):
         """

@@ -5,7 +5,7 @@ class WireLengthEval(EvalBase):
         pass
 
     @staticmethod
-    def eval(CGRA, app, individual):
+    def eval(CGRA, app, sim_params, individual):
         return individual.routing_cost
 
     @staticmethod
