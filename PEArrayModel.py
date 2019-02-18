@@ -196,7 +196,7 @@ class PEArrayModel:
                 raise self.InvalidConfigError("missing PE({0}) coordinate".format((x, y)))
             ALU = list(pe.iter("ALU"))[0]
             self.__network.add_node(ALU_node_exp.format(pos=(x, y)))
-            self.__operation_list[x][y] = [str(op) for op in ALU.iter("operation")]
+            self.__operation_list[x][y] = [str(op.text) for op in ALU.iter("operation")]
             connections[ALU_node_exp.format(pos=(x, y))] = ALU.iter("input")
 
             # SE
