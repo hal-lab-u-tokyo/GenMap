@@ -511,6 +511,9 @@ class PEArrayModel:
 
         return rtn_list
 
+    def getPregNumber(self):
+        return len(self.__preg_positions)
+
     @staticmethod
     def isSE(node_name):
         """Check whether the node is SE or not.
