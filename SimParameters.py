@@ -36,13 +36,14 @@ class SimParameters():
         self.delay_info = {op: {} for op in op_list}
         self.delay_info["SE"] = {}
         self.switching_info = {op: 0 for op in op_list}
-        self.static_power = {}
+        self.PE_leak = {}
         self.switching_energy = 0.0
         self.switching_propagation = 0.0
         self.switching_damp = 0.0
         self.bias_range = set()
         if CGRA.getPregNumber() > 0:
-            self.preg_energy = 0.0
+            self.preg_dynamic_energy = 0.0
+            self.preg_leak = 0.0
 
         # load each data
         self.__load_bias_range(bias_range)
@@ -125,7 +126,10 @@ class SimParameters():
     def __load_power_info(self, power_xml):
 
         # load static power info
-        for st_power in power_xml.findall("Static"):
+        static_power = power_xml.find("Static")
+        if static_power is None:
+            raise SimParameters.InvalidParameters("There is no static power information")
+        for st_power in static_power.findall("PE"):
             unit_str = st_power.get("unit")
             # if not unit specification, use default unit
             if unit_str is None:
@@ -151,10 +155,20 @@ class SimParameters():
             else:
                 raise SimParameters.InvalidParameters("missing static power value with bias {0} V".format(bias))
 
-            self.static_power[bias] = power_val * POWER_UNITS[unit_str] / POWER_UNITS[self.units["power"]]
+            self.PE_leak[bias] = power_val * POWER_UNITS[unit_str] / POWER_UNITS[self.units["power"]]
+
+        if not self.preg_leak is None:
+            preg_static = static_power.find("PREG")
+            unit_str = st_power.get("unit")
+            # if not unit specification, use default unit
+            if unit_str is None:
+                unit_str = POWER_UNITS[self.units["power"]]
+            elif not unit_str in POWER_UNITS.keys():
+                raise SimParameters.InvalidParameters("Unknown unit for power: " + unit_str)
+
 
         # validate static power info
-        bias_diff = self.bias_range - set(self.static_power.keys())
+        bias_diff = self.bias_range - set(self.PE_leak.keys())
         if len(bias_diff) > 0:
             raise SimParameters.InvalidParameters("There is static power with bias {0} V".format(list(bias_diff)[0]))
 
@@ -183,7 +197,7 @@ class SimParameters():
         self.switching_energy = E_sw_val * ENERGY_UNITS[unit_str] / ENERGY_UNITS[self.units["energy"]]
 
         # if PE array is pipelined, load preg dynamic energy
-        if not self.preg_energy is None:
+        if not self.preg_dynamic_energy is None:
 
             preg_dyn = dynamic_info.find("PREG")
             if preg_dyn is None:
@@ -201,7 +215,7 @@ class SimParameters():
             except ValueError:
                 raise SimParameters.InvalidParameters("Invalid value for energy: " + preg_dyn.text)
 
-            self.preg_energy = preg_dyn_val * ENERGY_UNITS[unit_str] / ENERGY_UNITS[self.units["energy"]]
+            self.preg_dynamic_energy = preg_dyn_val * ENERGY_UNITS[unit_str] / ENERGY_UNITS[self.units["energy"]]
 
         # load propagation ratio
         prop = dynamic_info.find("Propagation")
@@ -241,6 +255,10 @@ class SimParameters():
             except ValueError:
                     raise SimParameters.InvalidParameters("Invalid switching value: " + sw.text)
             self.switching_info[op_str] = sw_val
+
+    def calc_power(self, t, energy):
+        return  energy * ENERGY_UNITS[self.units["energy"]] \
+                   / t / DELAY_UNITS[self.units["delay"]] / POWER_UNITS[self.units["power"]]
 
 
 # test
