@@ -83,6 +83,9 @@ class SimParameters():
                 raise SimParameters.InvalidParameters("Invalid value for bias voltage: " + bias.text)
             self.bias_range.add(bias_val)
 
+        if len(self.bias_range) == 0:
+            raise SimParameters.InvalidParameters("At least, zero bias must be included in bias range")
+
 
     def __load_delay_info(self, delay_xml):
         """Loads delay information.
