@@ -188,15 +188,14 @@ class PEArrayModel:
             # check body bias domain
             if not pe.get("bbdomain") is None:
                 if not pe.get("bbdomain") in self.__bb_domains.keys():
-                    self.__bb_domains[pe.get("bbdomain")] = [(x, y)]
-                else:
-                    self.__bb_domains[pe.get("bbdomain")].append((x, y))
+                    self.__bb_domains[pe.get("bbdomain")] = {"ALU": [], "SE": []}
 
             # ALU
             if len(list(pe.iter("ALU"))) != 1:
                 raise self.InvalidConfigError("missing PE({0}) coordinate".format((x, y)))
             ALU = list(pe.iter("ALU"))[0]
             self.__network.add_node(ALU_node_exp.format(pos=(x, y)))
+            self.__bb_domains[pe.get("bbdomain")]["ALU"].append(ALU_node_exp.format(pos=(x, y)))
             self.__operation_list[x][y] = [str(op.text) for op in ALU.iter("operation")]
             connections[ALU_node_exp.format(pos=(x, y))] = ALU.iter("input")
 
@@ -214,6 +213,8 @@ class PEArrayModel:
                     if output.get("name") is None:
                         raise self.InvalidConfigError("missing output name of SE at ({0}, {1})".format((x, y)))
                     self.__network.add_node(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
+                    self.__bb_domains[pe.get("bbdomain")]["SE"].append(\
+                            SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
                     connections[SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id)] = output.iter("input")
                     self.__se_lists[(x, y)].add(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
                     if output.get("return_only") == "True":
