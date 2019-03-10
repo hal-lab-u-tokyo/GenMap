@@ -389,23 +389,3 @@ class SimParameters():
                 raise SimParameters.InvalidParameters("Invalid value {0} for {1[0]}".format(element.text, msg))
 
             return float_val
-
-# test
-if __name__ == "__main__":
-    import xml.etree.ElementTree as ET
-    tree = ET.ElementTree(file="./CMA_conf.xml")
-    pearray = tree.getroot()
-    if pearray.tag == "PEArray":
-        model = PEArrayModel(pearray)
-
-    try:
-        tree = ET.ElementTree(file="./simdata.xml")
-    except ET.ParseError as e:
-        print("Parse Error", e.args)
-        exit()
-
-    data = tree.getroot()
-    try:
-        simParams = SimParameters(model, data)
-    except SimParameters.InvalidParameters as e:
-        print("Parameter import failed: ", e.args[0])

@@ -131,7 +131,7 @@ class NSGA2():
         self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
         self.__toolbox.register("random_individual", creator.Individual, CGRA)
-        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, CGRA, app, None, router)
+        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, CGRA, app, sim_params, router)
         self.__toolbox.register("mate", Individual.cxSet)
         self.__toolbox.register("mutate", Individual.mutSet, 0.5)
         self.__toolbox.register("select", tools.selNSGA2)

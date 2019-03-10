@@ -37,10 +37,6 @@ if __name__ == "__main__":
     app = Application()
     app.read_dot(APP_DOT)
 
-    # wireLengthEval = WireLengthEval()
-    # mapWidthEval = MapWidthEval()
-    astar_rt = AStarRouter()
-
     try:
         tree = ET.ElementTree(file="./simdata.xml")
     except ET.ParseError as e:
@@ -48,7 +44,11 @@ if __name__ == "__main__":
         exit()
 
     data = tree.getroot()
-    sim_params = SimParameters(model, data)
+    try:
+        sim_params = SimParameters(model, data)
+    except SimParameters.InvalidParameters as e:
+        print("Parameter import failed: ", e.args[0])
+
 
     tree = ET.ElementTree(file="./OptimizationParameters.xml")
     nsga2_conf = tree.getroot()
