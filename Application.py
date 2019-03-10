@@ -5,7 +5,7 @@ class Application():
 
     def __init__(self):
         self.__DAG = nx.DiGraph()
-        self.__Freq = 0.0 # MHz
+        self.__Freq = 10.0 # MHz
 
     def read_dot(self, file):
         """set application data flow graph to this
