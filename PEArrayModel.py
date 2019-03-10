@@ -24,6 +24,7 @@ class PEArrayModel:
     __bb_domains = {}
     __preg_positions = []
     __se_lists = {}
+    __return_only_se = []
 
     def __init__(self, conf):
         '''Constructor of this class
@@ -215,6 +216,8 @@ class PEArrayModel:
                     self.__network.add_node(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
                     connections[SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id)] = output.iter("input")
                     self.__se_lists[(x, y)].add(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
+                    if output.get("return_only") == "True":
+                        self.__return_only_se.append(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
 
 
         # add output connections
@@ -491,7 +494,6 @@ class PEArrayModel:
         return rtn_list
 
     def getStageDomains(self, preg_config):
-
         stage = 0
         rtn_list = [[] for stage in range(sum(preg_config) + 1)]
 
@@ -507,8 +509,9 @@ class PEArrayModel:
             rtn_list[stage].extend([ALU_node_exp.format(pos=(x, y)) for x in range(self.__width)])
             # add SE
             for x in range(self.__width):
-                rtn_list[stage].extend(self.__se_lists[(x, y)])
+                rtn_list[stage].extend([se for se in self.__se_lists[(x, y)] if not se in self.__return_only_se])
 
+        rtn_list[-1].extend(self.__return_only_se)
         return rtn_list
 
     def getPregNumber(self):

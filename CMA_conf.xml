@@ -37,7 +37,7 @@
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 0)"/>
@@ -80,7 +80,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(0, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 0)"/>
@@ -129,7 +129,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(1, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 0)"/>
@@ -178,7 +178,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(2, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 0)"/>
@@ -227,7 +227,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(3, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 0)"/>
@@ -276,7 +276,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(4, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 0)"/>
@@ -325,7 +325,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(5, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 0)"/>
@@ -374,7 +374,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(6, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 0)"/>
@@ -423,7 +423,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(7, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 0)"/>
@@ -472,7 +472,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(8, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 0)"/>
@@ -521,7 +521,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(9, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 1)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 0)"/>
@@ -568,7 +568,7 @@
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="8"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,0)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 1)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 0)"/>
@@ -613,7 +613,7 @@
 				<input name="IN_DL_SE" type="ALU" coord="(1, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 1)"/>
@@ -664,7 +664,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(0, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 1)"/>
@@ -724,7 +724,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(1, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 1)"/>
@@ -784,7 +784,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(2, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 1)"/>
@@ -844,7 +844,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(3, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 1)"/>
@@ -904,7 +904,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(4, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 1)"/>
@@ -964,7 +964,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(5, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 1)"/>
@@ -1024,7 +1024,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(6, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 1)"/>
@@ -1084,7 +1084,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(7, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 1)"/>
@@ -1144,7 +1144,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(8, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 1)"/>
@@ -1204,7 +1204,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(9, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 2)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 1)"/>
@@ -1260,7 +1260,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(10, 0)"/>
 				<input name="IN_CONST_A" type="Const" index="9"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,1)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 2)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 1)"/>
@@ -1306,7 +1306,7 @@
 				<input name="IN_DL_SE" type="ALU" coord="(1, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 2)"/>
@@ -1357,7 +1357,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(0, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 2)"/>
@@ -1417,7 +1417,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(1, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 2)"/>
@@ -1477,7 +1477,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(2, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 2)"/>
@@ -1537,7 +1537,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(3, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 2)"/>
@@ -1597,7 +1597,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(4, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 2)"/>
@@ -1657,7 +1657,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(5, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 2)"/>
@@ -1717,7 +1717,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(6, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 2)"/>
@@ -1777,7 +1777,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(7, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 2)"/>
@@ -1837,7 +1837,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(8, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 2)"/>
@@ -1897,7 +1897,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(9, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 3)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 2)"/>
@@ -1953,7 +1953,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(10, 1)"/>
 				<input name="IN_CONST_A" type="Const" index="10"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,2)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 3)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 2)"/>
@@ -1999,7 +1999,7 @@
 				<input name="IN_DL_SE" type="ALU" coord="(1, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 3)"/>
@@ -2050,7 +2050,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(0, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 3)"/>
@@ -2110,7 +2110,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(1, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 3)"/>
@@ -2170,7 +2170,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(2, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 3)"/>
@@ -2230,7 +2230,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(3, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 3)"/>
@@ -2290,7 +2290,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(4, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 3)"/>
@@ -2350,7 +2350,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(5, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 3)"/>
@@ -2410,7 +2410,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(6, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 3)"/>
@@ -2470,7 +2470,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(7, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 3)"/>
@@ -2530,7 +2530,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(8, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 3)"/>
@@ -2590,7 +2590,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(9, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 4)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 3)"/>
@@ -2646,7 +2646,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(10, 2)"/>
 				<input name="IN_CONST_A" type="Const" index="11"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,3)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 4)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 3)"/>
@@ -2692,7 +2692,7 @@
 				<input name="IN_DL_SE" type="ALU" coord="(1, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 4)"/>
@@ -2743,7 +2743,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(0, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 4)"/>
@@ -2803,7 +2803,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(1, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 4)"/>
@@ -2863,7 +2863,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(2, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 4)"/>
@@ -2923,7 +2923,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(3, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 4)"/>
@@ -2983,7 +2983,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(4, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 4)"/>
@@ -3043,7 +3043,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(5, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 4)"/>
@@ -3103,7 +3103,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(6, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 4)"/>
@@ -3163,7 +3163,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(7, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 4)"/>
@@ -3223,7 +3223,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(8, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 4)"/>
@@ -3283,7 +3283,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(9, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 5)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 4)"/>
@@ -3339,7 +3339,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(10, 3)"/>
 				<input name="IN_CONST_A" type="Const" index="12"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,4)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 5)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 4)"/>
@@ -3385,7 +3385,7 @@
 				<input name="IN_DL_SE" type="ALU" coord="(1, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 5)"/>
@@ -3436,7 +3436,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(0, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 5)"/>
@@ -3496,7 +3496,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(1, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 5)"/>
@@ -3556,7 +3556,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(2, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 5)"/>
@@ -3616,7 +3616,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(3, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 5)"/>
@@ -3676,7 +3676,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(4, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 5)"/>
@@ -3736,7 +3736,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(5, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 5)"/>
@@ -3796,7 +3796,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(6, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 5)"/>
@@ -3856,7 +3856,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(7, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 5)"/>
@@ -3916,7 +3916,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(8, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 5)"/>
@@ -3976,7 +3976,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(9, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 6)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 5)"/>
@@ -4032,7 +4032,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(10, 4)"/>
 				<input name="IN_CONST_A" type="Const" index="13"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,5)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 6)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 5)"/>
@@ -4078,7 +4078,7 @@
 				<input name="IN_DL_SE" type="ALU" coord="(1, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 6)"/>
@@ -4129,7 +4129,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(0, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 6)"/>
@@ -4189,7 +4189,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(1, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 6)"/>
@@ -4249,7 +4249,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(2, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 6)"/>
@@ -4309,7 +4309,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(3, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 6)"/>
@@ -4369,7 +4369,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(4, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 6)"/>
@@ -4429,7 +4429,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(5, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 6)"/>
@@ -4489,7 +4489,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(6, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 6)"/>
@@ -4549,7 +4549,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(7, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 6)"/>
@@ -4609,7 +4609,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(8, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 6)"/>
@@ -4669,7 +4669,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(9, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 6)"/>
@@ -4725,7 +4725,7 @@
 				<input name="IN_DL_SW" type="ALU" coord="(10, 5)"/>
 				<input name="IN_CONST_A" type="Const" index="14"/>
 			</output>
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,6)"/>
 				<input name="IN_NORTH" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 6)"/>
@@ -4763,7 +4763,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(0,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 7)"/>
 			</output>
@@ -4803,7 +4803,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(1,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(2, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(0, 7)"/>
@@ -4852,7 +4852,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(2,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(3, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(1, 7)"/>
@@ -4901,7 +4901,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(3,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(4, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(2, 7)"/>
@@ -4950,7 +4950,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(4,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(5, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(3, 7)"/>
@@ -4999,7 +4999,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(5,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(6, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(4, 7)"/>
@@ -5048,7 +5048,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(6,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(7, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(5, 7)"/>
@@ -5097,7 +5097,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(7,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(8, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(6, 7)"/>
@@ -5146,7 +5146,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(8,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(9, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(7, 7)"/>
@@ -5195,7 +5195,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(9,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(10, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(8, 7)"/>
@@ -5244,7 +5244,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(10,7)"/>
 				<input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(11, 7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(9, 7)"/>
@@ -5291,7 +5291,7 @@
 			<input name="IN_CONST_B" type="Const" index="15"/>
 		</ALU>
 		<SE id="0" >
-			<output name="OUT_SOUTH">
+			<output name="OUT_SOUTH" return_only="True">
 				<input name="ALU" type="ALU" coord="(11,7)"/>
 				<input name="IN_WEST" type="SE" id="0" src_name="OUT_EAST" coord="(10, 7)"/>
 			</output>
