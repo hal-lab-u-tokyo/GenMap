@@ -2,8 +2,7 @@ from EvalBase import EvalBase
 
 import networkx as nx
 import pulp
-
-PENALTY_VALUE = 1000
+import copy
 
 class PowerEval(EvalBase):
     def __init__(self):
@@ -20,9 +19,10 @@ class PowerEval(EvalBase):
         else:
             do_bb_opt = False
 
-        leak_power = PowerEval.__eval_leak(CGRA, app, sim_params, individual, do_bb_opt)
-        print(leak_power)
-        print(individual.getEvaluatedData("body_bias"))
+        # leak_power = PowerEval.eval_leak(CGRA, app, sim_params, individual, do_bb_opt)
+        # print(leak_power)
+        # print(individual.getEvaluatedData("body_bias"))
+        PowerEval.eval_dynamic(CGRA, app, sim_params, individual)
 
 
     @staticmethod
@@ -37,7 +37,7 @@ class PowerEval(EvalBase):
                 paths.extend([p[1:-1] for p in nx.all_simple_paths(graph, i_port, o_port)])
 
         # path separation by activate pipeline register
-        if not individual.preg is None:
+        if CGRA.getPregNumber() != 0:
             data_path = []
             st_domain = CGRA.getStageDomains(individual.preg)
             for p in paths:
@@ -51,15 +51,22 @@ class PowerEval(EvalBase):
         return data_path
 
     @staticmethod
-    def __eval_leak(CGRA, app, sim_params, individual, leak_optimize):
+    def get_opcodes(CGRA, app, mapping):
+        op_attr = nx.get_node_attributes(app.getCompSubGraph(), "op")
+        opcodes = {CGRA.getNodeName("ALU", pos): op_attr[op_label]\
+                         for op_label, pos in mapping.items()}
+        return opcodes
+
+    @staticmethod
+    def eval_leak(CGRA, app, sim_params, individual, leak_optimize):
         if leak_optimize:
             bb_domains = CGRA.getBBdomains()
             # Probrem Declaration
             problem = pulp.LpProblem()
 
             # Variable Declaration
-            #     1st index: body bias domain
-            #     2nd index: body bias voltage
+            #     1st key: body bias domain
+            #     2nd key: body bias voltage
             isBBV = pulp.LpVariable.dicts("isBBV", (bb_domains.keys(), sim_params.bias_range),\
                                              0, 1, cat = "Binary")
 
@@ -76,11 +83,12 @@ class PowerEval(EvalBase):
             # 2. Latancy Satisfaction
             # make delay table
             # max_lat = 1 / app.getFrequency() * 1000
-            max_lat = 20
-            opcodes = nx.get_node_attributes(app.getCompSubGraph(), "op")
-            delay_table = {CGRA.getNodeName("ALU", pos): sim_params.delay_info[opcodes[op_label]]\
-                             for op_label, pos in individual.mapping.items()}
+            max_lat = 100
+            opcodes = PowerEval.get_opcodes(CGRA, app, individual.mapping)
+            delay_table = {node: sim_params.delay_info[opcode]
+                            for node, opcode in opcodes.items()}
             # make domain table
+            #    key: node name, value: domain name
             domain_table = {}
             for node in individual.routed_graph.nodes():
                 for domain in bb_domains.keys():
@@ -90,17 +98,18 @@ class PowerEval(EvalBase):
 
             # add constrain for each data path
             for dp in individual.getEvaluatedData("data_path"):
-                print(dp)
                 problem += pulp.lpSum([(delay_table[node][bbv] if CGRA.isALU(node) \
                                     else sim_params.delay_info["SE"][bbv]) \
                                     * isBBV[domain_table[node]][bbv] \
                                     for node in dp\
                                     for bbv in sim_params.bias_range]) <= max_lat
 
+            # solve this ILP
             stat = problem.solve()
             result = problem.objective.value()
             leak_power = pulp.value(problem.objective)
 
+            # check result
             bbv_assign = {}
             if pulp.LpStatus[stat] == "Optimal" and result != None:
                 # success
@@ -109,16 +118,85 @@ class PowerEval(EvalBase):
                         if isBBV[domain][bbv].value() == 1:
                             bbv_assign[domain] = bbv
                 individual.saveEvaluatedData("body_bias", bbv_assign)
-                return leak_power
             else:
                 individual.saveEvaluatedData("body_bias", None)
-                return PENALTY_VALUE
         else:
-            return 0
+            PE_leak = sim_params.PE_leak[0]
+            width, height = CGRA.getSize()
+            leak_power = PE_leak * width * height
+
+        if CGRA.getPregNumber() != 0:
+            leak_power += sim_params.preg_leak * CGRA.getPregNumber()
+
+        return leak_power
 
     @staticmethod
-    def __eval_dynamic():
-        pass
+    def eval_dynamic(CGRA, app, sim_params, individual):
+        stage_domains = CGRA.getStageDomains(individual.preg)
+        graph = copy.deepcopy(individual.routed_graph)
+        graph.add_node("root")
+        nx.set_node_attributes(graph, 0, "switching")
+        nx.set_node_attributes(graph, 0, "len")
+        opcodes = PowerEval.get_opcodes(CGRA, app, individual.mapping)
+
+        if CGRA.getPregNumber() != 0:
+            preg_flag = True
+            nx.set_node_attributes(graph, -1, "stage")
+            for v in graph.nodes():
+                graph.node[v]["stage"] = PowerEval.__getStageIndex(stage_domains, v)
+
+        for i_port in set(individual.routed_graph.nodes()) & set(CGRA.getInputPorts()):
+            graph.add_edge("root", i_port)
+
+        # analyze distance from pipeline register
+        for u, v in nx.bfs_edges(graph, "root"):
+            if CGRA.isALU(v) or CGRA.isSE(v):
+                if preg_flag:
+                    if graph.node[u]["stage"] == graph.node[v]["stage"] and\
+                        graph.node[u]["len"] + 1 > graph.node[v]["len"]:
+                        graph.node[v]["len"] = graph.node[u]["len"] + 1
+
+        # evaluate glitch propagation
+        traversed_list = []
+        for u, v in nx.bfs_edges(graph, "root"):
+            if v in traversed_list:
+                continue
+            else:
+                traversed_list.append(v)
+            if CGRA.isALU(v):
+                graph.node[v]["switching"] = sim_params.switching_info[opcodes[v]]
+            if graph.node[v]["len"] > 0:
+                prev_sw = max([graph.node[prev]["switching"] for prev in graph.predecessors(v)])
+                if CGRA.isALU(v):
+                    print(v, "prev", prev_sw)
+                    graph.node[v]["switching"] += sim_params.switching_propagation * \
+                                                    (sim_params.switching_damp ** (graph.node[v]["len"] - 1)) * \
+                                                    prev_sw
+                elif CGRA.isSE(v):
+                    graph.node[v]["switching"] = prev_sw
+
+
+        print(nx.get_node_attributes(graph, "switching"))
+        S_total = sum(nx.get_node_attributes(graph, "switching").values())
+
+        print(S_total)
+
+        del graph
+        if preg_flag:
+            return S_total * sim_params.switching_energy + \
+                    sum(individual.preg) * sim_params.preg_dynamic_energy
+        else:
+            return S_total * sim_params.switching_energy
+
+    def __getStageIndex(stage_domains, node):
+        for stage in range(len(stage_domains)):
+            if node in stage_domains[stage]:
+                break
+        else:
+            stage = -1
+
+        return stage
+
 
     @staticmethod
     def isMinimize():
