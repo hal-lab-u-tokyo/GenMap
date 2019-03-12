@@ -3,9 +3,12 @@ import copy
 
 class Application():
 
+    TIME_UNIT = {"ps": 10**(-12), "ns": 10**(-9), "us": 10**(-6), "ms": 10**(-3)}
+    FREQ_SCALE = {"G": 10**9, "M": 10**6, "k": 10**3}
+
     def __init__(self):
         self.__DAG = nx.DiGraph()
-        self.__Freq = 10.0 # MHz
+        self.__Freq = 10.0 * 10**6 # MHz
 
     def read_dot(self, file):
         """set application data flow graph to this
@@ -52,24 +55,28 @@ class Application():
         self.__DAG = dag
         return True
 
-    def setFrequency(self, f):
+    def setFrequency(self, f, scale="M"):
         """set operation frequency.
 
             Args:
                 f (float): Frequency
+                scale (str): scale
+                    "G": GHz, "M": MHz, "k": kHz
 
             Return: None
         """
-        self.__Freq = float(f)
+        self.__Freq = float(f) * self.FREQ_SCALE[scale]
 
-    def getFrequency(self):
-        """get operation frequency/
+    def getClockPeriod(self, time_unit):
+        """set operation frequency.
 
-            Args: None
-
-            Return: float: frequecy
+            Args:
+                f (float): Frequency
+                time_unit (str): time unit
+                    "ps": pico sec, "ns": nano sec, "us": micro sec, "ms": milli sec
+            Return: None
         """
-        return self.__Freq
+        return 1 / self.__Freq / self.TIME_UNIT[time_unit]
 
 
     def getCompSubGraph(self):

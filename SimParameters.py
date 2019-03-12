@@ -392,3 +392,6 @@ class SimParameters():
                 raise SimParameters.InvalidParameters("Invalid value {0} for {1[0]}".format(element.text, msg))
 
             return float_val
+
+    def getTimeUnit(self):
+        return self.units["delay"]

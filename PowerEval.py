@@ -19,10 +19,10 @@ class PowerEval(EvalBase):
         else:
             do_bb_opt = False
 
-        # leak_power = PowerEval.eval_leak(CGRA, app, sim_params, individual, do_bb_opt)
+        leak_power = PowerEval.eval_leak(CGRA, app, sim_params, individual, do_bb_opt)
         # print(leak_power)
-        # print(individual.getEvaluatedData("body_bias"))
-        PowerEval.eval_dynamic(CGRA, app, sim_params, individual)
+        print(individual.getEvaluatedData("body_bias"))
+        # PowerEval.eval_dynamic(CGRA, app, sim_params, individual)
 
 
     @staticmethod
@@ -82,8 +82,8 @@ class PowerEval(EvalBase):
 
             # 2. Latancy Satisfaction
             # make delay table
-            # max_lat = 1 / app.getFrequency() * 1000
-            max_lat = 100
+            max_lat = app.getClockPeriod(sim_params.getTimeUnit())
+            print(max_lat)
             opcodes = PowerEval.get_opcodes(CGRA, app, individual.mapping)
             delay_table = {node: sim_params.delay_info[opcode]
                             for node, opcode in opcodes.items()}
