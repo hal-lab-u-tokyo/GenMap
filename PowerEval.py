@@ -245,7 +245,6 @@ class PowerEval(EvalBase):
         if CGRA.getPregNumber() != 0:
             preg_flag = True
             nx.set_node_attributes(graph, -1, "stage")
-            print(individual.preg)
             for v in graph.nodes():
                 graph.node[v]["stage"] = PowerEval.__getStageIndex(stage_domains, v)
 
