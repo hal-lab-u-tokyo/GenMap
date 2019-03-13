@@ -4,6 +4,8 @@ import networkx as nx
 import pulp
 import copy
 
+PENALTY_COST = 1000
+
 class PowerEval(EvalBase):
     class DependencyError (Exception):
         pass
@@ -36,6 +38,8 @@ class PowerEval(EvalBase):
                 dynamic_power: dynamic power consumption
                 leackage_power: leackage power consumption
         """
+        if individual.valid == False:
+            return PENALTY_COST
 
         # save data path
         individual.saveEvaluatedData("data_path", PowerEval.data_path_analysis(CGRA, individual))
