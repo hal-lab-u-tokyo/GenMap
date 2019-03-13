@@ -123,6 +123,10 @@ class NSGA2():
         self.__random_pop_args = [comp_dfg, width, height, self.__params["Random place count"],\
                                     self.__params["Topological sort probability"]]
 
+        # check pipeline structure
+        self.preg_num = CGRA.getPregNumber()
+        self.pipeline_enable = self.preg_num > 0
+
         # check if mapping initialization successed
         if len(init_maps) < 1:
             return False
@@ -136,7 +140,10 @@ class NSGA2():
         self.__toolbox.register("map", self.__pool.map)
 
         # register each chromosome operation
-        self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
+        if self.pipeline_enable > 0:
+            self.__toolbox.register("individual", creator.Individual, CGRA, init_maps, self.preg_num)
+        else:
+            self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
         self.__toolbox.register("random_individual", creator.Individual, CGRA)
         self.__toolbox.register("evaluate", self.eval_objectives, eval_list, eval_args, CGRA, app, sim_params, router)
@@ -169,7 +176,7 @@ class NSGA2():
 
         """
         random_mappings = self.__placer.make_random_mappings(*self.__random_pop_args)
-        return [self.__toolbox.random_individual(random_mappings) for i in range(n)]
+        return [self.__toolbox.random_individual(random_mappings, self.preg_num) for i in range(n)]
 
     def eval_objectives(self, eval_list, eval_args, CGRA, app, sim_params, router, individual):
         """ Executes evaluation for each objective
