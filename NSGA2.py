@@ -42,10 +42,6 @@ class NSGA2():
             else:
                 raise ValueError("missing parameter name")
 
-
-        # self.__params = {"NGEN": 500, "MAX_STALL": 100, "INIT_POP_SIZE": 300, \
-        #                 "LAMBDA": 100, "MU": 45, "RNDMU": 10, "CXPB": 0.7,\
-        #                 "MUTPB": 0.3, "MUTELPB": 0.5}
         self.pop = []
         self.__placer = None
         self.__random_pop_args = []
@@ -64,7 +60,8 @@ class NSGA2():
         return {"pool": self}
 
 
-    def setup(self, CGRA, app, sim_params, router, eval_list, proc_num = multiprocessing.cpu_count()):
+    def setup(self, CGRA, app, sim_params, router, eval_list, \
+                eval_args = None, proc_num = multiprocessing.cpu_count()):
         """Setup NSGA2 optimization
 
             Args:
@@ -73,6 +70,7 @@ class NSGA2():
                 router (RouterBase): a router in which a routing algorithm is implemented
                 eval_list (list of EvalBase): objective functions of the optimization
                 Option:
+                    eval_args (list): list of kwargs(dict) for each evaluation.
                     proc_num (int): the number of process
                                     Default is equal to cpu count
 
@@ -87,6 +85,16 @@ class NSGA2():
         for evl in eval_list:
             if not issubclass(evl, EvalBase):
                 raise TypeError(evl.__name__ + "is not EvalBase class")
+
+        # check eval args
+        if not eval_args is None:
+            if len(eval_list) != len(eval_args):
+                raise TypeError("Inconsistent between evaluation list and their args")
+            for args in eval_args:
+                if not isinstance(args, dict):
+                    raise TypeError("eval_args must be list of dictionary")
+        else:
+            eval_args = [{} for evl in eval_list]
 
         # uni-objective optimization
         if len(eval_list) == 1:
@@ -131,7 +139,7 @@ class NSGA2():
         self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
         self.__toolbox.register("random_individual", creator.Individual, CGRA)
-        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, CGRA, app, sim_params, router)
+        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, eval_args, CGRA, app, sim_params, router)
         self.__toolbox.register("mate", Individual.cxSet)
         self.__toolbox.register("mutate", Individual.mutSet, 0.5)
         self.__toolbox.register("select", tools.selNSGA2)
@@ -163,13 +171,14 @@ class NSGA2():
         random_mappings = self.__placer.make_random_mappings(*self.__random_pop_args)
         return [self.__toolbox.random_individual(random_mappings) for i in range(n)]
 
-    def eval_objectives(self, eval_list, CGRA, app, sim_params, router, individual):
+    def eval_objectives(self, eval_list, eval_args, CGRA, app, sim_params, router, individual):
         """ Executes evaluation for each objective
         """
         # routing the mapping
         self.__doRouting(CGRA, app, router, individual)
         # evaluate each objectives
-        return [eval_cls.eval(CGRA, app, sim_params, individual) for eval_cls in eval_list], individual
+        return [eval_cls.eval(CGRA, app, sim_params, individual, **args) \
+                for eval_cls, args in zip(eval_list, eval_args)], individual
 
     def __doRouting(self, CGRA, app, router, individual):
         """
@@ -204,7 +213,11 @@ class NSGA2():
             return
 
         # output routing
-        cost += router.output_routing(CGRA, app.getOutputSubGraph(), individual.mapping, g)
+        if CGRA.getPregNumber() > 0:
+            cost += router.output_routing(CGRA, app.getOutputSubGraph(), \
+                                            individual.mapping, g, individual.preg)
+        else:
+            cost += router.output_routing(CGRA, app.getOutputSubGraph(), individual.mapping, g)
 
         if cost > penalty:
             individual.routing_cost = cost + penalty

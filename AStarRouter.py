@@ -93,22 +93,8 @@ class AStarRouter(RouterBase):
         return route_cost
 
     @staticmethod
-    def output_routing(CGRA, out_DFG, mapping, routed_graph, **info):
-        """Routes a computation DFG on the PE array.
+    def output_routing(CGRA, out_DFG, mapping, routed_graph, preg_conf = None, **info):
 
-            Args:
-                CGRA (PEArrayModel): A model of the CGRA
-                out_DFG (networkx DiGraph): A graph to be routed
-                mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
-                    values (tuple): PE coordinates
-                routed_graph (networkx DiGraph): PE array graph
-                Optional:
-                    stage_domains (list-like): nodes-list for each pipeline stage
-
-            Returns:
-                int: routing cost
-        """
         route_cost = 0
 
         # get output edges
@@ -125,8 +111,8 @@ class AStarRouter(RouterBase):
         # check pipeline structure
         path_extend_nodes = []
         free_last_stage_SEs = set()
-        if "stage_domains" in info.keys():
-            stage_domains = info["stage_domains"]
+        if not preg_conf is None:
+            stage_domains = CGRA.getStageDomain(preg_conf)
             if len(stage_domains) > 1:
                 last_stage_nodes = stage_domains[-1]
                 path_extend_nodes = [alu for alu in alu_list if not alu in last_stage_nodes]

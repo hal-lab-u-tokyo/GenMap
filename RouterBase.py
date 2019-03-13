@@ -78,9 +78,13 @@ class RouterBase(metaclass=ABCMeta):
                 CGRA (PEArrayModel): A model of the CGRA
                 out_DFG (networkx DiGraph): A graph to be routed
                 mapping (dict): mapping of the DFG
-                    keys (str): operation label of DFG
+                    keys (str): node names of DFG
                     values (tuple): PE coordinates
                 routed_graph (networkx DiGraph): PE array graph
+                Optional:
+                    preg_conf: Pipeline configuration if the PE Array is pipelined.
+                               If it is not None, pipeline latency is adjusted
+                               by extending output data path.
 
             Returns:
                 int: routing cost

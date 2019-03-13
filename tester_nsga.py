@@ -6,6 +6,7 @@ from Placer import Placer
 from Individual import Individual
 from WireLengthEval import WireLengthEval
 from MapWidthEval import MapWidthEval
+from PowerEval import PowerEval
 from NSGA2 import NSGA2
 
 import networkx as nx
@@ -35,6 +36,7 @@ if __name__ == "__main__":
     # g = model.getNetwork()
 
     app = Application()
+    app.setFrequency(30, "M")
     app.read_dot(APP_DOT)
 
     try:
@@ -57,7 +59,8 @@ if __name__ == "__main__":
     if nsga2_conf.tag == "Config":
         optimizer = NSGA2(nsga2_conf)
 
-    if optimizer.setup(model, app, sim_params, AStarRouter, [WireLengthEval, MapWidthEval]):
+    if optimizer.setup(model, app, sim_params, AStarRouter, [WireLengthEval, MapWidthEval, PowerEval],\
+                        [{}, {}, {"duplicate_enable": True}]):
         hof, hv = optimizer.runOptimization()
 
     elapsed_time = time.time() - start
