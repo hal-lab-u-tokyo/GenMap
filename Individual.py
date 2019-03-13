@@ -219,7 +219,7 @@ class Individual():
             # preg config
             if len(ind.preg) != 0:
                 preg_idx = random.randint(0, len(ind.preg) - 1)
-                ind.preg[preg_idx] = not(preg_idx[preg_idx])
+                ind.preg[preg_idx] = not(ind.preg[preg_idx])
 
         # make it invaliad
         ind.valid = False
