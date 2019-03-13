@@ -33,6 +33,8 @@ class PowerEval(EvalBase):
             Saved evaluation results:
                 data_path: data path on the PE array
                 body_bias: optimized body bias voltage
+                dynamic_power: dynamic power consumption
+                leackage_power: leackage power consumption
         """
 
         # save data path
@@ -44,18 +46,28 @@ class PowerEval(EvalBase):
         else:
             do_bb_opt = False
 
-        if not info["duplicate_enable"] is None and\
-             info["duplicate_enable"] is True:
+        duplicate_enable = False
+        if "duplicate_enable" in info.keys():
+            if info["duplicate_enable"] is True:
              duplicate_enable = True
              # chech dependency
              if individual.getEvaluatedData("map_width") is None:
-                raise DependencyError("PowerEval must be carried out after map width evaluation")
+                raise PowerEval.DependencyError("PowerEval must be carried out after map width evaluation")
 
         leak_power = PowerEval.eval_leak(CGRA, app, sim_params, individual, do_bb_opt)
-        # # print(leak_power)
-        # print(individual.getEvaluatedData("body_bias"))
-        dyn_comb = PowerEval.eval_glitch(CGRA, app, sim_params, individual, duplicate_enable)
+        dyn_energy = PowerEval.eval_glitch(CGRA, app, sim_params, individual, duplicate_enable)
 
+        # get dynamic energy of pipeline regs
+        if CGRA.getPregNumber() > 0:
+            dyn_energy += sim_params.preg_dynamic_energy * sum(individual.preg)
+
+        dyn_power = sim_params.calc_power(app.getClockPeriod(sim_params.getTimeUnit()), \
+                                          dyn_energy)
+
+        individual.saveEvaluatedData("dynamic_power", dyn_power)
+        individual.saveEvaluatedData("leakage_power", leak_power)
+
+        return dyn_power + leak_power
 
 
     @staticmethod
@@ -259,20 +271,18 @@ class PowerEval(EvalBase):
                     graph.node[v]["switching"] += sim_params.switching_propagation * \
                                                     (sim_params.switching_damp ** (graph.node[v]["len"])) * \
                                                     prev_sw
-                    # print(v, "prev", prev_sw, "factor", sim_params.switching_propagation * \
-                    #                                 (sim_params.switching_damp ** (graph.node[v]["len"])), 
-                    #                                 "->", graph.node[v]["switching"])
+
                 elif CGRA.isSE(v):
                     graph.node[v]["switching"] = prev_sw * sim_params.se_decay
             else:
                 pass
-                # print("after preg", v, graph.node[v]["switching"])
 
 
-        # print(nx.get_node_attributes(graph, "switching"))
         S_total = sum(nx.get_node_attributes(graph, "switching").values())
 
-        # print(S_total)
+        if duplicate_enable:
+            width, __ = CGRA.getSize()
+            S_total *= width // individual.getEvaluatedData("map_width")
 
         del graph
 

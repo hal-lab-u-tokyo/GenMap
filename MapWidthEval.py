@@ -25,7 +25,9 @@ class MapWidthEval(EvalBase):
 
         """
         x_coords = [x for (x, y) in individual.mapping.values()]
-        return max(x_coords) - min(x_coords) + 1
+        map_width = max(x_coords) - min(x_coords) + 1
+        individual.saveEvaluatedData("map_width", map_width)
+        return map_width
 
     @staticmethod
     def isMinimize():
