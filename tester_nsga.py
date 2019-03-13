@@ -22,7 +22,7 @@ from deap import algorithms
 from deap import creator
 
 
-APP_DOT = "./af.dot"
+APP_DOT = "./gray.dot"
 
 # test
 if __name__ == "__main__":
