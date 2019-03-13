@@ -24,7 +24,7 @@ class RouterBase(metaclass=ABCMeta):
                 CGRA (PEArrayModel): A model of the CGRA
                 comp_DFG (networkx DiGraph): A graph to be routed
                 mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
+                    keys (str): operation label of DFG
                     values (tuple): PE coordinates
                 routed_graph (networkx DiGraph): PE array graph
 
@@ -42,7 +42,7 @@ class RouterBase(metaclass=ABCMeta):
                 CGRA (PEArrayModel): A model of the CGRA
                 const_DFG (networkx DiGraph): A graph to be routed
                 mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
+                    keys (str): operation label of DFG
                     values (tuple): PE coordinates
                 routed_graph (networkx DiGraph): PE array graph
 
@@ -60,7 +60,7 @@ class RouterBase(metaclass=ABCMeta):
                 CGRA (PEArrayModel): A model of the CGRA
                 input_DFG (networkx DiGraph): A graph to be routed
                 mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
+                    keys (str): operation label of DFG
                     values (tuple): PE coordinates
                 routed_graph (networkx DiGraph): PE array graph
 
@@ -78,7 +78,7 @@ class RouterBase(metaclass=ABCMeta):
                 CGRA (PEArrayModel): A model of the CGRA
                 out_DFG (networkx DiGraph): A graph to be routed
                 mapping (dict): mapping of the DFG
-                    keys (str): node names of DFG
+                    keys (str): operation label of DFG
                     values (tuple): PE coordinates
                 routed_graph (networkx DiGraph): PE array graph
 

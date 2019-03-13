@@ -5,11 +5,36 @@ import pulp
 import copy
 
 class PowerEval(EvalBase):
+    class DependencyError (Exception):
+        pass
+
     def __init__(self):
+        """This evaluation must be carried out after MapWidthEval evaluation
+            if you want mapping duplication.
+        """
         pass
 
     @staticmethod
-    def eval(CGRA, app, sim_params, individual):
+    def eval(CGRA, app, sim_params, individual, **info):
+        """Return mapping width.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                app (Application): An application to be optimized
+                sim_params (SimParameters): parameters for some simulations
+                individual (Individual): An individual to be evaluated
+                Options:
+                    duplicate_enable (bool): True if you need the mapped data-flow
+                                                to be duplicated horizontally.
+
+            Returns:
+                float: evaluated power
+
+            Saved evaluation results:
+                data_path: data path on the PE array
+                body_bias: optimized body bias voltage
+        """
+
         # save data path
         individual.saveEvaluatedData("data_path", PowerEval.data_path_analysis(CGRA, individual))
         # get body bias domain
@@ -19,14 +44,32 @@ class PowerEval(EvalBase):
         else:
             do_bb_opt = False
 
+        if not info["duplicate_enable"] is None and\
+             info["duplicate_enable"] is True:
+             duplicate_enable = True
+             # chech dependency
+             if individual.getEvaluatedData("map_width") is None:
+                raise DependencyError("PowerEval must be carried out after map width evaluation")
+
         leak_power = PowerEval.eval_leak(CGRA, app, sim_params, individual, do_bb_opt)
-        # print(leak_power)
-        print(individual.getEvaluatedData("body_bias"))
-        # PowerEval.eval_dynamic(CGRA, app, sim_params, individual)
+        # # print(leak_power)
+        # print(individual.getEvaluatedData("body_bias"))
+        dyn_comb = PowerEval.eval_glitch(CGRA, app, sim_params, individual, duplicate_enable)
+
 
 
     @staticmethod
     def data_path_analysis(CGRA, individual):
+        """Analyzes data path on the PE array.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                individual (Individual): An individual to be evaluated
+
+            Returns:
+                list: list of path(networkx)
+        """
+
         # data path analysis
         graph = individual.routed_graph
         used_inports = set(graph.nodes()) & set(CGRA.getInputPorts())
@@ -52,6 +95,19 @@ class PowerEval(EvalBase):
 
     @staticmethod
     def get_opcodes(CGRA, app, mapping):
+        """Gets opcodes for each used ALU.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                app (Application): An application to be optimized
+                mapping (dict): mapping of the DFG
+                    keys (str): operation label of DFG
+                    values (tuple): PE coordinates
+            Returns:
+                Dict: opcodes of used ALUs
+                    keys (str): ALU name of routed graph
+                    values (str): opcode of the ALU
+        """
         op_attr = nx.get_node_attributes(app.getCompSubGraph(), "op")
         opcodes = {CGRA.getNodeName("ALU", pos): op_attr[op_label]\
                          for op_label, pos in mapping.items()}
@@ -59,6 +115,20 @@ class PowerEval(EvalBase):
 
     @staticmethod
     def eval_leak(CGRA, app, sim_params, individual, leak_optimize):
+        """Evaluates leackage power consumption.
+            If necessary, it will optimize body bias voltage assignments.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                app (Application): An application to be optimized
+                sim_params (SimParameters): parameters for simulations
+                individual (Individual): An individual to be evaluated
+                leak_optimize (bool): True if you need body bias optimization.
+
+            Returns:
+                float: leakage power of whole PE array.
+        """
+
         if leak_optimize:
             bb_domains = CGRA.getBBdomains()
             # Probrem Declaration
@@ -82,11 +152,10 @@ class PowerEval(EvalBase):
 
             # 2. Latancy Satisfaction
             # make delay table
-            max_lat = app.getClockPeriod(sim_params.getTimeUnit())
-            print(max_lat)
             opcodes = PowerEval.get_opcodes(CGRA, app, individual.mapping)
             delay_table = {node: sim_params.delay_info[opcode]
                             for node, opcode in opcodes.items()}
+
             # make domain table
             #    key: node name, value: domain name
             domain_table = {}
@@ -95,6 +164,9 @@ class PowerEval(EvalBase):
                     if node in bb_domains[domain]["ALU"] or \
                         node in bb_domains[domain]["SE"]:
                         domain_table[node] = domain
+
+            # get maximum latency
+            max_lat = app.getClockPeriod(sim_params.getTimeUnit())
 
             # add constrain for each data path
             for dp in individual.getEvaluatedData("data_path"):
@@ -131,7 +203,22 @@ class PowerEval(EvalBase):
         return leak_power
 
     @staticmethod
-    def eval_dynamic(CGRA, app, sim_params, individual):
+    def eval_glitch(CGRA, app, sim_params, individual, duplicate_enable = False):
+        """Evaluates dynamic energy consumption of the PE array considering glitch effects.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                app (Application): An application to be optimized
+                sim_params (SimParameters): parameters for simulations
+                individual (Individual): An individual to be evaluated
+                duplicate_enable (bool): True if you need the mapped data-flow
+                                         to be duplicated horizontally.
+            Returns:
+                float: evaluated energy consumption.
+                        Note that the value does not contain pipeline register &
+                        clock tree energy.
+        """
+
         stage_domains = CGRA.getStageDomains(individual.preg)
         graph = copy.deepcopy(individual.routed_graph)
         graph.add_node("root")
@@ -142,6 +229,7 @@ class PowerEval(EvalBase):
         if CGRA.getPregNumber() != 0:
             preg_flag = True
             nx.set_node_attributes(graph, -1, "stage")
+            print(individual.preg)
             for v in graph.nodes():
                 graph.node[v]["stage"] = PowerEval.__getStageIndex(stage_domains, v)
 
@@ -168,25 +256,27 @@ class PowerEval(EvalBase):
             if graph.node[v]["len"] > 0:
                 prev_sw = max([graph.node[prev]["switching"] for prev in graph.predecessors(v)])
                 if CGRA.isALU(v):
-                    print(v, "prev", prev_sw)
                     graph.node[v]["switching"] += sim_params.switching_propagation * \
-                                                    (sim_params.switching_damp ** (graph.node[v]["len"] - 1)) * \
+                                                    (sim_params.switching_damp ** (graph.node[v]["len"])) * \
                                                     prev_sw
+                    # print(v, "prev", prev_sw, "factor", sim_params.switching_propagation * \
+                    #                                 (sim_params.switching_damp ** (graph.node[v]["len"])), 
+                    #                                 "->", graph.node[v]["switching"])
                 elif CGRA.isSE(v):
-                    graph.node[v]["switching"] = prev_sw
+                    graph.node[v]["switching"] = prev_sw * sim_params.se_decay
+            else:
+                pass
+                # print("after preg", v, graph.node[v]["switching"])
 
 
-        print(nx.get_node_attributes(graph, "switching"))
+        # print(nx.get_node_attributes(graph, "switching"))
         S_total = sum(nx.get_node_attributes(graph, "switching").values())
 
-        print(S_total)
+        # print(S_total)
 
         del graph
-        if preg_flag:
-            return S_total * sim_params.switching_energy + \
-                    sum(individual.preg) * sim_params.preg_dynamic_energy
-        else:
-            return S_total * sim_params.switching_energy
+
+        return S_total * sim_params.switching_energy
 
     def __getStageIndex(stage_domains, node):
         for stage in range(len(stage_domains)):

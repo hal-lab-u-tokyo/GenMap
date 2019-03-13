@@ -68,7 +68,7 @@ class Placer():
                 height (int): PE array height
 
             Returns:
-                Dictionary: keys are nodes names, values are node positions of them.
+                Dictionary: keys are operation label, values are mapped positions of them.
                             In case of failure, returns None
 
         """
@@ -181,7 +181,7 @@ class Placer():
                 dag (networkx digraph): data-flow-graph to be mapped
 
             mapping (dict): operation mapping
-                                keys: node name
+                                keys: operation labels
                                 values: PE coordinates where the nodes are mapped
 
         """

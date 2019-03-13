@@ -13,7 +13,7 @@ class EvalBase(metaclass=ABCMeta):
                 individual (Individual): An individual to be evaluated
 
             Returns:
-                int: mapping width
+                float or int: evaluated value
         """
         pass
 
