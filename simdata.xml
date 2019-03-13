@@ -152,7 +152,8 @@
 		<Dynamic>
 			<Energy unit="pJ">0.099</Energy>
 			<Propagation>1.325</Propagation>
-			<Damp>0.072</Damp>
+			<Decay>0.072</Decay>
+			<SE_weight>1</SE_weight>
 			<Switching op="ADD">17.1693</Switching>
 			<Switching op="SUB">20.0153</Switching>
 			<Switching op="MULT">31.4623</Switching>

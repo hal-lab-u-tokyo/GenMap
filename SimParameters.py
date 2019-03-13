@@ -52,11 +52,13 @@ class SimParameters():
         self.switching_info = {op: 0 for op in self.op_list}
         self.switching_energy = 0.0
         self.switching_propagation = 0.0
-        self.switching_damp = 0.0
+        self.switching_decay = 0.0
         self.bias_range = set()
         if CGRA.getPregNumber() > 0:
             self.preg_dynamic_energy = 0.0
             self.preg_leak = 0.0
+
+        self.se_weight = 1.0
 
         # load each data
         self.__load_bias_range(bias_range)
@@ -229,12 +231,19 @@ class SimParameters():
         # store
         self.switching_propagation = prop_val
 
-        # load damp ratio
-        damp = dynamic_info.find("Damp")
-        # check damp value
-        damp_val = self.__getFloat(damp, msg=["damp", "glitch estimation"])
+        # load decay ratio
+        decay = dynamic_info.find("Decay")
+        # check decay value
+        decay_val = self.__getFloat(decay, msg=["decay", "glitch estimation"])
         # store
-        self.switching_damp = damp_val
+        self.switching_decay = decay_val
+
+        # load se weight
+        se_w = dynamic_info.find("SE_weight")
+        # check se_w value
+        se_w_val = self.__getFloat(se_w, msg=["se_w", "glitch estimation"])
+        # store
+        self.se_weight = se_w_val
 
         # load switching count for each operation
         for sw in dynamic_info.findall("Switching"):
