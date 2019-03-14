@@ -146,14 +146,9 @@ class Placer():
                     nearest_pos = free_coords[dists.index(min(dists))]
                     free_coords.remove(nearest_pos)
                     best_mapping[v] = nearest_pos
-                    print(v, "move from", coord, "to", nearest_pos)
-            print(len(list(best_mapping.values())) -  len(set(best_mapping.values())))
             return best_mapping
 
         return mapping
-
-    @staticmethod
-
 
     @staticmethod
     def make_random_mappings(dag, width, height, size, sort_prob = 0.5):
