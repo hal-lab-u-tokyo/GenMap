@@ -106,18 +106,54 @@ class Placer():
         pos = {v: ((map_width - 1) * x, (map_height - 1) * y) for v, (x, y) in pos.items()}
 
         # try to rounding the conrdinates
+        best_mapping_lest = len(pos)
         for i in range(self.__iterations):
             mapping = {v: self.__coord_rouding((x, y)) for v, (x, y) in pos.items()}
             # check duplication
-            if len(list(mapping.values())) == len(set(mapping.values())):
+            duplicated_node_num = len(list(mapping.values())) -  len(set(mapping.values()))
+            if duplicated_node_num == 0:
                 # check dependency
                 # if self.__if_keep_dependency(dag, mapping):
                 #     break
                 break
+            elif duplicated_node_num < best_mapping_lest:
+                best_mapping = mapping
+                best_mapping_lest = duplicated_node_num
         else:
-            return None
+
+            # fail to rouding
+            # get duplicated nodes
+            duplicated_nodes = {coord: [v for v in best_mapping.keys() if best_mapping[v] == coord] \
+                            for coord in set(best_mapping.values()) \
+                            if list(best_mapping.values()).count(coord) > 1}
+
+            # fix one of nodes which are mapped to same coord
+            for coord in duplicated_nodes:
+                duplicated_nodes[coord].pop(\
+                        random.randint(0, len(duplicated_nodes[coord]) - 1))
+
+            # sort in order of lest node count
+            duplicated_nodes = dict(sorted(duplicated_nodes.items(), key=lambda x: - len(x[1])))
+
+            # get free coordinates
+            free_coords = [(x, y) for x in range(map_width) for y in range(map_height)\
+                            if not (x, y) in best_mapping.values()]
+
+            for coord, nodes in duplicated_nodes.items():
+                for v in nodes:
+                    dists = [math.sqrt((x - coord[0]) ** 2 + (y - coord[1]) ** 2) \
+                                for (x, y) in free_coords]
+                    nearest_pos = free_coords[dists.index(min(dists))]
+                    free_coords.remove(nearest_pos)
+                    best_mapping[v] = nearest_pos
+                    print(v, "move from", coord, "to", nearest_pos)
+            print(len(list(best_mapping.values())) -  len(set(best_mapping.values())))
+            return best_mapping
 
         return mapping
+
+    @staticmethod
+
 
     @staticmethod
     def make_random_mappings(dag, width, height, size, sort_prob = 0.5):
