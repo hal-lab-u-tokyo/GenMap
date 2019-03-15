@@ -14,4 +14,4 @@ class WireLengthEval(EvalBase):
 
     @staticmethod
     def name():
-        return "Wire Length"
+        return "Wire_Length"

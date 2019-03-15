@@ -35,4 +35,4 @@ class MapWidthEval(EvalBase):
 
     @staticmethod
     def name():
-        return "Mapping Width"
+        return "Mapping_Width"

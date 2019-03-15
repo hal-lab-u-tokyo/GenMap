@@ -307,4 +307,4 @@ class PowerEval(EvalBase):
 
     @staticmethod
     def name():
-        return "Power Consumption"
+        return "Power_Consumption"
