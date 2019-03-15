@@ -146,7 +146,8 @@ if __name__ == '__main__':
         exit()
 
     # setup optimization
-    success_setup = optimizer.setup(model, app, sim_params, AStarRouter, [WireLengthEval, MapWidthEval, PowerEval],\
+    objectives = [WireLengthEval, MapWidthEval, PowerEval]
+    success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
                         [{}, {}, {"duplicate_enable": args.duplicate_enable}])
 
     # run optimization
@@ -157,7 +158,8 @@ if __name__ == '__main__':
         print("elapsed time:", elapsed_time, "[sec]")
 
         # save results
-        save_header = {"app": app, "arch": model, "opt_conf": tree_opt.getroot()}
+        save_header = {"app": app, "arch": model, "opt_conf": tree_opt.getroot(),
+                        "eval_names": [obj.name() for obj in objectives]}
         save_data = {"hof": hof, "hypervolume": hv}
         with open(output_file_name, "wb") as file:
             pickle.dump(save_header, file)
