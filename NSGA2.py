@@ -14,11 +14,13 @@ from RouterBase import RouterBase
 from Placer import Placer
 
 class NSGA2():
-    def __init__(self, config):
+    def __init__(self, config, logfile = None):
         """Constructor of the NSGA2 class.
 
             Args:
                 config (XML Element): a configuration of optimization parameters
+                Optional:
+                    logfile (_io.TextIOWrapper): log file
 
         """
         # initilize toolbox
@@ -54,6 +56,8 @@ class NSGA2():
         except ImportError:
             self.__hv_logging = False
 
+        # regist log gile
+        self.__logfile = logfile
 
     def __getstate__(self):
         # make this instance hashable for pickle (needed to use multiprocessing)
@@ -124,8 +128,8 @@ class NSGA2():
                                     self.__params["Topological sort probability"]]
 
         # check pipeline structure
-        self.preg_num = CGRA.getPregNumber()
-        self.pipeline_enable = self.preg_num > 0
+        self.__preg_num = CGRA.getPregNumber()
+        self.__pipeline_enable = self.__preg_num > 0
 
         # check if mapping initialization successed
         if len(init_maps) < 1:
@@ -140,8 +144,8 @@ class NSGA2():
         self.__toolbox.register("map", self.__pool.map)
 
         # register each chromosome operation
-        if self.pipeline_enable > 0:
-            self.__toolbox.register("individual", creator.Individual, CGRA, init_maps, self.preg_num)
+        if self.__pipeline_enable > 0:
+            self.__toolbox.register("individual", creator.Individual, CGRA, init_maps, self.__preg_num)
         else:
             self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
@@ -176,7 +180,7 @@ class NSGA2():
 
         """
         random_mappings = self.__placer.make_random_mappings(*self.__random_pop_args)
-        return [self.__toolbox.random_individual(random_mappings, self.preg_num) for i in range(n)]
+        return [self.__toolbox.random_individual(random_mappings, self.__preg_num) for i in range(n)]
 
     def eval_objectives(self, eval_list, eval_args, CGRA, app, sim_params, router, individual):
         """ Executes evaluation for each objective
@@ -260,6 +264,8 @@ class NSGA2():
             # show generation count
             gen_count = gen_count + 1
             self.progress.set_description("Generation {0}".format(gen_count))
+            if not self.__logfile is None:
+                self.__logfile.write("Generation {0}\n".format(gen_count))
 
             # make offspring
             offspring = algorithms.varOr(self.pop, self.__toolbox, self.__params["Offspring size"], \
@@ -303,6 +309,14 @@ class NSGA2():
             stats = self.stats.compile(hof)
             for i in range(len(stats["min"])):
                 self.status_disp[i].set_postfix(min=stats["min"][i], max=stats["max"][i])
+
+            # logging
+            if not self.__logfile is None:
+                self.__logfile.write("\thof_len = {0} stall = {1}\n".format(len(hof), stall_count))
+                for i in range(len(stats["min"])):
+                    self.__logfile.write("\t{obj}: min = {min}, max = max{max}\n".format(\
+                                            obj = self.status_disp[i].desc, min = stats["min"][i],\
+                                            max=stats["max"][i]))
 
         self.__pool.close()
         self.__pool.join()

@@ -56,8 +56,10 @@ if __name__ == "__main__":
     nsga2_conf = tree.getroot()
     start = time.time()
 
+    logfile = open("./log.txt", "w")
+
     if nsga2_conf.tag == "Config":
-        optimizer = NSGA2(nsga2_conf)
+        optimizer = NSGA2(nsga2_conf, logfile)
 
     if optimizer.setup(model, app, sim_params, AStarRouter, [WireLengthEval, MapWidthEval, PowerEval],\
                         [{}, {}, {"duplicate_enable": True}]):
@@ -67,4 +69,5 @@ if __name__ == "__main__":
 
     print("elapsed time:", elapsed_time, "[sec]")
 
+    logfile.close()
 
