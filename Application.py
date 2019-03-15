@@ -4,7 +4,7 @@ import copy
 class Application():
 
     TIME_UNIT = {"ps": 10**(-12), "ns": 10**(-9), "us": 10**(-6), "ms": 10**(-3)}
-    FREQ_SCALE = {"G": 10**9, "M": 10**6, "k": 10**3}
+    FREQ_PREFEX = {"G": 10**9, "M": 10**6, "k": 10**3}
 
     def __init__(self):
         self.__DAG = nx.DiGraph()
@@ -55,17 +55,17 @@ class Application():
         self.__DAG = dag
         return True
 
-    def setFrequency(self, f, scale="M"):
+    def setFrequency(self, f, prefex="M"):
         """set operation frequency.
 
             Args:
                 f (float): Frequency
-                scale (str): scale
+                prefex (str): prefex of frequency unit
                     "G": GHz, "M": MHz, "k": kHz
 
             Return: None
         """
-        self.__Freq = float(f) * self.FREQ_SCALE[scale]
+        self.__Freq = float(f) * self.FREQ_PREFEX[prefex]
 
     def getClockPeriod(self, time_unit):
         """set operation frequency.
