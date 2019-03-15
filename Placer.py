@@ -29,7 +29,7 @@ class Placer():
         """Returns multiple initial mappings.
 
             Args:
-                dga (networkx DiGraph): data-flow-graph
+                dag (networkx DiGraph): data-flow-graph
                 width (int): PE array width
                 height (int): PE array height
                 count (int): try count to generate mappings
@@ -57,13 +57,13 @@ class Placer():
 
 
     def mt_wrapper(self, args):
-        return self.make_position(*args)
+        return self.make_graphviz_mapping(*args)
 
-    def make_position(self, dag, width, height):
+    def make_graphviz_mapping(self, dag, width, height):
         """ Makes nodes position on the PE array.
 
             Args:
-                dga (networkx DiGraph): data-flow-graph
+                dag (networkx DiGraph): data-flow-graph
                 width (int): PE array width
                 height (int): PE array height
 
@@ -155,7 +155,7 @@ class Placer():
         """ Generate random mappings
 
             Args:
-                dga (networkx DiGraph): data-flow-graph
+                dag (networkx DiGraph): data-flow-graph
                 width (int): PE array width
                 height (int): PE array height
                 size (int): The number of mappings to be generated
