@@ -159,7 +159,8 @@ if __name__ == '__main__':
 
         # save results
         save_header = {"app": app, "arch": model, "opt_conf": tree_opt.getroot(),
-                        "eval_names": [obj.name() for obj in objectives]}
+                        "eval_names": [obj.name() for obj in objectives],
+                        "fitness_weights": tuple(-1.0 if obj.isMinimize() else 1.0 for obj in objectives)}
         save_data = {"hof": hof, "hypervolume": hv}
         with open(output_file_name, "wb") as file:
             pickle.dump(save_header, file)
