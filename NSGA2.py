@@ -314,7 +314,7 @@ class NSGA2():
             if not self.__logfile is None:
                 self.__logfile.write("\thof_len = {0} stall = {1}\n".format(len(hof), stall_count))
                 for i in range(len(stats["min"])):
-                    self.__logfile.write("\t{obj}: min = {min}, max = max{max}\n".format(\
+                    self.__logfile.write("\t{obj}: min = {min}, max = {max}\n".format(\
                                             obj = self.status_disp[i].desc, min = stats["min"][i],\
                                             max=stats["max"][i]))
 
