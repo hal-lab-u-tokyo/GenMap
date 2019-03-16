@@ -166,7 +166,7 @@ class PEArrayModel:
         # init SE list
         for x in range(self.__width):
             for y in range(self.__height):
-                self.__se_lists[(x,y)] = set()
+                self.__se_lists[(x,y)] = {}
 
         # get PE configs
         PEs = [pe for pe in conf if pe.tag == "PE"]
@@ -216,7 +216,9 @@ class PEArrayModel:
                     self.__bb_domains[pe.get("bbdomain")]["SE"].append(\
                             SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
                     connections[SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id)] = output.iter("input")
-                    self.__se_lists[(x, y)].add(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
+                    if not se_id in self.__se_lists[(x, y)].keys():
+                        self.__se_lists[(x, y)][se_id] = set()
+                    self.__se_lists[(x, y)][se_id].add(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
                     if output.get("return_only") == "True":
                         self.__return_only_se.append(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
 
@@ -488,7 +490,8 @@ class PEArrayModel:
 
         for x in x_range:
             for y in y_range:
-                for se in self.__se_lists[(x, y)]:
+                se_set = set([se for subset in self.__se_lists[(x, y)].values() for se in subset])
+                for se in se_set:
                     if self.__network.nodes[se]["free"] == True:
                         rtn_list.append(se)
 
@@ -510,7 +513,8 @@ class PEArrayModel:
             rtn_list[stage].extend([ALU_node_exp.format(pos=(x, y)) for x in range(self.__width)])
             # add SE
             for x in range(self.__width):
-                rtn_list[stage].extend([se for se in self.__se_lists[(x, y)] if not se in self.__return_only_se])
+                se_set = set([se for subset in self.__se_lists[(x, y)].values() for se in subset])
+                rtn_list[stage].extend([se for se in se_set if not se in self.__return_only_se])
 
         rtn_list[-1].extend(self.__return_only_se)
         return rtn_list
