@@ -26,8 +26,7 @@ class Individual():
         self.routed_graph = CGRA.getNetwork()
         # initialize each variable
         self.routing_cost = 0
-        self.valid = False
-        self.satisfy = False
+        self.__valid = False
         # user data
         self.__userData = {}
 
@@ -68,6 +67,14 @@ class Individual():
             for op, (x, y) in self.mapping.items():
                 self.mapping[op] = (x - min_x, y - min_y)
 
+    def invalidate(self):
+        self.__valid = False
+
+    def isValid(self):
+        return self.__valid
+
+    def validate(self):
+        self.__valid = True
 
     @staticmethod
     def cxSet(father, mother):
@@ -87,8 +94,8 @@ class Individual():
         # initialize each variable
         child1.routed_graph = father.model.getNetwork()
         child2.routed_graph = father.model.getNetwork()
-        child1.valid = False
-        child2.valid = False
+        child1.invalidate()
+        child2.invalidate()
 
         # set crossover point
         cx_point = random.randint(0, len(father.mapping) - 1)
@@ -221,8 +228,8 @@ class Individual():
                 preg_idx = random.randint(0, len(ind.preg) - 1)
                 ind.preg[preg_idx] = not(ind.preg[preg_idx])
 
-        # make it invaliad
-        ind.valid = False
+        # make it invalidate
+        ind.invalidate()
         # init graph
         ind.routed_graph = ind.model.getNetwork()
 

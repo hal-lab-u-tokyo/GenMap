@@ -196,7 +196,7 @@ class NSGA2():
             Execute routing
         """
         # check if routing is necessary
-        if individual.valid:
+        if individual.isValid():
             return
 
         # get penalty routing cost
@@ -237,7 +237,7 @@ class NSGA2():
             individual.routing_cost = cost
             # eliminate unnecessary nodes and edges
             router.clean_graph(g)
-            individual.valid = True
+            individual.validate()
 
 
     def runOptimization(self):
@@ -327,6 +327,9 @@ class NSGA2():
             disp.close()
 
         print("\n\nFinish optimization")
+
+        # eleminate invalid individuals
+        hof = [ind for ind in hof if ind.isValid()]
 
         # Hypervolume evolution (if possible)
         if self.__hv_logging:

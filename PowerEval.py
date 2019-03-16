@@ -38,7 +38,7 @@ class PowerEval(EvalBase):
                 dynamic_power: dynamic power consumption
                 leackage_power: leackage power consumption
         """
-        if individual.valid == False:
+        if individual.isValid() == False:
             return PENALTY_COST
 
         # save data path
