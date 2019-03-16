@@ -474,6 +474,13 @@ class PEArrayModel:
         """
         return [OUT_PORT_node_exp.format(index=i) for i in self.__in_port_range]
 
+    def get_PE_resources(self, coord):
+        return {"ALU": self.getNodeName("ALU", coord),\
+                 "SE": self.__se_lists[coord]}
+
+    def getPregPositions(self):
+        return self.__preg_positions
+
 
     def getFreeSEs(self, routed_graph, x_range=None, y_range=None):
         """
@@ -566,4 +573,5 @@ class PEArrayModel:
             return []
         else:
             return self.__operation_list[x][y]
+
 

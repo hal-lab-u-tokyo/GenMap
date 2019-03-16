@@ -44,8 +44,12 @@ if __name__ == '__main__':
     if pearray.tag == "PEArray":
         model = PEArrayModel(pearray)
 
+    for ind in data["hof"]:
+        print(ind.fitness)
+
     ##### debug end #####
 
     width, height = model.getSize()
-    drawer = ConfDrawer(width, height)
-    drawer.make_PEArray(model)
+    drawer = ConfDrawer(model, data["hof"][2])
+    drawer.draw_PEArray(model, data["hof"][2])
+    drawer.show()
