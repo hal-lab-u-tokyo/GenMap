@@ -18,6 +18,7 @@ from PowerEval import PowerEval
 # standard libs
 from argparse import ArgumentParser
 import sys
+import termios
 import os
 import time
 import pickle
@@ -152,8 +153,29 @@ if __name__ == '__main__':
 
     # run optimization
     if success_setup:
+        # tty echo off
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        new = termios.tcgetattr(fd)
+        new[3] &= ~(termios.ECHO | termios.ICANON)
+
         start_time = time.time()
-        hof, hv = optimizer.runOptimization()
+
+        try:
+            termios.tcsetattr(fd, termios.TCSANOW, new)
+            hof, hv = optimizer.runOptimization()
+        except KeyboardInterrupt:
+            # exit safety
+            termios.tcsetattr(fd, termios.TCSANOW, old)
+            if not logfile is None:
+                logfile.close()
+            sys.exit()
+        finally:
+            # discard std input
+            _ = sys.stdin.read(1)
+            # restore tty attr
+            termios.tcsetattr(fd, termios.TCSANOW, old)
+
         elapsed_time = time.time() - start_time
         print("elapsed time:", elapsed_time, "[sec]")
 
