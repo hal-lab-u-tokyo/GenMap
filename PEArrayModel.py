@@ -7,24 +7,10 @@ CONST_node_exp = "CONST_{index}"
 IN_PORT_node_exp = "IN_PORT_{index}"
 OUT_PORT_node_exp = "OUT_PORT_{index}"
 
-class PEArrayModel:
+class PEArrayModel():
 
     class InvalidConfigError(Exception):
         pass
-
-    # member variables
-    __network = nx.DiGraph()
-    __width = 0
-    __height = 0
-    __const_reg_range = []
-    __in_port_range = []
-    __out_port_range = []
-    # operation list supported by the PEs
-    __operation_list = []
-    __bb_domains = {}
-    __preg_positions = []
-    __se_lists = {}
-    __return_only_se = []
 
     def __init__(self, conf):
         '''Constructor of this class
@@ -98,6 +84,22 @@ class PEArrayModel:
             If there exist invalid configurations, it will raise
                 ValueError or InvalidConfigError
         '''
+
+        # init all instance variables
+            # member variables
+        self.__network = nx.DiGraph()
+        self.__width = 0
+        self.__height = 0
+        self.__const_reg_range = []
+        self.__in_port_range = []
+        self.__out_port_range = []
+        # operation list supported by the PEs
+        self.__operation_list = []
+        self.__bb_domains = {}
+        self.__preg_positions = []
+        self.__se_lists = {}
+        self.__return_only_se = []
+
         # init PE array width
         width_str = conf.get("width")
         if width_str == None:
