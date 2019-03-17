@@ -46,7 +46,7 @@ def parser():
     argparser.add_argument("--freq-unit", type=str, choices=["M", "G", "k"], default="M",\
                             help="specify the prefex of frequency prefex (default = M)")
     argparser.add_argument("--log", type=str, help="specify log file name (default: no logging)")
-
+    argparser.add_argument("--nproc", type=int, help="specify the number of multi-process (default: cpu count)")
     args = argparser.parse_args()
     return args
 
@@ -146,7 +146,13 @@ if __name__ == '__main__':
 
     # setup optimization
     objectives = [WireLengthEval, MapWidthEval, PowerEval]
-    success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
+
+    if not args.nproc is None:
+        success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
+                        [{}, {}, {"duplicate_enable": args.duplicate_enable}], \
+                        proc_num = args.nproc)
+    else:
+        success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
                         [{}, {}, {"duplicate_enable": args.duplicate_enable}])
 
     # run optimization

@@ -122,7 +122,8 @@ class NSGA2():
 
         # make initial mappings
         init_maps = self.__placer.generate_init_mappings(comp_dfg, width, height, \
-                                                        count = self.__params["Initial place count"])
+                                                        count = self.__params["Initial place count"],
+                                                        proc_num = proc_num)
 
         self.__random_pop_args = [comp_dfg, width, height, self.__params["Random place count"],\
                                     self.__params["Topological sort probability"]]
@@ -326,7 +327,7 @@ class NSGA2():
         for disp in self.status_disp:
             disp.close()
 
-        print("\n\nFinish optimization")
+        print("\n\nFinish optimization. Please enter any keys")
 
         # eleminate invalid individuals
         hof = [ind for ind in hof if ind.isValid()]
