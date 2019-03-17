@@ -4,13 +4,13 @@ import matplotlib.patches as pat
 # drawing setting
 pe_margin = 0.15
 se_margin = 0.1
-pe_color = "red"
+pe_color = "skyblue"
 se_size = 0.2
-se_color = "green"
+se_color = "lightgreen"
 alu_scale = 0.3
-alu_color = "blue"
+alu_color = "lightcoral"
 pe_size = 1 - pe_margin * 2
-preg_color = "yellow"
+preg_color = "purple"
 arrow_setting = dict(facecolor='black', width =0.8 ,headwidth=4.0,headlength=4.0,shrink=0.01)
 
 
@@ -28,6 +28,7 @@ class ConfDrawer():
                 for SEs in rsc["SE"].values():
                     self.PE_resources[x][y].extend(SEs)
 
+        print(self.PE_resources[1][7])
         for v in individual.routed_graph.nodes():
             for x in range(self.width):
                 for y in range(self.height):
@@ -35,7 +36,6 @@ class ConfDrawer():
                         self.used_PE[x][y] = True
                         break
 
-                if self.used_PE[x][y]: break
 
         actual_width = max(x for x in range(self.width) for y in range(self.height) if self.used_PE[x][y]) + 1
         actual_height = max(y for x in range(self.width) for y in range(self.height) if self.used_PE[x][y]) + 1
@@ -104,7 +104,7 @@ class ConfDrawer():
 
         pos = (coord[0] + 0.5, coord[1] + 0.4)
         x = [0.0, 0.4, 0.5, 0.6, 1.0, 0.8, 0.2]
-        y = [0.0, 0.0, 0.1, 0.0, 0.0, 0.7, 0.7, 0.0]
+        y = [0.0, 0.0, 0.2, 0.0, 0.0, 0.7, 0.7, 0.0]
 
         x = [v * alu_scale + pos[0] for v in x]
         y = [v * alu_scale + pos[1] for v in y]
