@@ -20,36 +20,13 @@ if __name__ == '__main__':
 
     f.close()
 
-    # shell = GenMapShell(header, data)
+    shell = GenMapShell(header, data)
 
-    # while (1):
-    #     try:
-    #         shell.cmdloop()
-    #         break
-    #     except KeyboardInterrupt:
-    #         shell.intro = ""
-    #         print()
-    #         continue
-
-
-    # print()
-
-    # model = header["arch"]
-
-    #####  debug   #####
-    from PEArrayModel import PEArrayModel
-    import xml.etree.ElementTree as ET
-    tree = ET.ElementTree(file="./CMA_conf.xml")
-    pearray = tree.getroot()
-    if pearray.tag == "PEArray":
-        model = PEArrayModel(pearray)
-
-    for ind in data["hof"]:
-        print(ind.fitness)
-
-    ##### debug end #####
-
-    width, height = model.getSize()
-    drawer = ConfDrawer(model, data["hof"][2])
-    drawer.draw_PEArray(model, data["hof"][2])
-    drawer.show()
+    while (1):
+        try:
+            shell.cmdloop()
+            break
+        except KeyboardInterrupt:
+            shell.intro = ""
+            print()
+            continue

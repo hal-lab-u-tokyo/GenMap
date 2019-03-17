@@ -4,6 +4,8 @@ import prettytable
 import copy
 import readline
 
+from ConfDrawer import ConfDrawer
+
 class GenMapShell(Cmd):
     prompt = "GenMap shell> "
     intro = "=== GenMap solution selection utility ==="
@@ -17,9 +19,11 @@ class GenMapShell(Cmd):
         for c in "=!<>":
             new_delims = new_delims.replace(c, '')
         readline.set_completer_delims(new_delims)
+        self.selected_id = -1
 
     def do_EOF(self, arg):
-        return True;
+        print()
+        return self.do_quit(arg)
 
     def emptyline(self):
         pass
@@ -71,7 +75,7 @@ class GenMapShell(Cmd):
 
     def parse_sort(self, args):
         usage = "sort [objective] [order]\nIt sorts filtered solutions"
-        parser = ArgumentParser(usage=usage)
+        parser = ArgumentParser(prog = "sort", usage=usage)
         parser.add_argument("object", type=str, choices=self.header["eval_names"])
         parser.add_argument("order", type=str, choices=["asc", "desc", "ASC", "DESC"])
 
@@ -133,7 +137,7 @@ class GenMapShell(Cmd):
 
     def parse_filter(self, args):
         usage = "filter [objective] [comp_operator] [value]\nIt sorts filtered solutions"
-        parser = ArgumentParser(usage=usage)
+        parser = ArgumentParser(prog = "filter", usage=usage)
         parser.add_argument("object", type=str, choices=self.header["eval_names"])
         parser.add_argument("comp_operator", type=str, \
                             choices=["==", "!=", "<", ">", "<=", ">="])
@@ -148,20 +152,51 @@ class GenMapShell(Cmd):
 
     def do_reset(self, _):
         self.filtered_sols = list(copy.deepcopy(self.data["hof"]))
+        self.selected_id = -1
 
     def help_reset(self):
-        print("usage: reset\nIt resets filtering")
+        print("usage: reset\nIt resets filtering and selected ID")
 
     def do_quit(self, _):
+        print("Exiting the shell...")
         return True
 
     def help_quit(self, _):
         print("usage: quit\nExits the shell")
 
-    def do_select(self, arg):
-        pass
+    def do_select(self, line):
+        args = line.split(" ")
+        if len(args) != 1:
+            self.help_select()
+        else:
+            try:
+                sol_id = int(args[0])
+            except ValueError:
+                print("select: {0} is not integer value".format(args[0]))
+                return;
+            if sol_id >= len(self.data["hof"]):
+                print("select: ID {0}  is out of range".format(args[0]))
+            else:
+                self.selected_id = sol_id
 
     def help_select(self):
+        print("usage: select [solution ID]\nIt selects a solution")
+
+    def do_view(self, _):
+        if self.selected_id < 0:
+            print("view: a solution is not selected")
+        else:
+            model = self.header["arch"]
+            ind = self.data["hof"][self.selected_id]
+            drawer = ConfDrawer(model, ind)
+            drawer.draw_PEArray(model, ind)
+            drawer.show()
+
+    def help_view(self):
+        print("usage: view\nIt shows the selected solution")
+
+    def do_save(self):
         pass
+
 
 
