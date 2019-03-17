@@ -24,7 +24,6 @@ import time
 import pickle
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from pathlib import Path
 
 def parser():
     usage = 'Usage: python3 {0} [options...] dot_file frequency'.format(__file__)
@@ -118,8 +117,7 @@ if __name__ == '__main__':
 
     # check output file
     if args.output is None:
-        path = Path(args.dot_file)
-        output_file_name = path.stem + ".dump"
+        output_file_name = app.getAppName() + ".dump"
     else:
         output_file_name = args.output
 

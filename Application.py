@@ -1,5 +1,6 @@
 import networkx as nx
 import copy
+from pathlib import Path
 
 class Application():
 
@@ -9,6 +10,7 @@ class Application():
     def __init__(self):
         self.__DAG = nx.DiGraph()
         self.__Freq = 10.0 * 10**6 # MHz
+        self.__app_name = ""
 
     def read_dot(self, file):
         """set application data flow graph to this
@@ -25,6 +27,10 @@ class Application():
         except FileNotFoundError:
             print(file + " is not found")
             return False
+
+        # get app name
+        path = Path(file)
+        self.__app_name = path.stem
 
         # check if it is a DAG
         if nx.is_directed_acyclic_graph(g):
@@ -54,6 +60,11 @@ class Application():
             return False
         self.__DAG = dag
         return True
+
+    def getAppName(self):
+        """Returns application name
+        """
+        return self.__app_name
 
     def setFrequency(self, f, prefex="M"):
         """set operation frequency.

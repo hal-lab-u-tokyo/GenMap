@@ -3,8 +3,11 @@ from argparse import ArgumentParser
 import prettytable
 import copy
 import readline
+import os
 
 from ConfDrawer import ConfDrawer
+
+
 
 class GenMapShell(Cmd):
     prompt = "GenMap shell> "
@@ -16,7 +19,7 @@ class GenMapShell(Cmd):
         self.data = data
         self.filtered_sols = list(copy.deepcopy(self.data["hof"]))
         new_delims = readline.get_completer_delims()
-        for c in "=!<>":
+        for c in "=!<>./-":
             new_delims = new_delims.replace(c, '')
         readline.set_completer_delims(new_delims)
         self.selected_id = -1
@@ -57,6 +60,10 @@ class GenMapShell(Cmd):
 
     def complete_sort(self, text, line, begidx, endidx):
         args = line.split(" ")
+        args = [argv for argv in args if argv != ""]
+        if text == "":
+            args.append(text)
+
         pos = args.index(text)
 
         if pos == 1:
@@ -74,7 +81,8 @@ class GenMapShell(Cmd):
         self.parse_sort(["--help"])
 
     def parse_sort(self, args):
-        usage = "sort [objective] [order]\nIt sorts filtered solutions"
+        usage = "sort {0} {1}\nIt sorts filtered solutions".format(\
+                    self.__bold_font("objective"), self.__bold_font("order"))
         parser = ArgumentParser(prog = "sort", usage=usage)
         parser.add_argument("object", type=str, choices=self.header["eval_names"])
         parser.add_argument("order", type=str, choices=["asc", "desc", "ASC", "DESC"])
@@ -120,6 +128,10 @@ class GenMapShell(Cmd):
 
     def complete_filter(self, text, line, begidx, endidx):
         args = line.split(" ")
+        args = [argv for argv in args if argv != ""]
+        if text == "":
+            args.append(text)
+
         pos = args.index(text)
 
         if pos == 1:
@@ -133,10 +145,13 @@ class GenMapShell(Cmd):
         return comp_args
 
     def help_filter(self):
-        self.parse_sort(["--help"])
+        self.parse_filter(["--help"])
 
     def parse_filter(self, args):
-        usage = "filter [objective] [comp_operator] [value]\nIt sorts filtered solutions"
+        usage = "filter {0} {1} {2}\nIt sorts filtered solutions".format(\
+                self.__bold_font("objective"), \
+                self.__bold_font("comp_operator"),\
+                self.__bold_font("value"))
         parser = ArgumentParser(prog = "filter", usage=usage)
         parser.add_argument("object", type=str, choices=self.header["eval_names"])
         parser.add_argument("comp_operator", type=str, \
@@ -180,7 +195,8 @@ class GenMapShell(Cmd):
                 self.selected_id = sol_id
 
     def help_select(self):
-        print("usage: select [solution ID]\nIt selects a solution")
+        print("usage: select {0}\nIt selects a solution".format(\
+            self.__bold_font("solution_ID")))
 
     def do_view(self, _):
         if self.selected_id < 0:
@@ -196,7 +212,70 @@ class GenMapShell(Cmd):
         print("usage: view\nIt shows the selected solution")
 
     def do_save(self):
+        parsed_args = self.parse_save(line.split(" "))
+
+        if not parsed_args is None:
+            print(parsed_args)
+
+    def parse_save(self, args):
+        usage = "save [options...]\nIt sorts filtered solutions"
+        parser = ArgumentParser(prog = "save", usage=usage)
+        parser.add_argument("-o", "--output_dir", type=str, \
+                            help="specify output directory name (default: app_name)")
+        parser.add_argument("-f", "--force", action='store_true', \
+                            help="overwrite without prompt")
+        parser.add_argument("-p", "--prefex", type=str, \
+                            help="specify prefex of output file names (default: app_name)",\
+                            defalt=self.header["app"].getAppName())
+
+        try:
+            parsed_args = parser.parse_args(args=args)
+        except SystemExit:
+            return None
+
+        return parsed_args
+
+    def complete_save(self, text, line, begidx, endidx):
+        args = line.split(" ")
+        args = [argv for argv in args if argv != ""]
+        if text == "":
+            args.append("")
+
+        # in case of output option, complete file/directory names
+        if len(args) > 0:
+            # only option flas
+            if args[-1] == "-o" or args[-1] == "--output":
+                if line[-1] != " ":
+                    # insert spaca at the end of option flag
+                    comp_args = [args[-1] + " "]
+                else:
+                    # scan current dir
+                    comp_args = [f.name + ("/" if f.is_dir() else "")\
+                                for f in os.scandir()]
+            elif args[-2] == "-o" or args[-2] == "--output":
+                # complement splash
+                if text[-2:] == "..":
+                    text += "/"
+                pos = text.rfind("/")
+                if pos != -1:
+                    # extract upper directories
+                    dir_name = text[:pos+1]
+                    remains = text[pos+1:]
+                    # scan the upper directories
+                    files = os.scandir(dir_name)
+                    comp_args = [dir_name + f.name + ("/" if f.is_dir() else "")\
+                                for f in files if f.name.startswith(remains)]
+                else:
+                    # scan current dir
+                    files = os.scandir()
+                    comp_args = [f.name + ("/" if f.is_dir() else "")\
+                                for f in files if f.name.startswith(text)]
+
+        return comp_args
+
+    def help_save(self):
         pass
 
-
-
+    @staticmethod
+    def __bold_font(s):
+        return '\033[1m' + s + '\033[0m'
