@@ -274,7 +274,20 @@ class GenMapShell(Cmd):
         return comp_args
 
     def help_save(self):
-        pass
+        self.parse_save(["--help"])
+
+    def do_report_hypervolume(self, line):
+        if not self.data["hypervolume"] is None:
+            import matplotlib.pyplot as plt
+            hv = self.data["hypervolume"]
+            gen = range(len(hv))
+            plt.plot(gen, hv)
+            plt.show()
+        else:
+            print("There is no hypervolume data")
+
+
+
 
     @staticmethod
     def __bold_font(s):

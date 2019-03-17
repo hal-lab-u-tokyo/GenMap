@@ -28,7 +28,6 @@ class ConfDrawer():
                 for SEs in rsc["SE"].values():
                     self.PE_resources[x][y].extend(SEs)
 
-        print(self.PE_resources[1][7])
         for v in individual.routed_graph.nodes():
             for x in range(self.width):
                 for y in range(self.height):
