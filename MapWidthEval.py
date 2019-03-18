@@ -13,9 +13,6 @@ class MapWidthEval(EvalBase):
                 app (Application): An application to be optimized
                 sim_params (SimParameters): parameters for some simulations
                 individual (Individual): An individual to be evaluated
-                Options:
-                    duplicate_enable (bool): True if you need the mapped data-flow
-                                                to be duplicated horizontally.
 
             Returns:
                 int: mapping width
@@ -25,7 +22,16 @@ class MapWidthEval(EvalBase):
 
         """
         x_coords = [x for (x, y) in individual.mapping.values()]
-        map_width = max(x_coords) - min(x_coords) + 1
+        SEs = [v for v in individual.routed_graph.nodes() if CGRA.isSE(v)]
+        width, height = CGRA.getSize()
+        for se in SEs:
+            for x in range(width):
+                for y in range(height):
+                    rsc = CGRA.get_PE_resources((x, y))
+                    if se in  [v for se_set in rsc["SE"].values() for v in se_set ]:
+                        x_coords.append(x)
+                        break
+        map_width = max(x_coords) + 1
         individual.saveEvaluatedData("map_width", map_width)
         return map_width
 
