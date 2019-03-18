@@ -85,20 +85,50 @@ class PEArrayModel():
                 ValueError or InvalidConfigError
         '''
 
-        # init all instance variables
-            # member variables
+        # init all member variables
         self.__network = nx.DiGraph()
         self.__width = 0
         self.__height = 0
         self.__const_reg_range = []
         self.__in_port_range = []
         self.__out_port_range = []
+
         # operation list supported by the PEs
+        #    1st index: pos_x
+        #    2nd index: pos_y
+        #    value    : list of opcodes
         self.__operation_list = []
+
+        # resources for each body bias domain
+        #    1st key: domain name
+        #    2nd key: "ALU" or "SE"
+        #    value: list of resource node names
         self.__bb_domains = {}
+
+        # pipeline regs positions (list)
         self.__preg_positions = []
+
+        # SE list
+        #    1st key: coord
+        #    2nd key: SE ID
+        #    value  : set of SE node nodes
         self.__se_lists = {}
+
+        # SEs whose return_only attr is True
         self.__return_only_se = []
+
+        # network configuration data value
+        #    1st key: successor node name
+        #    2nd key: predecessor node name
+        #    value  : configuration value
+        self.__config_net_table = {}
+
+        # operation configuration data value
+        #    1st index: x_pos
+        #    2nd index: y_pos
+        #    3rd key: opcode
+        #    value   ; configration value
+        self.__config_op_table = []
 
         # init PE array width
         width_str = conf.get("width")
@@ -147,6 +177,8 @@ class PEArrayModel():
 
         # init operation list
         self.__operation_list = [[[] for y in range(self.__height)] for x in range(self.__width)]
+        # init conf op table
+        self.__config_op_table = [[{} for y in range(self.__height)] for x in range(self.__width)]
 
         # get PREG configs
         pregs = [preg for preg in conf if preg.tag == "PREG"]
@@ -198,7 +230,23 @@ class PEArrayModel():
             ALU = list(pe.iter("ALU"))[0]
             self.__network.add_node(ALU_node_exp.format(pos=(x, y)))
             self.__bb_domains[pe.get("bbdomain")]["ALU"].append(ALU_node_exp.format(pos=(x, y)))
-            self.__operation_list[x][y] = [str(op.text) for op in ALU.iter("operation")]
+            for op in ALU.iter("operation"):
+                if str(op.text) != "":
+                    self.__operation_list[x][y].append(str(op.text))
+                else:
+                    raise self.InvalidConfigError("Empty opcode for ALU at " + str((x, y)))
+                conf_val_str = op.get("value")
+                if not conf_val_str is None:
+                    try:
+                        conf_val = int(conf_val_str)
+                    except ValueError:
+                        raise ValueError("Invalid configration value for opcode: " \
+                                            + str(op.text))
+                    self.__config_op_table[x][y][op.text] = conf_val
+                else:
+                    raise self.InvalidConfigError("missing configuration value for opcode: "\
+                                                    + str(op.text))
+
             connections[ALU_node_exp.format(pos=(x, y))] = ALU.iter("input")
 
             # SE
@@ -246,6 +294,10 @@ class PEArrayModel():
         # set edge attributes
         self.setInitEdgeAttr("free", True)
 
+    def __reg_config_net_table(self, dst, src, value):
+        if not dst in self.__config_net_table.keys():
+            self.__config_net_table[dst] = {}
+        self.__config_net_table[dst][src] = value
 
     def __make_connection(self, dst, srcs):
         for src in srcs:
@@ -256,12 +308,8 @@ class PEArrayModel():
                 if not attr["coord"] is None:
                     alu = ALU_node_exp.format(pos=attr["coord"])
                     if alu in self.__network.nodes():
-                        if dst.find("ALU") == 0:
-                            # set ALU input weigth
-                            self.__network.add_edge(alu, dst)
-                        else:
-                            self.__network.add_edge(alu, dst)
-
+                        self.__network.add_edge(alu, dst)
+                        self.__reg_config_net_table(dst, alu, attr["conf_value"])
                     else:
                         raise self.InvalidConfigError(alu + " is not exist")
                 else:
@@ -274,11 +322,8 @@ class PEArrayModel():
                 else:
                     se = SE_node_exp.format(pos=attr["coord"], id=attr["id"], name=attr["src_name"])
                     if se in self.__network.nodes():
-                        if dst.find("ALU") == 0:
-                            # set ALU input weight
-                            self.__network.add_edge(se, dst)
-                        else:
-                            self.__network.add_edge(se, dst)
+                        self.__network.add_edge(se, dst)
+                        self.__reg_config_net_table(dst, se, attr["conf_value"])
                     else:
                         raise self.InvalidConfigError(se + " is not exist")
 
@@ -288,7 +333,9 @@ class PEArrayModel():
                     raise self.InvalidConfigError("missing index of const register connected to " + dst)
                 else:
                     if attr["index"] in self.__const_reg_range:
-                        self.__network.add_edge(CONST_node_exp.format(index=attr["index"]), dst)
+                        const_node = CONST_node_exp.format(index=attr["index"])
+                        self.__network.add_edge(const_node, dst)
+                        self.__reg_config_net_table(dst, const_node, attr["conf_value"])
                     else:
                         raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
 
@@ -298,7 +345,9 @@ class PEArrayModel():
                     raise self.InvalidConfigError("missing index of input port connected to " + dst)
                 else:
                     if attr["index"] in self.__in_port_range:
-                        self.__network.add_edge(IN_PORT_node_exp.format(index=attr["index"]), dst)
+                        input_node = IN_PORT_node_exp.format(index=attr["index"])
+                        self.__network.add_edge(input_node, dst)
+                        self.__reg_config_net_table(dst, input_node, attr["conf_value"])
                     else:
                         raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
             else:
@@ -355,7 +404,24 @@ class PEArrayModel():
         # get src_name of input_connection (if any)
         src_name = input_connection.get("src_name")
 
-        return {"label": label, "type": con_type, "coord": src_coord, "index": src_index, "id": src_id, "src_name": src_name}
+        # get configuration value
+        #   config value is essential except for OUT_PORTs
+        conf_val_str = input_connection.get("value")
+        if not conf_val_str is None:
+            try:
+                conf_val = int(conf_val_str)
+            except ValueError:
+                raise ValueError("Invalid configuration value for input " + label + " for " + \
+                                    dst + ": ", conf_val_str)
+        elif not self.isOUT_PORT(dst):
+            raise self.InvalidConfigError("missing configuration value for input " + \
+                                            label + " for " + dst)
+        else:
+            conf_val = 0
+
+        return {"label": label, "type": con_type, "coord": src_coord, \
+                "index": src_index, "id": src_id, "src_name": src_name,\
+                "conf_value": conf_val}
 
     # getter method
     def getNetwork(self):
@@ -560,6 +626,20 @@ class PEArrayModel():
         """
         return node_name.find("ALU") == 0
 
+    @staticmethod
+    def isOUT_PORT(node_name):
+        """Check whether the node is OUT_PORT or not.
+
+            Args:
+                node_name (str): a name of node
+
+            Returns:
+                bool: if the node is OUT_PORT, return True.
+                      otherwise return False.
+
+        """
+        return node_name.find("OUT_PORT") == 0
+
     def getOperationList(self, coord):
         """Returns operation list supported by an ALU.
 
@@ -575,5 +655,12 @@ class PEArrayModel():
             return []
         else:
             return self.__operation_list[x][y]
+
+    def getOpConfValue(self, coord, opcode):
+        x, y = coord
+        return self.__config_op_table[x][y][opcode]
+
+    def getNetConfValue(self, dst, src):
+        return self.__config_net_table[dst][src]
 
 
