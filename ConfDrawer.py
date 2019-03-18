@@ -147,3 +147,7 @@ class ConfDrawer():
     def show(self):
         plt.axis("off")
         self.fig.show()
+
+    def save(self, filepath):
+        plt.axis("off")
+        plt.savefig(filepath)

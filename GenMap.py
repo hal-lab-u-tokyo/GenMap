@@ -168,6 +168,8 @@ if __name__ == '__main__':
         try:
             termios.tcsetattr(fd, termios.TCSANOW, new)
             hof, hv = optimizer.runOptimization()
+            elapsed_time = time.time() - start_time
+            print("elapsed time:", elapsed_time, "[sec]")
         except KeyboardInterrupt:
             # exit safety
             termios.tcsetattr(fd, termios.TCSANOW, old)
@@ -179,9 +181,6 @@ if __name__ == '__main__':
             _ = sys.stdin.read(1)
             # restore tty attr
             termios.tcsetattr(fd, termios.TCSANOW, old)
-
-        elapsed_time = time.time() - start_time
-        print("elapsed time:", elapsed_time, "[sec]")
 
         # save results
         save_header = {"app": app, "arch": model, "opt_conf": tree_opt.getroot(),

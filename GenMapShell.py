@@ -13,7 +13,7 @@ class GenMapShell(Cmd):
     prompt = "GenMap shell> "
     intro = "=== GenMap solution selection utility ==="
 
-    def __init__(self, header, data):
+    def __init__(self, header, data, conf_gen):
         Cmd.__init__(self)
         self.header = header
         self.data = data
@@ -23,6 +23,7 @@ class GenMapShell(Cmd):
             new_delims = new_delims.replace(c, '')
         readline.set_completer_delims(new_delims)
         self.selected_id = -1
+        self.conf_gen = conf_gen
 
     def do_EOF(self, arg):
         print()
@@ -211,25 +212,32 @@ class GenMapShell(Cmd):
     def help_view(self):
         print("usage: view\nIt shows the selected solution")
 
-    def do_save(self):
+    def do_save(self, line):
         parsed_args = self.parse_save(line.split(" "))
 
         if not parsed_args is None:
-            print(parsed_args)
+            if self.selected_id < 0:
+                print("save: a solution is not selected")
+            else:
+                self.conf_gen.generate(self.header["arch"],
+                                        self.header["app"],
+                                        self.data["hof"][self.selected_id],
+                                        self.header["eval_names"], parsed_args)
 
     def parse_save(self, args):
         usage = "save [options...]\nIt sorts filtered solutions"
         parser = ArgumentParser(prog = "save", usage=usage)
         parser.add_argument("-o", "--output_dir", type=str, \
-                            help="specify output directory name (default: app_name)")
+                            help="specify output directory name",\
+                            default=self.header["app"].getAppName())
         parser.add_argument("-f", "--force", action='store_true', \
                             help="overwrite without prompt")
         parser.add_argument("-p", "--prefex", type=str, \
                             help="specify prefex of output file names (default: app_name)",\
-                            defalt=self.header["app"].getAppName())
+                            default=self.header["app"].getAppName())
 
         try:
-            parsed_args = parser.parse_args(args=args)
+            parsed_args = parser.parse_args(args=[argv for argv in args if argv != ""])
         except SystemExit:
             return None
 
@@ -285,8 +293,6 @@ class GenMapShell(Cmd):
             plt.show()
         else:
             print("There is no hypervolume data")
-
-
 
 
     @staticmethod
