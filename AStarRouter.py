@@ -114,9 +114,9 @@ class AStarRouter(RouterBase):
         out_port_nodes = CGRA.getOutputPorts()
 
         # # get alu nodes connected to output port
-        # alu_list = []
-        # for v, o in output_edges:
-        #     alu_list.append(CGRA.getNodeName("ALU", pos=mapping[v]))
+        alu_list = []
+        for v, o in output_edges:
+            alu_list.append(CGRA.getNodeName("ALU", pos=mapping[v]))
 
         # check pipeline structure
         path_extend_nodes = []
