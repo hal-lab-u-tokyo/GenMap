@@ -222,7 +222,7 @@ class GenMapShell(Cmd):
                 self.conf_gen.generate(self.header["arch"],
                                         self.header["app"],
                                         self.data["hof"][self.selected_id],
-                                        self.header["eval_names"], parsed_args)
+                                        self.header["eval_names"], vars(parsed_args))
 
     def parse_save(self, args):
         usage = "save [options...]\nIt sorts filtered solutions"

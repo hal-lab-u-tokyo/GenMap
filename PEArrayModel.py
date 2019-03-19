@@ -130,6 +130,11 @@ class PEArrayModel():
         #    value   ; configration value
         self.__config_op_table = []
 
+        # output names of SE
+        #    key:   SE node name
+        #    value: output name defined by config file
+        self.__output_names = {}
+
         # init PE array width
         width_str = conf.get("width")
         if width_str == None:
@@ -262,16 +267,17 @@ class PEArrayModel():
                 for output in se.iter("output"):
                     if output.get("name") is None:
                         raise self.InvalidConfigError("missing output name of SE at ({0}, {1})".format((x, y)))
-                    self.__network.add_node(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
+                    se_node_name = SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id)
+                    self.__network.add_node(se_node_name)
                     self.__bb_domains[pe.get("bbdomain")]["SE"].append(\
-                            SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
-                    connections[SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id)] = output.iter("input")
+                            se_node_name)
+                    connections[se_node_name] = output.iter("input")
                     if not se_id in self.__se_lists[(x, y)].keys():
                         self.__se_lists[(x, y)][se_id] = set()
-                    self.__se_lists[(x, y)][se_id].add(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
+                    self.__se_lists[(x, y)][se_id].add(se_node_name)
+                    self.__output_names[se_node_name] = output.get("name")
                     if output.get("return_only") == "True":
-                        self.__return_only_se.append(SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id))
-
+                        self.__return_only_se.append(se_node_name)
 
         # add output connections
         for ele in conf:
@@ -662,5 +668,8 @@ class PEArrayModel():
 
     def getNetConfValue(self, dst, src):
         return self.__config_net_table[dst][src]
+
+    def getWireName(self, se):
+        return self.__output_names[se]
 
 
