@@ -26,7 +26,6 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
-
         # get out degree for each node
         out_deg = {v: comp_DFG.out_degree(v) for v in comp_DFG.nodes() if comp_DFG.out_degree(v) > 0 }
         # sort in ascending order
@@ -43,8 +42,13 @@ class AStarRouter(RouterBase):
                 routed_graph.edges[src_alu, suc_element]["weight"] = 1
 
             # get destination alus in ascending order of manhattan distance from the src node
-            dest_alus = [CGRA.getNodeName("ALU", pos = mapping[dst_node]) for dst_node in \
-                     sorted(list(comp_DFG.successors(src_node)), key=lambda x: AStarRouter.__manhattan_dist(mapping[x], mapping[src_node])) ]
+            #       key  : dst alu node name
+            #       value: operand attributes of edge between the dest and the src
+            dest_alus = {CGRA.getNodeName("ALU", pos = mapping[dst_node]): \
+                            comp_DFG.edges[src_node, dst_node]["operand"] \
+                            if "operand" in comp_DFG.edges[src_node, dst_node] else None for dst_node in \
+                            sorted(list(comp_DFG.successors(src_node)), \
+                                key=lambda x: AStarRouter.__manhattan_dist(mapping[x], mapping[src_node])) }
 
             # route each path
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
@@ -68,7 +72,10 @@ class AStarRouter(RouterBase):
 
         route_cost = 0
         for c_reg, edges in const_map.items():
-            dst_alus = [CGRA.getNodeName("ALU", pos=mapping[dst_node]) for c, dst_node in edges]
+            dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
+                        const_DFG.edges[(c, dst_node)]["operand"] \
+                        if "operand" in const_DFG.edges[(c, dst_node)] else None \
+                        for c, dst_node in edges}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, c_reg, dst_alus)
 
         return route_cost
@@ -87,7 +94,10 @@ class AStarRouter(RouterBase):
 
         route_cost = 0
         for i_port, edges in input_map.items():
-            dst_alus = [CGRA.getNodeName("ALU", pos=mapping[dst_node]) for i, dst_node in edges]
+            dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
+                        in_DFG.edges[(i, dst_node)]["operand"] \
+                        if "operand" in in_DFG.edges[(i, dst_node)] else None \
+                        for i, dst_node in edges}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, i_port, dst_alus)
 
         return route_cost
@@ -103,10 +113,10 @@ class AStarRouter(RouterBase):
         # get output node name
         out_port_nodes = CGRA.getOutputPorts()
 
-        # get alu nodes connected to output port
-        alu_list = []
-        for v, o in output_edges:
-            alu_list.append(CGRA.getNodeName("ALU", pos=mapping[v]))
+        # # get alu nodes connected to output port
+        # alu_list = []
+        # for v, o in output_edges:
+        #     alu_list.append(CGRA.getNodeName("ALU", pos=mapping[v]))
 
         # check pipeline structure
         path_extend_nodes = []
@@ -119,7 +129,9 @@ class AStarRouter(RouterBase):
                 free_last_stage_SEs = set(last_stage_nodes) & set(CGRA.getFreeSEs(routed_graph))
 
         # greedy output routing
-        for alu in alu_list:
+        for v, o in output_edges:
+            # get alu name
+            alu = CGRA.getNodeName("ALU", pos=mapping[v])
             # remove high cost of alu out
             for suc_element in routed_graph.successors(alu):
                 routed_graph.edges[alu, suc_element]["weight"] = 1
@@ -167,6 +179,8 @@ class AStarRouter(RouterBase):
             # print("out", path)
 
             out_port_nodes.remove(path[-1])
+
+            routed_graph.nodes[path[-1]]["map"] = o
 
         return route_cost
 
@@ -287,8 +301,11 @@ class AStarRouter(RouterBase):
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
                 graph (networkx DiGraph): A graph where the paths are routed
-                src (str): source node name on the inputed graph
-                dests (list-like): destination nodes on the inputed graph
+                src (str): source node name of the routed edges
+                dests (dict): destination nodes of the routed edges
+                                key:   dest node names
+                                value: operand attribute of the edge
+                                        If the edge don't has this attributes, it is None
 
             Returns:
                 int: routing cost
@@ -300,7 +317,7 @@ class AStarRouter(RouterBase):
         if len(dsts) == 0:
             return 0
 
-        for dst in dsts:
+        for dst, operand in dsts.items():
             try:
                 # get path length by using astar
                 path_len = nx.astar_path_length(graph, src, dst, weight = "weight")
@@ -325,7 +342,9 @@ class AStarRouter(RouterBase):
                             # other than SE's
                             graph.edges[e]["weight"] = USED_LINK_WEIGHT
                             graph.edges[e]["free"] = False
-
+                    # add operand attr
+                    if not operand is None:
+                        graph.edges[(path[-2], path[-1])]["operand"] = operand
             except nx.exception.NetworkXNoPath:
                 # there is no path
                 # print("Fail:", src, "->", dst)

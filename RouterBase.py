@@ -30,6 +30,10 @@ class RouterBase(metaclass=ABCMeta):
 
             Returns:
                 int: routing cost
+
+            Notes:
+                This method will add following attributes to routed_graph's edges
+                    1. operand: to fix order of operands for an ALU
         """
         pass
 
@@ -48,6 +52,12 @@ class RouterBase(metaclass=ABCMeta):
 
             Returns:
                 int: routing cost
+
+            Notes:
+                This method will add following attributes to routed_graph's edges
+                    1. operand: to fix order of operands for an ALU
+                Also, this method will add following attributes to routed_graph's nodes
+                    1. value: constant value which is assigned to an const reg
         """
         pass
 
@@ -66,6 +76,12 @@ class RouterBase(metaclass=ABCMeta):
 
             Returns:
                 int: routing cost
+
+            Notes:
+                This method will add following attributes to routed_graph's edges
+                    1. operand: to fix order of operands for an ALU
+                Also, this method will add following attributes to routed_graph's nodes
+                    1. map: input data which is mapped to an input port
         """
         pass
 
@@ -88,5 +104,9 @@ class RouterBase(metaclass=ABCMeta):
 
             Returns:
                 int: routing cost
+
+            Notes:
+                This method will add following attributes to routed_graph's nodes
+                    1. map: output data which is mapped to a output port
         """
         pass
