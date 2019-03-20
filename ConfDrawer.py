@@ -13,7 +13,6 @@ pe_size = 1 - pe_margin * 2
 preg_color = "purple"
 arrow_setting = dict(facecolor='black', width =0.8 ,headwidth=4.0,headlength=4.0,shrink=0.01)
 
-
 class ConfDrawer():
 
     def __init__(self, CGRA, individual):
@@ -50,7 +49,7 @@ class ConfDrawer():
         self.node_to_patch = {}
 
 
-    def draw_PEArray(self, CGRA, individual):
+    def draw_PEArray(self, CGRA, individual, app):
         # add PEs
         for x in range(self.width):
             for y in range(self.height):
@@ -61,8 +60,7 @@ class ConfDrawer():
                 pe = self.__make_PE_patch((x, y), color)
                 self.ax.add_patch(pe)
 
-
-
+        # add ALUs & SEs
         for v in individual.routed_graph.nodes():
             for x in range(self.width):
                 for y in range(self.height):
@@ -78,7 +76,14 @@ class ConfDrawer():
                                     self.ax.add_patch(se)
                                     self.node_to_patch[v] = se
 
+        # add op labels
+        dfg = app.getCompSubGraph()
+        for op_label, (x, y) in individual.mapping.items():
+            opcode = dfg.nodes[op_label]["op"]
+            self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, y + 1 - pe_margin * 2),\
+                                size=12)
 
+        # draw routing
         for u, v in individual.routed_graph.edges():
             if u in self.node_to_patch.keys() and \
                 v in self.node_to_patch.keys():
@@ -91,6 +96,8 @@ class ConfDrawer():
         for i in range(CGRA.getPregNumber()):
             if individual.preg[i]:
                 self.ax.add_patch(self.__make_preg(preg_positions[i]))
+
+
 
     @staticmethod
     def __make_PE_patch(coord, color):
