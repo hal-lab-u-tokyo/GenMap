@@ -1,6 +1,6 @@
 from EvalBase import EvalBase
 
-class MapWidthEval(EvalBase):
+class OpMapWidthEval(EvalBase):
     def __init__(self):
         pass
 

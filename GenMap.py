@@ -151,7 +151,7 @@ if __name__ == '__main__':
 
     if not args.nproc is None:
         success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
-                        [{}, {}, {"duplicate_enable": args.duplicate_enable}], \
+                        [{}, {}, {}, {"duplicate_enable": args.duplicate_enable}, {}], \
                         proc_num = args.nproc)
     else:
         success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
