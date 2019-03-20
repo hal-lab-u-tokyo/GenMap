@@ -1,4 +1,5 @@
 from EvalBase import EvalBase
+from DataPathAnalysis import DataPathAnalysis
 
 import networkx as nx
 import pulp
@@ -33,7 +34,6 @@ class PowerEval(EvalBase):
                 float: evaluated power
 
             Saved evaluation results:
-                data_path: data path on the PE array
                 body_bias: optimized body bias voltage
                 dynamic_power: dynamic power consumption
                 leakage_power: leackage power consumption
@@ -41,8 +41,6 @@ class PowerEval(EvalBase):
         if individual.isValid() == False:
             return PENALTY_COST
 
-        # save data path
-        individual.saveEvaluatedData("data_path", PowerEval.data_path_analysis(CGRA, individual))
         # get body bias domain
         bb_domains = CGRA.getBBdomains()
         if len(bb_domains) != 0 and len(sim_params.bias_range) > 0:
@@ -73,41 +71,6 @@ class PowerEval(EvalBase):
 
         return dyn_power + leak_power
 
-
-    @staticmethod
-    def data_path_analysis(CGRA, individual):
-        """Analyzes data path on the PE array.
-
-            Args:
-                CGRA (PEArrayModel): A model of the CGRA
-                individual (Individual): An individual to be evaluated
-
-            Returns:
-                list: list of path(networkx)
-        """
-
-        # data path analysis
-        graph = individual.routed_graph
-        used_inports = set(graph.nodes()) & set(CGRA.getInputPorts())
-        used_outports = set(graph.nodes()) & set(CGRA.getOutputPorts())
-        paths = []
-        for i_port in used_inports:
-            for o_port in used_outports:
-                paths.extend([p[1:-1] for p in nx.all_simple_paths(graph, i_port, o_port)])
-
-        # path separation by activate pipeline register
-        if CGRA.getPregNumber() != 0:
-            data_path = []
-            st_domain = CGRA.getStageDomains(individual.preg)
-            for p in paths:
-                for stage in st_domain:
-                    dp = sorted(set(p) & set(stage), key=p.index)
-                    if not dp in data_path:
-                        data_path.append(dp)
-        else:
-            data_path = paths
-
-        return data_path
 
     @staticmethod
     def get_opcodes(CGRA, app, mapping):
@@ -185,7 +148,7 @@ class PowerEval(EvalBase):
             max_lat = app.getClockPeriod(sim_params.getTimeUnit())
 
             # add constrain for each data path
-            for dp in individual.getEvaluatedData("data_path"):
+            for dp in DataPathAnalysis.get_data_path(CGRA, individual):
                 problem += pulp.lpSum([(delay_table[node][bbv] if CGRA.isALU(node) \
                                     else sim_params.delay_info["SE"][bbv]) \
                                     * isBBV[domain_table[node]][bbv] \
@@ -208,6 +171,7 @@ class PowerEval(EvalBase):
                 individual.saveEvaluatedData("body_bias", bbv_assign)
             else:
                 individual.saveEvaluatedData("body_bias", None)
+                individual.invalidate()
         else:
             PE_leak = sim_params.PE_leak[0]
             width, height = CGRA.getSize()
