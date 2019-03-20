@@ -58,7 +58,11 @@ class TimeSlackEval(EvalBase):
             else:
                 delays.append(sum([list(delay_table[v].values())[0] for v in dp]))
 
-        return app.getClockPeriod(sim_params.getTimeUnit()) - max(delays)
+        time_slack = app.getClockPeriod(sim_params.getTimeUnit()) - max(delays)
+        if time_slack < 0:
+            individual.invalidate()
+
+        return time_slack
 
     @staticmethod
     def calc_delay(path, sim_params, body_bias):
