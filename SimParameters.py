@@ -404,3 +404,9 @@ class SimParameters():
 
     def getTimeUnit(self):
         return self.units["delay"]
+
+    def getPowerUnit(self):
+        return self.units["power"]
+
+    def getEnergyUnit(self):
+        return self.units["energy"]

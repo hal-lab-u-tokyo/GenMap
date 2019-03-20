@@ -36,7 +36,7 @@ class PowerEval(EvalBase):
                 data_path: data path on the PE array
                 body_bias: optimized body bias voltage
                 dynamic_power: dynamic power consumption
-                leackage_power: leackage power consumption
+                leakage_power: leackage power consumption
         """
         if individual.isValid() == False:
             return PENALTY_COST

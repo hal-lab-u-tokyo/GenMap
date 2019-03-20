@@ -78,6 +78,9 @@ class Application():
         """
         self.__Freq = float(f) * self.FREQ_PREFEX[prefex]
 
+    def getFrequency(self, prefex):
+        return self.__Freq / self.FREQ_PREFEX[prefex]
+
     def getClockPeriod(self, time_unit):
         """set operation frequency.
 

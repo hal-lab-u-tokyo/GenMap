@@ -16,6 +16,7 @@ class ConfGenBase(metaclass=ABCMeta):
         args = self.parser()
         filename = args.result
         if not os.path.exists(filename):
+            print(filename, " does not exist")
             return
 
         with open(filename, "rb") as f:
@@ -49,7 +50,7 @@ class ConfGenBase(metaclass=ABCMeta):
         return args
 
     @abstractmethod
-    def generate(self, CGRA, app, individual, eval_list, args):
+    def generate(self, header, data, individual_id, args):
         pass
 
 if __name__ == '__main__':

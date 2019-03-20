@@ -219,10 +219,8 @@ class GenMapShell(Cmd):
             if self.selected_id < 0:
                 print("save: a solution is not selected")
             else:
-                self.conf_gen.generate(self.header["arch"],
-                                        self.header["app"],
-                                        self.data["hof"][self.selected_id],
-                                        self.header["eval_names"], vars(parsed_args))
+                self.conf_gen.generate(self.header, self.data,\
+                                         self.selected_id, vars(parsed_args))
 
     def parse_save(self, args):
         usage = "save [options...]\nIt sorts filtered solutions"
@@ -235,6 +233,8 @@ class GenMapShell(Cmd):
         parser.add_argument("-p", "--prefex", type=str, \
                             help="specify prefex of output file names (default: app_name)",\
                             default=self.header["app"].getAppName())
+        parser.add_argument("-s", "--style", nargs="+", default=[],\
+                            help="Pass the space separated arguments to configuration generator")
 
         try:
             parsed_args = parser.parse_args(args=[argv for argv in args if argv != ""])
