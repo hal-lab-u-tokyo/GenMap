@@ -111,7 +111,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 for y in range(height):
                     if len(PE_confs[x][y]) > 0:
                         addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
-                        print((x,y), PE_confs[x][y])
                         for filed in CONF_FIELDS:
                             if not filed in PE_confs[x][y]:
                                 PE_confs[x][y][filed] = 0
@@ -133,8 +132,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                             vch=0, src=0, dst=1))
                 f.write(TAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
-                print(i, Const_conf[i])
-
 
             # LD table
             f.write("\n//LD Table\n")
