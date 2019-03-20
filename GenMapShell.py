@@ -205,8 +205,9 @@ class GenMapShell(Cmd):
         else:
             model = self.header["arch"]
             ind = self.data["hof"][self.selected_id]
+            app = self.header["app"]
             drawer = ConfDrawer(model, ind)
-            drawer.draw_PEArray(model, ind)
+            drawer.draw_PEArray(model, ind, app)
             drawer.show()
 
     def help_view(self):

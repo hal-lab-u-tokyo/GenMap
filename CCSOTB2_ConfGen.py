@@ -14,7 +14,7 @@ PREG_CONF_ADDR = 0x26_0000
 CONF_FIELDS = ["OUT_NORTH", "OUT_SOUTH", "OUT_EAST", "OUT_WEST", "OPCODE", "SEL_A", "SEL_B"]
 SE_CONF_FORMAT_BIN = "{OUT_NORTH:03b}_{OUT_SOUTH:02b}_{OUT_EAST:03b}_{OUT_WEST:02b}"
 ALU_CONF_FORMAT_BIN = "{OPCODE:04b}_{SEL_A:03b}_{SEL_B:03b}"
-PE_CONF_FORMAT_BIN = SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT_BIN
+PE_CONF_FORMAT_BIN = "0" * 12 + "_" + SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT_BIN
 PREG_CONF_FORMAT = "0" * 25 + "_" + "{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
 
 TABLE_FORMAT = "0000_0000_{5:04b}_{4:04b}_{3:04b}_{2:04b}_{1:04b}_{0:04b}"
@@ -26,7 +26,7 @@ TABLE_MASK_OFFSET = 12
 
 
 HEAD_FLIT = "001_{addr:022b}_{mt:03b}_{vch:03b}_{src:02b}_{dst:02b}\n"
-HEADTAIL_FLIT = "011_{data:s}\n"
+TAIL_FLIT = "010_{data:s}\n"
 MSG_TYPES = {"SW": 1}
 
 class CCSOTB2_ConfGen(ConfGenBase):
@@ -74,7 +74,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 print(fig_filename, "exist")
             else:
                 drawer = ConfDrawer(CGRA, individual)
-                drawer.draw_PEArray(CGRA, individual)
+                drawer.draw_PEArray(CGRA, individual, app)
                 drawer.save(fig_filename)
 
                 # make configurations
@@ -82,7 +82,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 ld_conf = self.make_LD_Dmanu(CGRA, individual.routed_graph)
                 st_conf = self.make_ST_Dmanu(CGRA, individual.routed_graph)
                 const_conf = self.make_Const(CGRA, individual.routed_graph)
-                if "duplicate" in args:
+                if "duplicate" in args["style"]:
                     map_width = individual.getEvaluatedData("map_width")
                     if map_width is None:
                         print("duplicate option ignored because map width was not evaluated")
@@ -92,7 +92,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 if self.save_conf(CGRA, PE_confs, const_conf, ld_conf, st_conf, individual.preg, \
                                      args["output_dir"] + "/" + args["prefex"] + "_conf.pkt"):
 
-                    self.save_info(header, individual, individual_id,\
+                    self.save_info(header, individual, individual_id, ld_conf, st_conf,\
                         args["output_dir"] + "/" + args["prefex"] + "_info.txt")
         else:
             print("No such direcotry: ", args["output_dir"])
@@ -110,20 +110,21 @@ class CCSOTB2_ConfGen(ConfGenBase):
             for x in range(width):
                 for y in range(height):
                     if len(PE_confs[x][y]) > 0:
-                        addr = 12 * y + x << 8
+                        addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
+                        print((x,y), PE_confs[x][y])
                         for filed in CONF_FIELDS:
                             if not filed in PE_confs[x][y]:
                                 PE_confs[x][y][filed] = 0
                         f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                     vch=0, src=0, dst=1))
-                        f.write(HEADTAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
+                        f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
 
             # PREG Config
             f.write("\n//PREG Config\n")
             addr = PREG_CONF_ADDR
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                         vch=0, src=0, dst=1))
-            f.write(HEADTAIL_FLIT.format(data=PREG_CONF_FORMAT.format(*PREG_conf)))
+            f.write(TAIL_FLIT.format(data=PREG_CONF_FORMAT.format(*PREG_conf)))
 
             # Const Regs
             f.write("\n//Const Regs\n")
@@ -131,7 +132,8 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 addr = CONST_BASEADDR + 4 * i
                 f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                             vch=0, src=0, dst=1))
-                f.write(HEADTAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
+                f.write(TAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
+                print(i, Const_conf[i])
 
 
             # LD table
@@ -139,18 +141,18 @@ class CCSOTB2_ConfGen(ConfGenBase):
             addr = LD_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                     vch=0, src=0, dst=1))
-            f.write(HEADTAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][0:6])))
+            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][0:6])))
 
             addr = LD_DMANU_BASEADDR + TABLE_LATTER_OFFSET
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                     vch=0, src=0, dst=1))
-            f.write(HEADTAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][6:12])))
+            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][6:12])))
 
 
             addr = LD_DMANU_BASEADDR + TABLE_MASK_OFFSET
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                     vch=0, src=0, dst=1))
-            f.write(HEADTAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*LD_conf["mask"])))
+            f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*LD_conf["mask"])))
 
 
             # ST table
@@ -158,18 +160,18 @@ class CCSOTB2_ConfGen(ConfGenBase):
             addr = ST_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                     vch=0, src=0, dst=1))
-            f.write(HEADTAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][0:6])))
+            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][0:6])))
 
             addr = ST_DMANU_BASEADDR + TABLE_LATTER_OFFSET
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                     vch=0, src=0, dst=1))
-            f.write(HEADTAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][6:12])))
+            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][6:12])))
 
 
             addr = ST_DMANU_BASEADDR + TABLE_MASK_OFFSET
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                     vch=0, src=0, dst=1))
-            f.write(HEADTAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*ST_conf["mask"])))
+            f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*ST_conf["mask"])))
 
             f.close()
 
@@ -197,9 +199,9 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
             # add in/out data
             for in_idx in range(in_num):
-                ld_conf["mem_align"].append(ld_conf["mem_align"][in_idx] + "_" + str(dup_count))
+                ld_conf["mem_align"].append(ld_conf["mem_align"][in_idx] + "_(" + str(dup_count) + ")")
             for out_idx in range(out_num):
-                st_conf["mem_align"].append(st_conf["mem_align"][out_idx] + "_" + str(dup_count))
+                st_conf["mem_align"].append(st_conf["mem_align"][out_idx] + "_(" + str(dup_count) + ")")
 
 
     def make_PE_conf(self, CGRA, app, individual):
@@ -318,7 +320,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         return const_conf
 
-    def save_info(self, header, individual, individual_id, filename):
+    def save_info(self, header, individual, individual_id, LD_conf, ST_conf, filename):
         if os.path.exists(filename) and not self.force_mode:
             print(filename, "exists")
         else:
@@ -362,6 +364,13 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 for domain, voltage in body_bias.items():
                     f.write("{0}: {1} V\n".format(domain, voltage))
 
+            # data memory alignment
+            f.write("\n")
+            f.write("Input data alignment\n")
+            f.write(str(LD_conf["mem_align"]))
+            f.write("\n\n")
+            f.write("Output data alignment\n")
+            f.write(str(ST_conf["mem_align"]))
 
             f.close()
 
