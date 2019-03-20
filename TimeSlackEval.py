@@ -2,6 +2,8 @@ from EvalBase import EvalBase
 from DataPathAnalysis import DataPathAnalysis
 import networkx as nx
 
+PENALTY_COST = 1000
+
 class TimeSlackEval(EvalBase):
 
     def __init__(self):
@@ -21,6 +23,9 @@ class TimeSlackEval(EvalBase):
                 int: mapping width
 
         """
+
+        if individual.isValid() == False:
+            return PENALTY_COST
 
         body_bias = individual.getEvaluatedData("body_bias")
 
