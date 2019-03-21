@@ -234,7 +234,8 @@ class PEArrayModel():
                 raise self.InvalidConfigError("missing PE({0}) coordinate".format((x, y)))
             ALU = list(pe.iter("ALU"))[0]
             self.__network.add_node(ALU_node_exp.format(pos=(x, y)))
-            self.__bb_domains[pe.get("bbdomain")]["ALU"].append(ALU_node_exp.format(pos=(x, y)))
+            if not pe.get("bbdomain") is None:
+                self.__bb_domains[pe.get("bbdomain")]["ALU"].append(ALU_node_exp.format(pos=(x, y)))
             for op in ALU.iter("operation"):
                 if str(op.text) != "":
                     self.__operation_list[x][y].append(str(op.text))
@@ -269,8 +270,9 @@ class PEArrayModel():
                         raise self.InvalidConfigError("missing output name of SE at ({0}, {1})".format((x, y)))
                     se_node_name = SE_node_exp.format(pos=(x, y), name=output.get("name"), id=se_id)
                     self.__network.add_node(se_node_name)
-                    self.__bb_domains[pe.get("bbdomain")]["SE"].append(\
-                            se_node_name)
+                    if not pe.get("bbdomain") is None:
+                        self.__bb_domains[pe.get("bbdomain")]["SE"].append(\
+                                se_node_name)
                     connections[se_node_name] = output.iter("input")
                     if not se_id in self.__se_lists[(x, y)].keys():
                         self.__se_lists[(x, y)][se_id] = set()
