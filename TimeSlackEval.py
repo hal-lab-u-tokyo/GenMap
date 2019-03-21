@@ -2,7 +2,7 @@ from EvalBase import EvalBase
 from DataPathAnalysis import DataPathAnalysis
 import networkx as nx
 
-PENALTY_COST = 1000
+PENALTY_COST = -1000
 
 class TimeSlackEval(EvalBase):
 
