@@ -257,8 +257,8 @@ class NSGA2():
         # start evolution
         gen_count = 0
         stall_count = 0
-        prev_hof_num = 0
-        hof_log = []
+        prev_hof = []
+        fitness_hof_log = []
 
         # Repeat evolution
         while gen_count < self.__params["Maximum generation"] and stall_count < self.__params["Maximum stall"]:
@@ -283,19 +283,20 @@ class NSGA2():
             hof.update(self.pop)
 
             # check if there is an improvement
-            if len(hof) == prev_hof_num:
+            if len(hof) == len(prev_hof):
                 if set([ind.fitness.values for ind in hof]) == \
-                    set([ind.fitness.values for ind in hof_log[-1]]):
+                    set([ind.fitness.values for ind in prev_hof]):
                     # no fitness improvement
                     stall_count += 1
                 else:
                     stall_count = 0
             else:
                 stall_count = 0
-            prev_hof_num = len(hof)
 
-            # logging hof
-            hof_log.append(copy.deepcopy(hof))
+            prev_hof = copy.deepcopy(hof)
+
+            # logging hof fitness (only valid individuals)
+            fitness_hof_log.append([ind.fitness.values for ind in hof if ind.isValid()])
 
             # Adding random individuals to the population (attempt to avoid local optimum)
             rnd_ind = self.random_population(self.__params["Random population size"])
@@ -334,10 +335,10 @@ class NSGA2():
 
         # Hypervolume evolution (if possible)
         if self.__hv_logging:
-            fitness_hof_log = [[ind.fitness.values for ind in hof] for hof in hof_log]
             hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
             ref_point = hv.refpoint(offset=0.1)   # Define global reference point
-            hypervolume_log = [self.hypervolume(fit).compute(ref_point) for fit in fitness_hof_log]
+            hypervolume_log = [self.hypervolume(fit).compute(ref_point) \
+                                if len(fit) > 0 else 0 for fit in fitness_hof_log]
             return hof, hypervolume_log
         else:
             return hof, None
