@@ -121,7 +121,8 @@ class ConfDrawer():
     def __make_SE_patch(coord, SE_id):
         x, y = coord
         pos_x = x + pe_margin + se_margin
-        pos_y = y + pe_margin + pe_size - (se_margin + se_size * (SE_id + 1))
+        # pos_y = y + pe_margin + pe_size - (se_margin + (se_size + se_margin) * (SE_id + 1))
+        pos_y = y + pe_margin + pe_size - (se_size + se_margin) * (SE_id + 1)
         return pat.Rectangle(xy = (pos_x, pos_y), \
                                 width = se_size, height = se_size, \
                                 angle = 0, color = se_color)
