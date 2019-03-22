@@ -206,24 +206,18 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, operands["right"])
             elif "left" in operands:
                 confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, operands["left"])
-                pre_nodes.pop(v)
+                pre_nodes.remove(operands["left"])
                 if len(pre_nodes) > 0:
                     confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-                else:
-                    confs[x][y]["SEL_B"] = None
             elif "right" in operands:
                 confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, operands["right"])
-                pre_nodes.pop(v)
+                pre_nodes.remove(operands["right"])
                 if len(pre_nodes) > 0:
                     confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-                else:
-                    confs[x][y]["SEL_A"] = None
             else:
                 confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, pre_nodes[0])
                 if len(pre_nodes) > 1:
                     confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, pre_nodes[1])
-                else:
-                    confs[x][y]["SEL_B"] = None
 
         # SEs
         for x in range(width):
