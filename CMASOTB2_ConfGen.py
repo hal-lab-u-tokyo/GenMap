@@ -3,33 +3,27 @@ from ConfDrawer import ConfDrawer
 
 import os
 
-# ADDRESS
-CONST_BASEADDR = 0x00_3000
-LD_DMANU_BASEADDR = 0x00_5000
-ST_DMANU_BASEADDR = 0x00_6000
-PE_CONF_BASEADDR = 0x28_0000
-PREG_CONF_ADDR = 0x26_0000
-
 # DATA FOMRATS
-CONF_FIELDS = ["OUT_NORTH", "OUT_SOUTH", "OUT_EAST", "OUT_WEST", "OPCODE", "SEL_A", "SEL_B"]
-SE_CONF_FORMAT_BIN = "{OUT_NORTH:03b}_{OUT_SOUTH:02b}_{OUT_EAST:03b}_{OUT_WEST:02b}"
+SE_FIELDS = ["OUT_A_NORTH", "OUT_A_SOUTH", "OUT_A_EAST", "OUT_A_WEST", \
+                "OUT_B_NORTH", "OUT_B_EAST", "OUT_B_WEST"]
+ALU_FIELDS = ["OPCODE", "SEL_A", "SEL_B"]
+SE_CONF_FORMAT_BIN = "{OUT_A_NORTH:03b}_{OUT_A_SOUTH:03b}_{OUT_A_EAST:03b}_{OUT_A_WEST:03b}" + \
+                        "{OUT_B_NORTH:03b}_{OUT_B_EAST:03b}_{OUT_B_WEST:03b}"
 ALU_CONF_FORMAT_BIN = "{OPCODE:04b}_{SEL_A:03b}_{SEL_B:03b}"
-PE_CONF_FORMAT_BIN = "0" * 12 + "_" + SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT_BIN
-PREG_CONF_FORMAT = "0" * 25 + "_" + "{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
 
-TABLE_FORMAT = "0000_0000_{5:04b}_{4:04b}_{3:04b}_{2:04b}_{1:04b}_{0:04b}"
-TABLE_FORMAER_OFFSET = 4
-TABLE_LATTER_OFFSET = 8
-TABLE_MASK_FORMAT = "0000_0000_0000_0000_0000_{11:01b}_{10:01b}_{9:01b}_{8:01b}" + \
-                    "_{7:01b}_{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
-TABLE_MASK_OFFSET = 12
+ALU_CONF_PKT = "100000_00000000000__1111__{CONF:s}__{ROW:08b}__{COL:08b} //PE Config\n"
+SE_CONF_PKT = "100001_0000__{CONF:s}__{ROW:08b}__{COL:08b} //SE Config\n"
+CONST_PKT = "100010_00_0000_000__{CONST:016b}__0000000000000000 //Constant\n"
+TAIL_PKT = "111111_000000_000_0000000000000000__0000000000000000 // others\n"
 
+TABLE_FORMAT = "{7:03b}_{6:03b}_{5:03b}_{4:03b}_{3:03b}_{2:03b}_{1:03b}_{0:03b}"
+TABLE_MASK_FORMAT = "_{7:01b}_{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
+LD_TABLE_PKT = "001100000000_0_{TABLE:s} //LD TABLE\n"
+LD_MASK_PKT = "001100000001_0_00000000_00000000{MASK:s} //LD MASK\n"
+ST_TABLE_PKT = "010000000000_0_{TABLE:s} //ST TABLE\n"
+ST_MASK_PKT = "010000000001_0_00000000_00000000{MASK:s} //ST MASK\n"
 
-HEAD_FLIT = "001_{addr:022b}_{mt:03b}_{vch:03b}_{src:02b}_{dst:02b}\n"
-TAIL_FLIT = "010_{data:s}\n"
-MSG_TYPES = {"SW": 1}
-
-class CCSOTB2_ConfGen(ConfGenBase):
+class CMASOTB2_ConfGen(ConfGenBase):
     # def generate(self, CGRA, app, individual, eval_list, args):
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
@@ -39,24 +33,27 @@ class CCSOTB2_ConfGen(ConfGenBase):
         self.force_mode = args["force"]
 
         if os.path.exists(args["output_dir"]):
+
             fig_filename = args["output_dir"] + "/" + args["prefex"] + "_map.png"
-            conf_filename = args["output_dir"] + "/" + args["prefex"] + "_conf.pkt"
+            confp_filename = args["output_dir"] + "/" + args["prefex"] + "_confp.dat"
+            table_filename = args["output_dir"] + "/" + args["prefex"] + "_table.dat"
             info_filename = args["output_dir"] + "/" + args["prefex"] + "_info.txt"
 
             # check if files exist
             files_exist = False
             if self.force_mode != True:
                 files_exist |= os.path.exists(fig_filename)
-                files_exist |= os.path.exists(conf_filename)
+                files_exist |= os.path.exists(confp_filename)
+                files_exist |= os.path.exists(table_filename)
                 files_exist |= os.path.exists(info_filename)
 
-            # mapping figure
             if files_exist:
                 print("some file exist")
             else:
-                drawer = ConfDrawer(CGRA, individual)
-                drawer.draw_PEArray(CGRA, individual, app)
-                drawer.save(fig_filename)
+                # mapping figure
+                # drawer = ConfDrawer(CGRA, individual)
+                # drawer.draw_PEArray(CGRA, individual, app)
+                # drawer.save(fig_filename)
 
                 # make configurations
                 PE_confs = self.make_PE_conf(CGRA, app, individual)
@@ -67,18 +64,22 @@ class CCSOTB2_ConfGen(ConfGenBase):
                     map_width = individual.getEvaluatedData("map_width")
                     if map_width is None:
                         print("duplicate option ignored because map width was not evaluated")
+                        self.save_confp(CGRA, PE_confs, const_conf, confp_filename)
+                        self.save_table(CGRA, ld_conf, st_conf, table_filename)
                     else:
-                        self.duplicate(CGRA, PE_confs, ld_conf, st_conf, map_width)
+                        self.save_confp(CGRA, PE_confs, const_conf, confp_filename, True, map_width)
+                        self.save_table(CGRA, ld_conf, st_conf, table_filename, True, map_width)
+                else:
+                    self.save_confp(CGRA, PE_confs, const_conf, confp_filename)
+                    self.save_table(CGRA, ld_conf, st_conf, table_filename)
 
-                self.save_conf(CGRA, PE_confs, const_conf, ld_conf, st_conf, individual.preg, \
-                                     conf_filename):
+                self.save_info(header, individual, individual_id, ld_conf, st_conf, info_filename)
 
-                self.save_info(header, individual, individual_id, ld_conf, st_conf,\
-                        info_filename)
         else:
             print("No such direcotry: ", args["output_dir"])
 
-    def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename):
+    def save_confp(self, CGRA, PE_confs, Const_conf, filename, duplicate = False,\
+                    map_width = 0):
         if os.path.exists(filename) and not self.force_mode:
             print(filename, "exists")
             return False
@@ -86,80 +87,48 @@ class CCSOTB2_ConfGen(ConfGenBase):
             f = open(filename, "w")
             width, height = CGRA.getSize()
 
-            # PE config
-            f.write("\n//PE Config\n")
-            for x in range(width):
-                for y in range(height):
-                    if len(PE_confs[x][y]) > 0:
-                        addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
-                        for filed in CONF_FIELDS:
-                            if not filed in PE_confs[x][y]:
-                                PE_confs[x][y][filed] = 0
-                        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-                        f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
+            if duplicate:
+                dup_count = width // map_width
+            else:
+                dup_count = 1
+                map_width = width
 
-            # PREG Config
-            f.write("\n//PREG Config\n")
-            addr = PREG_CONF_ADDR
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                        vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=PREG_CONF_FORMAT.format(*PREG_conf)))
+            # PE config
+            for x in range(map_width):
+                col = 0
+                for i in range(dup_count):
+                    col = col << map_width
+                    col += (1 << x)
+                for y in range(height):
+                    row = 1 << y
+                    if len(PE_confs[x][y]) > 0:
+                        alu_conf = {k: v for k, v in PE_confs[x][y].items() if k in ALU_FIELDS}
+                        se_conf = {k: v for k, v in PE_confs[x][y].items() if k in SE_FIELDS}
+                        if len(alu_conf) > 0:
+                            for filed in ALU_FIELDS:
+                                if not filed in alu_conf:
+                                    alu_conf[filed] = 0
+                            f.write(ALU_CONF_PKT.format(CONF=ALU_CONF_FORMAT_BIN.format(**alu_conf), \
+                                                    ROW=row, COL=col))
+                        if len(se_conf) > 0:
+                            for filed in SE_FIELDS:
+                                if not filed in se_conf:
+                                    se_conf[filed] = 0
+                        f.write(SE_CONF_PKT.format(CONF=SE_CONF_FORMAT_BIN.format(**se_conf), \
+                                                    ROW=row, COL=col))
 
             # Const Regs
-            f.write("\n//Const Regs\n")
             for i in range(len(Const_conf)):
-                addr = CONST_BASEADDR + 4 * i
-                f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                            vch=0, src=0, dst=1))
-                f.write(TAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
-
-            # LD table
-            f.write("\n//LD Table\n")
-            addr = LD_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][0:6])))
-
-            addr = LD_DMANU_BASEADDR + TABLE_LATTER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][6:12])))
-
-
-            addr = LD_DMANU_BASEADDR + TABLE_MASK_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*LD_conf["mask"])))
-
-
-            # ST table
-            f.write("\n//ST Table\n")
-            addr = ST_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][0:6])))
-
-            addr = ST_DMANU_BASEADDR + TABLE_LATTER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][6:12])))
-
-
-            addr = ST_DMANU_BASEADDR + TABLE_MASK_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*ST_conf["mask"])))
-
+                f.write(CONST_PKT.format(CONST=int(Const_conf[i])))
             f.close()
 
             return True
 
-    def duplicate(self, CGRA, PE_confs, ld_conf, st_conf, map_width):
+    def save_table(self, CGRA, ld_conf, st_conf, filename, duplicate = False, map_width = 0):
         width, height = CGRA.getSize()
         out_num = len(st_conf["mem_align"])
         in_num = len(ld_conf["mem_align"])
-        for dup_count in range(1, width // map_width):
+        for dup_count in range(1, width // map_width if duplicate else 1):
             for x in range(map_width):
                 dest_x = map_width * dup_count + x
                 # LD table
@@ -167,8 +136,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
                                             + in_num * dup_count
                 ld_conf["mask"][dest_x] = ld_conf["mask"][x]
 
-                for y in range(height):
-                    PE_confs[dest_x][y] = PE_confs[x][y]
             # ST table
             for out_idx in range(out_num):
                 st_conf["table"][out_idx + dup_count * out_num] = st_conf["table"][out_idx] + map_width * dup_count
@@ -180,6 +147,12 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 ld_conf["mem_align"].append(ld_conf["mem_align"][in_idx] + "_(" + str(dup_count) + ")")
             for out_idx in range(out_num):
                 st_conf["mem_align"].append(st_conf["mem_align"][out_idx] + "_(" + str(dup_count) + ")")
+
+        with open(filename, "w") as f:
+            f.write(LD_TABLE_PKT.format(TABLE=TABLE_FORMAT.format(*ld_conf["table"])))
+            f.write(LD_MASK_PKT.format(MASK=TABLE_MASK_FORMAT.format(*ld_conf["mask"])))
+            f.write(ST_TABLE_PKT.format(TABLE=TABLE_FORMAT.format(*st_conf["table"])))
+            f.write(ST_MASK_PKT.format(MASK=TABLE_MASK_FORMAT.format(*st_conf["mask"])))
 
 
     def make_PE_conf(self, CGRA, app, individual):
@@ -229,14 +202,15 @@ class CCSOTB2_ConfGen(ConfGenBase):
         for x in range(width):
             for y in range(height):
                 se_list = CGRA.get_PE_resources((x, y))["SE"]
-                if len(se_list) == 1:
-                    # for each SE outputs
-                    for se in list(se_list.values())[0]:
-                        if se in routed_graph.nodes():
-                            pre_node = list(routed_graph.predecessors(se))[0]
-                            confs[x][y][CGRA.getWireName(se)] = CGRA.getNetConfValue(se, pre_node)
+                if len(se_list) == 2:
+                    # for each SE
+                    for se_id, se_sublist in se_list.items():
+                        for se in se_sublist:
+                            if se in routed_graph.nodes():
+                                pre_node = list(routed_graph.predecessors(se))[0]
+                                confs[x][y][CGRA.getWireName(se)] = CGRA.getNetConfValue(se, pre_node)
                 else:
-                    raise TypeError("CCSOTB2 assumes one SE per PE")
+                    raise TypeError("CMA-SOTB2 assumes two SEs per PE")
 
         return confs
 
@@ -353,5 +327,5 @@ class CCSOTB2_ConfGen(ConfGenBase):
             f.close()
 
 if __name__ == '__main__':
-    generator = CCSOTB2_ConfGen()
+    generator = CMASOTB2_ConfGen()
     generator.main()
