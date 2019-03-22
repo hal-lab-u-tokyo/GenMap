@@ -180,6 +180,7 @@ if __name__ == '__main__':
             sys.exit()
         finally:
             # discard std input
+            print("Please enter any keys\n")
             _ = sys.stdin.read(1)
             # restore tty attr
             termios.tcsetattr(fd, termios.TCSANOW, old)

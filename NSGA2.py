@@ -328,7 +328,7 @@ class NSGA2():
         for disp in self.status_disp:
             disp.close()
 
-        print("\n\nFinish optimization. Please enter any keys")
+        print("\n\nFinish optimization.")
 
         # eleminate invalid individuals
         hof = [ind for ind in hof if ind.isValid()]
