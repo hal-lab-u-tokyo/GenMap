@@ -36,35 +36,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
         individual = data["hof"][individual_id]
         app = header["app"]
 
-        ### debug ###
-        import xml.etree.ElementTree as ET
-        from PEArrayModel import PEArrayModel
-        from SimParameters import SimParameters
-        tree = ET.ElementTree(file="./CMA_conf.xml")
-        pearray = tree.getroot()
-        if pearray.tag == "PEArray":
-            CGRA = PEArrayModel(pearray)
-
-        try:
-            tree = ET.ElementTree(file="./simdata.xml")
-        except ET.ParseError as e:
-            print("Parse Error", e.args)
-            exit()
-
-        sim_xml = tree.getroot()
-        try:
-            sim_params = SimParameters(CGRA, sim_xml)
-        except SimParameters.InvalidParameters as e:
-            print("Parameter import failed: ", e.args[0])
-        header["sim_params"] = sim_params
-
-        from Application import Application
-        app = Application()
-        app.read_dot("./af.dot")
-        app.setFrequency(30, "M")
-        header["app"] = app
-        ### debug end ###
-
         self.force_mode = args["force"]
 
         if os.path.exists(args["output_dir"]):
