@@ -191,6 +191,8 @@ if __name__ == '__main__':
                         "eval_names": [obj.name() for obj in objectives],
                         "fitness_weights": tuple(-1.0 if obj.isMinimize() else 1.0 for obj in objectives)}
         save_data = {"hof": hof, "hypervolume": hv}
+
+        print("Saving optimization results...")
         with open(output_file_name, "wb") as file:
             pickle.dump(save_header, file)
             pickle.dump(save_data, file)
