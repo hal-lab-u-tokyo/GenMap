@@ -211,6 +211,8 @@ class PowerEval(EvalBase):
             nx.set_node_attributes(graph, -1, "stage")
             for v in graph.nodes():
                 graph.node[v]["stage"] = PowerEval.__getStageIndex(stage_domains, v)
+        else:
+            preg_flag
 
         for i_port in set(individual.routed_graph.nodes()) & set(CGRA.getInputPorts()):
             graph.add_edge("root", i_port)

@@ -2,6 +2,7 @@ from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
 
 import os
+import math
 
 # DATA FOMRATS
 SE_FIELDS = ["OUT_A_NORTH", "OUT_A_SOUTH", "OUT_A_EAST", "OUT_A_WEST", \
@@ -13,15 +14,15 @@ ALU_CONF_FORMAT_BIN = "{OPCODE:04b}_{SEL_A:03b}_{SEL_B:03b}"
 
 ALU_CONF_PKT = "100000_00000000000__1111__{CONF:s}__{ROW:08b}__{COL:08b} //PE Config\n"
 SE_CONF_PKT = "100001_0000__{CONF:s}__{ROW:08b}__{COL:08b} //SE Config\n"
-CONST_PKT = "100010_00_0000_000__{CONST:016b}__0000000000000000 //Constant\n"
+CONST_PKT = "100010_00_{index:04b}_000__{CONST:016b}__0000000000000000 //Constant\n"
 TAIL_PKT = "111111_000000_000_0000000000000000__0000000000000000 // others\n"
 
 TABLE_FORMAT = "{7:03b}_{6:03b}_{5:03b}_{4:03b}_{3:03b}_{2:03b}_{1:03b}_{0:03b}"
 TABLE_MASK_FORMAT = "_{7:01b}_{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
-LD_TABLE_PKT = "001100000000_0_{TABLE:s} //LD TABLE\n"
-LD_MASK_PKT = "001100000001_0_00000000_00000000{MASK:s} //LD MASK\n"
-ST_TABLE_PKT = "010000000000_0_{TABLE:s} //ST TABLE\n"
-ST_MASK_PKT = "010000000001_0_00000000_00000000{MASK:s} //ST MASK\n"
+LD_TABLE_PKT = "0011000_{index:04b}0_0_{TABLE:s} //LD TABLE\n"
+LD_MASK_PKT  = "0011000_{index:04b}1_0_00000000_00000000{MASK:s} //LD MASK\n"
+ST_TABLE_PKT = "0100000_{index:04b}0_0_{TABLE:s} //ST TABLE\n"
+ST_MASK_PKT  = "0100000_{index:04b}1_0_00000000_00000000{MASK:s} //ST MASK\n"
 
 class CMASOTB2_ConfGen(ConfGenBase):
     # def generate(self, CGRA, app, individual, eval_list, args):
@@ -119,7 +120,7 @@ class CMASOTB2_ConfGen(ConfGenBase):
 
             # Const Regs
             for i in range(len(Const_conf)):
-                f.write(CONST_PKT.format(CONST=int(Const_conf[i])))
+                f.write(CONST_PKT.format(index=i, CONST=int(Const_conf[i])))
             f.close()
 
             return True
@@ -148,11 +149,24 @@ class CMASOTB2_ConfGen(ConfGenBase):
             for out_idx in range(out_num):
                 st_conf["mem_align"].append(st_conf["mem_align"][out_idx] + "_(" + str(dup_count) + ")")
 
+        ld_data_size = len(ld_conf["mem_align"])
+        ld_table_num = (width * ld_data_size // math.gcd(width, ld_data_size)) // ld_data_size
+
+        st_data_size = len(st_conf["mem_align"])
+        st_table_num = (width * st_data_size // math.gcd(width, st_data_size)) // st_data_size
+
         with open(filename, "w") as f:
-            f.write(LD_TABLE_PKT.format(TABLE=TABLE_FORMAT.format(*ld_conf["table"])))
-            f.write(LD_MASK_PKT.format(MASK=TABLE_MASK_FORMAT.format(*ld_conf["mask"])))
-            f.write(ST_TABLE_PKT.format(TABLE=TABLE_FORMAT.format(*st_conf["table"])))
-            f.write(ST_MASK_PKT.format(MASK=TABLE_MASK_FORMAT.format(*st_conf["mask"])))
+            for i in range(ld_table_num):
+                table = [v + ((ld_data_size * i) % width)for v in ld_conf["table"]]
+                f.write(LD_TABLE_PKT.format(TABLE=TABLE_FORMAT.format(*table), index=i))
+                f.write(LD_MASK_PKT.format(MASK=TABLE_MASK_FORMAT.format(*ld_conf["mask"]), index=i))
+            for i in range(st_table_num):
+                table = [st_conf["table"][j - ((st_data_size * i) % width)] \
+                            for j in range(len(st_conf["table"]))]
+                mask = [st_conf["mask"][j - ((st_data_size * i) % width)] \
+                            for j in range(len(st_conf["mask"]))]
+                f.write(ST_TABLE_PKT.format(TABLE=TABLE_FORMAT.format(*table), index=i))
+                f.write(ST_MASK_PKT.format(MASK=TABLE_MASK_FORMAT.format(*mask), index=i))
 
 
     def make_PE_conf(self, CGRA, app, individual):
