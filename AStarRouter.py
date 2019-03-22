@@ -121,7 +121,7 @@ class AStarRouter(RouterBase):
         # check pipeline structure
         path_extend_nodes = []
         free_last_stage_SEs = set()
-        if not preg_conf is None:
+        if CGRA.getPregNumber() != 0:
             stage_domains = CGRA.getStageDomains(preg_conf)
             if len(stage_domains) > 1:
                 last_stage_nodes = stage_domains[-1]

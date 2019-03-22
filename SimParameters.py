@@ -57,6 +57,9 @@ class SimParameters():
         if CGRA.getPregNumber() > 0:
             self.preg_dynamic_energy = 0.0
             self.preg_leak = 0.0
+        else:
+            self.preg_leak = None
+            self.preg_dynamic_energy = None
 
         self.se_weight = 1.0
 

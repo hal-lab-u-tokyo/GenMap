@@ -199,7 +199,6 @@ class PowerEval(EvalBase):
                         clock tree energy.
         """
 
-        stage_domains = CGRA.getStageDomains(individual.preg)
         graph = copy.deepcopy(individual.routed_graph)
         graph.add_node("root")
         nx.set_node_attributes(graph, 0, "switching")
@@ -207,6 +206,7 @@ class PowerEval(EvalBase):
         opcodes = PowerEval.get_opcodes(CGRA, app, individual.mapping)
 
         if CGRA.getPregNumber() != 0:
+            stage_domains = CGRA.getStageDomains(individual.preg)
             preg_flag = True
             nx.set_node_attributes(graph, -1, "stage")
             for v in graph.nodes():

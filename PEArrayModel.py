@@ -196,10 +196,6 @@ class PEArrayModel():
             else:
                 self.__preg_positions.append(int(vpos_str))
 
-        if len(self.__preg_positions) == 0:
-            # no pipeline structure
-            self.__preg_positions.append(self.__height)
-
         self.__preg_positions.sort()
 
         # init SE list
