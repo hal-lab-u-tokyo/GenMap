@@ -71,7 +71,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
                         self.duplicate(CGRA, PE_confs, ld_conf, st_conf, map_width)
 
                 self.save_conf(CGRA, PE_confs, const_conf, ld_conf, st_conf, individual.preg, \
-                                     conf_filename):
+                                     conf_filename)
 
                 self.save_info(header, individual, individual_id, ld_conf, st_conf,\
                         info_filename)
