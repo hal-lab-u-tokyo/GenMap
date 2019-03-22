@@ -334,7 +334,7 @@ class NSGA2():
         hof = [ind for ind in hof if ind.isValid()]
 
         # Hypervolume evolution (if possible)
-        if self.__hv_logging:
+        if self.__hv_logging and len(hof) > 0:
             hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
             ref_point = hv.refpoint(offset=0.1)   # Define global reference point
             hypervolume_log = [self.hypervolume(fit).compute(ref_point) \
