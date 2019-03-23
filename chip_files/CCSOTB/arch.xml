@@ -85,7 +85,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(1,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="1" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(0, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(0, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(0, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="1" />
@@ -137,7 +137,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(2,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="2" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(1, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(1, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(1, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="2" />
@@ -189,7 +189,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(3,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="3" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(2, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(2, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(2, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="3" />
@@ -241,7 +241,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(4,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="4" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(3, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(3, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(3, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="4" />
@@ -293,7 +293,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(5,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="5" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(4, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(4, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(4, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="5" />
@@ -345,7 +345,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(6,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="6" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(5, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(5, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(5, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="6" />
@@ -397,7 +397,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(7,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="7" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(6, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(6, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(6, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="7" />
@@ -449,7 +449,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(8,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="8" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(7, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(7, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(7, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="8" />
@@ -501,7 +501,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(9,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="9" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(8, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(8, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(8, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="9" />
@@ -553,7 +553,7 @@
 				<input name="ALU" value="0" type="ALU" coord="(10,0)"/>
 				<input name="IN_SOUTH" value="1" type="IN_PORT" index="10" />
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(9, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(9, 0)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(9, 0)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="IN_PORT" index="10" />
@@ -695,7 +695,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(1, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(0, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(1, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(0, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(0, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(1, 0)"/>
@@ -751,7 +751,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(2, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(1, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(2, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(1, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(1, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(2, 0)"/>
@@ -807,7 +807,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(3, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(2, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(3, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(2, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(2, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(3, 0)"/>
@@ -863,7 +863,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(4, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(3, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(4, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(3, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(3, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(4, 0)"/>
@@ -919,7 +919,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(5, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(4, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(5, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(4, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(4, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(5, 0)"/>
@@ -975,7 +975,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(6, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(5, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(6, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(5, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(5, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(6, 0)"/>
@@ -1031,7 +1031,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(7, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(6, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(7, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(6, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(6, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(7, 0)"/>
@@ -1087,7 +1087,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(8, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(7, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(8, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(7, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(7, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(8, 0)"/>
@@ -1143,7 +1143,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(9, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(8, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(9, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(8, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(8, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(9, 0)"/>
@@ -1199,7 +1199,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(10, 0)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(9, 1)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(10, 0)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(9, 1)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(9, 1)"/>
 			</output>
 			<output name="OUT_WEST">
 				<input name="IN_SOUTH" value="0" type="SE" id="0" src_name="OUT_NORTH" coord="(10, 0)"/>
@@ -1350,7 +1350,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(1, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(0, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(1, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(0, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(0, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(1, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1410,7 +1410,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(2, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(1, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(2, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(1, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(1, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(2, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1470,7 +1470,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(3, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(2, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(3, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(2, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(2, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(3, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1530,7 +1530,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(4, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(3, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(4, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(3, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(3, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(4, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1590,7 +1590,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(5, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(4, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(5, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(4, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(4, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(5, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1650,7 +1650,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(6, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(5, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(6, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(5, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(5, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(6, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1710,7 +1710,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(7, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(6, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(7, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(6, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(6, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(7, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1770,7 +1770,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(8, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(7, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(8, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(7, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(7, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(8, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1830,7 +1830,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(9, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(8, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(9, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(8, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(8, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(9, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -1890,7 +1890,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(10, 1)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(9, 2)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(10, 1)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(9, 2)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(9, 2)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(10, 0)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2046,7 +2046,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(1, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(0, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(1, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(0, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(0, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(1, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2106,7 +2106,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(2, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(1, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(2, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(1, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(1, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(2, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2166,7 +2166,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(3, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(2, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(3, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(2, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(2, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(3, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2226,7 +2226,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(4, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(3, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(4, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(3, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(3, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(4, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2286,7 +2286,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(5, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(4, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(5, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(4, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(4, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(5, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2346,7 +2346,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(6, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(5, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(6, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(5, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(5, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(6, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2406,7 +2406,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(7, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(6, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(7, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(6, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(6, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(7, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2466,7 +2466,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(8, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(7, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(8, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(7, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(7, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(8, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2526,7 +2526,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(9, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(8, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(9, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(8, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(8, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(9, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2586,7 +2586,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(10, 2)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(9, 3)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(10, 2)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(9, 3)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(9, 3)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(10, 1)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2742,7 +2742,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(1, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(0, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(1, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(0, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(0, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(1, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2802,7 +2802,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(2, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(1, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(2, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(1, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(1, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(2, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2862,7 +2862,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(3, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(2, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(3, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(2, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(2, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(3, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2922,7 +2922,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(4, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(3, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(4, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(3, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(3, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(4, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -2982,7 +2982,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(5, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(4, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(5, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(4, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(4, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(5, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3042,7 +3042,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(6, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(5, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(6, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(5, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(5, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(6, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3102,7 +3102,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(7, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(6, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(7, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(6, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(6, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(7, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3162,7 +3162,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(8, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(7, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(8, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(7, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(7, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(8, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3222,7 +3222,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(9, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(8, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(9, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(8, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(8, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(9, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3282,7 +3282,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(10, 3)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(9, 4)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(10, 3)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(9, 4)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(9, 4)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(10, 2)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3438,7 +3438,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(1, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(0, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(1, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(0, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(0, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(1, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3498,7 +3498,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(2, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(1, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(2, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(1, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(1, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(2, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3558,7 +3558,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(3, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(2, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(3, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(2, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(2, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(3, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3618,7 +3618,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(4, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(3, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(4, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(3, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(3, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(4, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3678,7 +3678,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(5, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(4, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(5, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(4, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(4, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(5, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3738,7 +3738,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(6, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(5, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(6, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(5, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(5, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(6, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3798,7 +3798,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(7, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(6, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(7, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(6, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(6, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(7, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3858,7 +3858,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(8, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(7, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(8, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(7, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(7, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(8, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3918,7 +3918,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(9, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(8, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(9, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(8, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(8, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(9, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -3978,7 +3978,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(10, 4)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(9, 5)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(10, 4)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(9, 5)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(9, 5)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(10, 3)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4114,7 +4114,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(1, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(0, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(1, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(0, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(0, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(1, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4163,7 +4163,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(2, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(1, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(2, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(1, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(1, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(2, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4212,7 +4212,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(3, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(2, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(3, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(2, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(2, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(3, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4261,7 +4261,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(4, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(3, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(4, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(3, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(3, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(4, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4310,7 +4310,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(5, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(4, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(5, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(4, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(4, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(5, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4359,7 +4359,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(6, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(5, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(6, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(5, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(5, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(6, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4408,7 +4408,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(7, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(6, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(7, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(6, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(6, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(7, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4457,7 +4457,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(8, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(7, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(8, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(7, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(7, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(8, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4506,7 +4506,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(9, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(8, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(9, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(8, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(8, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(9, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4555,7 +4555,7 @@
 				<input name="IN_SOUTH" value="1" type="SE" id="0" src_name="OUT_NORTH" coord="(10, 5)"/>
 				<input name="IN_WEST" value="2" type="SE" id="0" src_name="OUT_EAST" coord="(9, 6)"/>
 				<input name="IN_DL_S" value="3" type="ALU" coord="(10, 5)"/>
-				<input name="IN_DL_W" value="5" type="ALU" coord="(9, 6)"/>
+				<input name="IN_DL_W" value="4" type="ALU" coord="(9, 6)"/>
 				<input name="IN_DL_SS" value="5" type="ALU" coord="(10, 4)"/>
 			</output>
 			<output name="OUT_WEST">
@@ -4663,7 +4663,6 @@
 	<OUT_PORT index="11">
 		<input name="OUT_11" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 0)"/>
 	</OUT_PORT>
-
 
 </PEArray>
 
