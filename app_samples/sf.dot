@@ -43,7 +43,7 @@ digraph{
 
 	# dependencies
 	"INPUT_0" -> "r0"
-	"8" -> "r0" [operand=right]
+	"16" -> "r0" [operand=right]
 
 	"INPUT_0" -> "g00"
 	"8" -> "g00" [operand=right]
