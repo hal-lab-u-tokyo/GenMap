@@ -1,0 +1,63 @@
+digraph{
+
+	# inputs
+	"INPUT_0" [input=True]
+
+	# operations
+	"op1" [op=ADD]
+	"op2" [op=SR]
+	"op3" [op=SL]
+	"op4" [op=SR]
+	"op5" [op=AND]
+	"op6" [op=AND]
+	"op7" [op=ADD]
+	"op8" [op=MULT]
+	"op9" [op=SR]
+	"op10" [op=SL]
+	"op11" [op=SL]
+	"op12" [op=OR]
+	"op13" [op=OR]
+
+	# outputs
+	"OUTPUT_0" [output=True]
+
+	# constants
+	"16" [const=True]
+	"8" [const=True]
+	"255" [const=True]
+	"21" [const=True]
+	"6" [const=True]
+
+	# dependencies
+	"op2" -> "op1"
+	"op3" -> "op4"
+	"op4" -> "op5"
+	"op6" -> "op7"
+	"op5" -> "op1"
+	"op1" -> "op7"
+	"op7" -> "op8"
+	"op8" -> "op9"
+	"op9" -> "op10"
+	"op10" -> "op11"
+	"op9" -> "op12" [operand=right]
+	"op10" -> "op12" [operand=left]
+	"op11" -> "op13" [operand=left]
+	"op12" -> "op13" [operand=right]
+
+	"INPUT_0" -> "op2"
+	"INPUT_0" -> "op3"
+	"INPUT_0" -> "op6"
+
+	"16" -> "op2" [operand=right]
+	"16" -> "op4" [operand=right]
+	"8" -> "op3" [operand=right]
+	"255" -> "op6" [operand=right]
+	"255" -> "op5" [operand=right]
+	"21" -> "op8" [operand=right]
+	"6" -> "op9" [operand=right]
+	"8" -> "op10" [operand=right]
+	"8" -> "op11" [operand=right]
+
+	"op13" -> "OUTPUT_0"
+
+}

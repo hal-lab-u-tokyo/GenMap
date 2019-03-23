@@ -1,0 +1,107 @@
+digraph{
+
+	# inputs
+	"INPUT_0" [input=True]
+
+	# operations
+	"r0" 	[op=SR]
+	"g00"	[op=SR]
+	"rp0" 	[op=MULT]
+	"g0" 	[op=AND]
+	"b0" 	[op=AND]
+	"gp0" 	[op=MULT]
+	"bp0" 	[op=MULT]
+	"rgp0" 	[op=ADD]
+	"rgbp0" [op=ADD]
+	"y0" 	[op=SR]
+	"sr000" [op=MULT]
+	"sg000" [op=MULT]
+	"sr00" 	[op=SR]
+	"sg00" 	[op=SR]
+	"sb00" 	[op=MULT]
+	"sr0" 	[op=SL]
+	"sg0" 	[op=SL]
+	"sb0" 	[op=SR]
+	"srg0" 	[op=OR]
+	"out0" 	[op=OR]
+
+	# outputs
+	"OUTPUT_0" [output=True]
+
+	# constants
+	"16" [const=True]
+	"8" [const=True]
+	"306" [const=True]
+	"255" [const=True]
+	"601" [const=True]
+	"117" [const=True]
+	"10" [const=True]
+	"240" [const=True]
+	"200" [const=True]
+	"145" [const=True]
+	"16" [const=True]
+
+	# dependencies
+	"INPUT_0" -> "r0"
+	"8" -> "r0" [operand=right]
+
+	"INPUT_0" -> "g00"
+	"8" -> "g00" [operand=right]
+
+	"r0" -> "rp0"
+	"306" -> "rp0"
+
+	"g00" -> "g0"
+	"255" -> "g0"
+
+	"INPUT_0" -> "b0"
+	"255" -> "b0"
+
+
+	"g0" -> "gp0"
+	"601" -> "gp0"
+
+	"b0" -> "bp0"
+	"117" -> "bp0"
+
+	"rp0" -> "rgp0"
+	"gp0" -> "rgp0"
+
+	"rgp0" -> "rgbp0"
+	"bp0" -> "rgbp0"
+
+	"rgbp0" -> "y0"
+	"10" -> "y0" [operand=right]
+
+	"y0" -> "sr000"
+	"240" -> "sr000"
+
+	"y0" -> "sg000"
+	"200" -> "sg000"
+
+	"sr000" -> "sr00"
+	"8" -> "sr00" [operand=right]
+
+	"sg000" -> "sg00"
+	"8" -> "sg00"
+
+	"y0" -> "sb00"
+	"145" -> "sb00"
+
+	"sr00" -> "sr0"
+	"16" -> "sr0" [operand=right]
+
+	"sg00" -> "sg0"
+	"8" -> "sg0" [operand=right]
+
+	"sb00" -> "sb0"
+	"8" -> "sb0" [operand=right]
+
+	"sr0" -> "srg0"
+	"sg0" -> "srg0"
+
+	"srg0" -> "out0"
+	"sb0" -> "out0"
+
+	"out0" -> "OUTPUT_0"
+}

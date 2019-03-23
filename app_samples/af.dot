@@ -1,0 +1,93 @@
+digraph{
+	#inputs
+	"INPUT_0" [input=True]
+	"INPUT_1" [input=True]
+
+	# operations
+	"op1" [op=SR]
+	"op2" [op=AND]
+	"op3" [op=SR]
+	"op4" [op=AND]
+	"op5" [op=SR]
+	"op6" [op=AND]
+	"op7" [op=SR]
+	"op8" [op=AND]
+	"op9" [op=MULT]
+	"op10" [op=MULT]
+	"op11" [op=MULT]
+	"op12" [op=MULT]
+	"op13" [op=ADD]
+	"op14" [op=MULT]
+	"op15" [op=ADD]
+	"op16" [op=MULT]
+	"op17" [op=SR]
+	"op18" [op=SR]
+	"op19" [op=ADD]
+	"op20" [op=SL]
+	"op21" [op=SL]
+	"op22" [op=SR]
+	"op23" [op=OR]
+	"op24" [op=OR]
+
+	# constants
+	"8" [const=True]
+	"255" [const=True]
+	"100" [const=True]
+	"7" [const=True]
+	"28" [const=True]
+	"16" [const=True]
+
+	# outputs
+	"OUTPUT_0" [output=True]
+
+	# dependencies
+	"INPUT_0" -> "op1" [operand=left];
+	"8" -> "op1" [operand=right];
+	"INPUT_0" -> "op2" [operand=left];
+	"255" -> "op2" [operand=right];
+	"INPUT_1" -> "op3" [operand=left];
+	"8" -> "op3" [operand=right];
+	"INPUT_1" -> "op4" [operand=left];
+	"255" -> "op4" [operand=right];
+	"op1" -> "op5" [operand=left];
+	"8" -> "op5" [operand=right];
+	"op1" -> "op6" [operand=left];
+	"255" -> "op6" [operand=right];
+	"op3" -> "op7" [operand=left];
+	"8" -> "op7" [operand=right];
+	"op3" -> "op8" [operand=left];
+	"255" -> "op8" [operand=right];
+	"op5" -> "op9";
+	"100" -> "op9";
+	"op6" -> "op10";
+	"100" -> "op10";
+	"op7" -> "op11";
+	"28" -> "op11";
+	"op8" -> "op12";
+	"28" -> "op12";
+	"op9" -> "op13";
+	"op11" -> "op13";
+	"op2" -> "op14";
+	"100" -> "op14";
+	"op10" -> "op15";
+	"op12" -> "op15";
+	"op4" -> "op16";
+	"28" -> "op16";
+	"op13" -> "op17" [operand=left];
+	"7" -> "op17" [operand=right];
+	"op15" -> "op18" [operand=left];
+	"7" -> "op18" [operand=right];
+	"op14" -> "op19";
+	"op16" -> "op19";
+	"op17" -> "op20" [operand=left];
+	"16" -> "op20" [operand=right];
+	"op18" -> "op21" [operand=left];
+	"8" -> "op21" [operand=right];
+	"op19" -> "op22" [operand=left];
+	"7" -> "op22" [operand=right];
+	"op20" -> "op23" [operand=left];
+	"op21" -> "op23" [operand=right];
+	"op22" -> "op24" [operand=left];
+	"op23" -> "op24" [operand=right];
+	"op24" -> "OUTPUT_0"
+}
