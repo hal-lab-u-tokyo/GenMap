@@ -79,81 +79,78 @@ class CCSOTB2_ConfGen(ConfGenBase):
             print("No such direcotry: ", args["output_dir"])
 
     def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename):
-        if os.path.exists(filename) and not self.force_mode:
-            print(filename, "exists")
-            return False
-        else:
-            f = open(filename, "w")
-            width, height = CGRA.getSize()
 
-            # PE config
-            f.write("\n//PE Config\n")
-            for x in range(width):
-                for y in range(height):
-                    if len(PE_confs[x][y]) > 0:
-                        addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
-                        for filed in CONF_FIELDS:
-                            if not filed in PE_confs[x][y]:
-                                PE_confs[x][y][filed] = 0
-                        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-                        f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
+        f = open(filename, "w")
+        width, height = CGRA.getSize()
 
-            # PREG Config
-            f.write("\n//PREG Config\n")
-            addr = PREG_CONF_ADDR
+        # PE config
+        f.write("\n//PE Config\n")
+        for x in range(width):
+            for y in range(height):
+                if len(PE_confs[x][y]) > 0:
+                    addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
+                    for filed in CONF_FIELDS:
+                        if not filed in PE_confs[x][y]:
+                            PE_confs[x][y][filed] = 0
+                    f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                vch=0, src=0, dst=1))
+                    f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
+
+        # PREG Config
+        f.write("\n//PREG Config\n")
+        addr = PREG_CONF_ADDR
+        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                    vch=0, src=0, dst=1))
+        f.write(TAIL_FLIT.format(data=PREG_CONF_FORMAT.format(*PREG_conf)))
+
+        # Const Regs
+        f.write("\n//Const Regs\n")
+        for i in range(len(Const_conf)):
+            addr = CONST_BASEADDR + 4 * i
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                         vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=PREG_CONF_FORMAT.format(*PREG_conf)))
+            f.write(TAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
 
-            # Const Regs
-            f.write("\n//Const Regs\n")
-            for i in range(len(Const_conf)):
-                addr = CONST_BASEADDR + 4 * i
-                f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                            vch=0, src=0, dst=1))
-                f.write(TAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
+        # LD table
+        f.write("\n//LD Table\n")
+        addr = LD_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
+        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                vch=0, src=0, dst=1))
+        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][0:6])))
 
-            # LD table
-            f.write("\n//LD Table\n")
-            addr = LD_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][0:6])))
-
-            addr = LD_DMANU_BASEADDR + TABLE_LATTER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][6:12])))
+        addr = LD_DMANU_BASEADDR + TABLE_LATTER_OFFSET
+        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                vch=0, src=0, dst=1))
+        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][6:12])))
 
 
-            addr = LD_DMANU_BASEADDR + TABLE_MASK_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*LD_conf["mask"])))
+        addr = LD_DMANU_BASEADDR + TABLE_MASK_OFFSET
+        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                vch=0, src=0, dst=1))
+        f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*LD_conf["mask"])))
 
 
-            # ST table
-            f.write("\n//ST Table\n")
-            addr = ST_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][0:6])))
+        # ST table
+        f.write("\n//ST Table\n")
+        addr = ST_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
+        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                vch=0, src=0, dst=1))
+        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][0:6])))
 
-            addr = ST_DMANU_BASEADDR + TABLE_LATTER_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][6:12])))
+        addr = ST_DMANU_BASEADDR + TABLE_LATTER_OFFSET
+        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                vch=0, src=0, dst=1))
+        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][6:12])))
 
 
-            addr = ST_DMANU_BASEADDR + TABLE_MASK_OFFSET
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*ST_conf["mask"])))
+        addr = ST_DMANU_BASEADDR + TABLE_MASK_OFFSET
+        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                vch=0, src=0, dst=1))
+        f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*ST_conf["mask"])))
 
-            f.close()
+        f.close()
 
-            return True
+        return True
 
     def duplicate(self, CGRA, PE_confs, ld_conf, st_conf, map_width):
         width, height = CGRA.getSize()
@@ -293,58 +290,55 @@ class CCSOTB2_ConfGen(ConfGenBase):
         return const_conf
 
     def save_info(self, header, individual, individual_id, LD_conf, ST_conf, filename):
-        if os.path.exists(filename) and not self.force_mode:
-            print(filename, "exists")
-        else:
-            app = header["app"]
-            sim_params = header["sim_params"]
+        app = header["app"]
+        sim_params = header["sim_params"]
 
-            f = open(filename, "w")
-            # save ID
-            f.write("ID: " + str(individual_id) + "\n\n")
+        f = open(filename, "w")
+        # save ID
+        f.write("ID: " + str(individual_id) + "\n\n")
 
-            # save app name
-            f.write("APP: " + app.getAppName() + "\n\n")
+        # save app name
+        f.write("APP: " + app.getAppName() + "\n\n")
 
-            # save frequency
-            f.write("Clock Frequncy: {0}MHz\n\n".format(app.getFrequency("M")))
+        # save frequency
+        f.write("Clock Frequncy: {0}MHz\n\n".format(app.getFrequency("M")))
 
-            # units setting
-            f.write("Units setting\n")
-            f.write("Time: " + sim_params.getTimeUnit() + "\n")
-            f.write("Power: " + sim_params.getPowerUnit() + "\n")
-            f.write("Energy: " + sim_params.getEnergyUnit() + "\n")
-            f.write("\n")
+        # units setting
+        f.write("Units setting\n")
+        f.write("Time: " + sim_params.getTimeUnit() + "\n")
+        f.write("Power: " + sim_params.getPowerUnit() + "\n")
+        f.write("Energy: " + sim_params.getEnergyUnit() + "\n")
+        f.write("\n")
 
-            # evaluated data
-            f.write("Evaluation results\n")
-            for eval_name, value in zip(header["eval_names"], individual.fitness.values):
-                f.write("{0}: {1}\n".format(eval_name, value))
+        # evaluated data
+        f.write("Evaluation results\n")
+        for eval_name, value in zip(header["eval_names"], individual.fitness.values):
+            f.write("{0}: {1}\n".format(eval_name, value))
 
-            # Other data
-            leak = individual.getEvaluatedData("leakage_power")
-            dynamic = individual.getEvaluatedData("dynamic_power")
-            if not leak is None:
-                f.write("Leakage Power: {0}\n".format(leak))
+        # Other data
+        leak = individual.getEvaluatedData("leakage_power")
+        dynamic = individual.getEvaluatedData("dynamic_power")
+        if not leak is None:
+            f.write("Leakage Power: {0}\n".format(leak))
 
-            if not dynamic is None:
-                f.write("Dynamic Power: {0}\n".format(dynamic))
+        if not dynamic is None:
+            f.write("Dynamic Power: {0}\n".format(dynamic))
 
-            body_bias = individual.getEvaluatedData("body_bias")
-            if not body_bias is None:
-                f.write("\nBody Bias Voltages\n")
-                for domain, voltage in body_bias.items():
-                    f.write("{0}: {1} V\n".format(domain, voltage))
+        body_bias = individual.getEvaluatedData("body_bias")
+        if not body_bias is None:
+            f.write("\nBody Bias Voltages\n")
+            for domain, voltage in body_bias.items():
+                f.write("{0}: {1} V\n".format(domain, voltage))
 
-            # data memory alignment
-            f.write("\n")
-            f.write("Input data alignment\n")
-            f.write(str(LD_conf["mem_align"]))
-            f.write("\n\n")
-            f.write("Output data alignment\n")
-            f.write(str(ST_conf["mem_align"]))
+        # data memory alignment
+        f.write("\n")
+        f.write("Input data alignment\n")
+        f.write(str(LD_conf["mem_align"]))
+        f.write("\n\n")
+        f.write("Output data alignment\n")
+        f.write(str(ST_conf["mem_align"]))
 
-            f.close()
+        f.close()
 
 if __name__ == '__main__':
     generator = CCSOTB2_ConfGen()
