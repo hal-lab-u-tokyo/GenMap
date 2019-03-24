@@ -83,7 +83,7 @@ digraph{
 	"8" -> "sr00" [operand=right]
 
 	"sg000" -> "sg00"
-	"8" -> "sg00"
+	"8" -> "sg00" [operand=right]
 
 	"y0" -> "sb00"
 	"145" -> "sb00"
