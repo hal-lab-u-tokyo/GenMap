@@ -154,7 +154,7 @@ class CMASOTB2_ConfGen(ConfGenBase):
 
         with open(filename, "w") as f:
             for i in range(ld_table_num):
-                table = [v + ((ld_data_size * i) % width)for v in ld_conf["table"]]
+                table = [(v + (ld_data_size * i)) % width for v in ld_conf["table"]]
                 f.write(LD_TABLE_PKT.format(TABLE=TABLE_FORMAT.format(*table), index=i))
                 f.write(LD_MASK_PKT.format(MASK=TABLE_MASK_FORMAT.format(*ld_conf["mask"]), index=i))
             for i in range(st_table_num):
