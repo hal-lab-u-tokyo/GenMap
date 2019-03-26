@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # load application dot file
     app = Application()
     if os.path.exists(args.dot_file):
-        if app.read_dot(args.dot_file):
+        if app.read_dot(args.dot_file) == False:
             exit()
         app.setFrequency(args.freq, args.freq_unit)
     else:
