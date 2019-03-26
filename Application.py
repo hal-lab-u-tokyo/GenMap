@@ -61,7 +61,7 @@ class Application():
 
         # chech input for each node
         for v in dag:
-            if dag.in_degree(v) == 0 and dag.out_degree(v):
+            if dag.in_degree(v) == 0 and dag.out_degree(v) == 0:
                 print("App Error: operation ", v, "does not have input and output")
             elif dag.in_degree(v) > 2:
                 print("App Error: There is too much input to operation", v)
