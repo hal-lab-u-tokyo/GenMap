@@ -16,6 +16,13 @@ arrow_setting = dict(facecolor='black', width =0.8 ,headwidth=4.0,headlength=4.0
 class ConfDrawer():
 
     def __init__(self, CGRA, individual):
+        """Constructor of this class
+
+            Args:
+                CGRA: (PEArrayModel): A model of the CGRA
+                individual (Individual): An individual to be evaluated
+        """
+
         self.width, self.height = CGRA.getSize()
         self.used_PE = [ [False for y in range(self.height)] for x in range(self.width)]
         self.PE_resources = [ [ [] for y in range(self.height)] for x in range(self.width)]
@@ -50,6 +57,16 @@ class ConfDrawer():
 
 
     def draw_PEArray(self, CGRA, individual, app):
+        """Draws a PE array where application is mapped
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                individual (Individual): An individual to be evaluated
+                app (Application): an application mapped to the PE array
+
+            Returns:
+                None
+        """
         # add PEs
         for x in range(self.width):
             for y in range(self.height):
@@ -101,13 +118,29 @@ class ConfDrawer():
 
     @staticmethod
     def __make_PE_patch(coord, color):
+        """Makes a square for PE
+
+            Args:
+                coord (tuple): coordinate of the PE
+                color (str): color of the PE
+
+            Returns:
+                patch of matplotlib: a square
+        """
         x, y = coord
         return pat.Rectangle(xy = (x + pe_margin, y + pe_margin), \
                             width = pe_size, height = pe_size, \
                             angle = 0, facecolor = color, edgecolor="black")
     @staticmethod
     def __make_ALU_patch(coord):
+        """Makes a patch for ALU
 
+            Args:
+                coord (tuple): coordinate of the PE
+
+            Returns:
+                patch of matplotlib: an ALU
+        """
         pos = (coord[0] + 0.5, coord[1] + 0.4)
         x = [0.0, 0.4, 0.5, 0.6, 1.0, 0.8, 0.2]
         y = [0.0, 0.0, 0.2, 0.0, 0.0, 0.7, 0.7, 0.0]
@@ -119,6 +152,15 @@ class ConfDrawer():
 
     @staticmethod
     def __make_SE_patch(coord, SE_id):
+        """Makes a square for SE
+
+            Args:
+                coord (tuple): coordinate of the SE
+                SE_id (int): ID of the SE
+
+            Returns:
+                patch of matplotlib: a square
+        """
         x, y = coord
         pos_x = x + pe_margin + se_margin
         # pos_y = y + pe_margin + pe_size - (se_margin + (se_size + se_margin) * (SE_id + 1))
@@ -128,12 +170,22 @@ class ConfDrawer():
                                 angle = 0, color = se_color)
 
     def __make_preg(self, pos):
+        """Makes a line for activated pipeline regs
+
+            Args:
+                pos (int): position of the preg
+
+            Returns:
+                patch of matplotlib: a rectangle
+        """
         return pat.Rectangle(xy = (0, pos - pe_margin / 2), \
                                 width = self.width, height = pe_margin, \
                                 angle = 0, color = preg_color)
 
     @staticmethod
     def __get_center(patch):
+        """Calculates center coordinate of patch
+        """
         if isinstance(patch, plt.Rectangle):
             width = patch.get_width()
             height = patch.get_width()
@@ -153,9 +205,11 @@ class ConfDrawer():
 
 
     def show(self):
+        """Shows a drawn figure"""
         plt.axis("off")
         self.fig.show()
 
     def save(self, filepath):
+        """Save a drawn figure"""
         plt.axis("off")
         plt.savefig(filepath)

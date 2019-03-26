@@ -257,6 +257,7 @@ class PowerEval(EvalBase):
 
         return S_total * sim_params.switching_energy
 
+    @staticmethod
     def __getStageIndex(stage_domains, node):
         for stage in range(len(stage_domains)):
             if node in stage_domains[stage]:

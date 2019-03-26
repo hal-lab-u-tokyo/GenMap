@@ -40,24 +40,31 @@ class Application():
                 if len(attr) == 1:
                     k, v = tuple(attr.items())[0]
                     if not k in ["op", "const", "input", "output"]:
-                        print("Unknow attribute " + k)
+                        print("App Error: Unknow attribute " + k)
                         return False
                 else:
-                    print("There is no or too much attributes for " + v)
+                    print("App Error: There is no or too much attributes for " + v)
                     return False
             # check attributes of edges
             for u1, u2, attr in dag.edges(data=True):
                 if len(attr) == 1:
                     k, v = tuple(attr.items())[0]
                     if not k in ["operand"]:
-                        print("Unknow attribute " + k)
+                        print("App Error: Unknow attribute " + k)
                         return False
                 elif len(attr) > 1:
-                    print("There are too much attributes for edge " + (u1, u2))
+                    print("App Error: There are too much attributes for edge " + (u1, u2))
                     return False
         else:
-            print(file + " is not directed acyclic graph (DAG)")
+            print("App Error: " + file + " is not directed acyclic graph (DAG)")
             return False
+
+        # chech input for each node
+        for v in dag:
+            if dag.in_degree(v) == 0:
+                print("App Error: There is no input to operation", v)
+            elif dag.in_degree(v) > 2:
+                print("App Error: There is too much input to operation", v)
         self.__DAG = dag
         return True
 
@@ -183,23 +190,7 @@ class Application():
         return subg
 
     def hasConst(self):
+        """Returns wheather the application has constant values or not.
+        """
         return len(nx.get_node_attributes(self.__DAG, "const").keys()) > 0
-
-# test
-if __name__ == "__main__":
-    app = Application()
-    print(app.read_dot("./gray.dot"))
-    g = app.getCompSubGraph()
-    # import pylab
-    # pos = nx.nx_pydot.graphviz_layout(g)
-    # labels = nx.get_node_attributes(g, "op")
-    # nx.draw(g, pos)
-    # nx.draw_networkx_labels(g, pos, labels)
-    # # pylab.show()
-    # print(labels)
-
-    g2 = app.getConstSubGraph()
-    g3 = app.getInputSubGraph()
-    g4 = app.getOutputSubGraph()
-
 

@@ -45,9 +45,10 @@ class PEArrayModel():
             Example:
                 <SE id="0">...</SE>
 
-            "operation" Element has an inner text of the operation name supported by the ALU
+            "operation" Element has an inner text of the operation name supported by the ALU.
+            Also, it must have an attributes named "value" for configration data.
             Example:
-                <operation>ADD</operation>
+                <operation value="1" >ADD</operation>
 
             "output" Element is a output link of the SE.
             It must have its own name as a attribute named "name"
@@ -55,10 +56,11 @@ class PEArrayModel():
                 <output name="OUT_NORTH">...</output>
 
             "input" Element will be used to specify the connection between two Elements.
-            It must have 2 essential attributes and 3 optional attrbutes as follows.
+            It must have 3 essential attributes and 3 optional attrbutes as follows.
                 Essential:
                     name: name of this connection
                     type: a type of source node
+                    value: integer value of configuration data
                 Optional:
                     coord: coordinate of the source node
                         If type is ALU or SE, it is necessary.
@@ -69,10 +71,10 @@ class PEArrayModel():
                     index: index of the node
                         If type is Const or IN_PORT, it is necessay
             Examples:
-                <input name="ALU" type="ALU" coord="(0,0)"/>
-                <input name="IN_EAST" type="SE" id="0" src_name="OUT_WEST" coord="(1, 0)"/>
-                <input name="IN_SOUTH" type="IN_PORT" index="0" />
-                <input name="IN_CONST_A" type="Const" index="0"/>
+                <input name="ALU" type="ALU" value="0", coord="(0,0)"/>
+                <input name="IN_EAST" type="SE" id="0" value="2" src_name="OUT_WEST" coord="(1, 0)"/>
+                <input name="IN_SOUTH" type="IN_PORT" value="1" index="0" />
+                <input name="IN_CONST_A" type="Const" value="6" index="0"/>
 
             "PREG" Elements are pipeline registers.
             It must have a attribute "vpos" as a vetical position.
@@ -299,11 +301,30 @@ class PEArrayModel():
         self.setInitEdgeAttr("free", True)
 
     def __reg_config_net_table(self, dst, src, value):
+        """Regists configuration data table for PE array network.
+
+            Args:
+                dst (str): destionation node name
+                src (str): source node name
+                value (int): configration value when routing from src to dst
+
+            Returns:
+                None
+        """
         if not dst in self.__config_net_table.keys():
             self.__config_net_table[dst] = {}
         self.__config_net_table[dst][src] = value
 
     def __make_connection(self, dst, srcs):
+        """Makes connction from multiple source nodes to a destionation node
+
+            Args:
+                dst (src): destionation node name
+                srcs (list of XML Element): source node
+
+            Returns:
+                None
+        """
         for src in srcs:
             # parse input info
             attr = self.__parse_input(dst, src)
@@ -358,6 +379,8 @@ class PEArrayModel():
                 raise self.InvalidConfigError("known connection type {0}".format(attr["type"]))
 
     def __coord_str2tuple(self, s):
+        """convert a string of 2D coordinate to a tuple
+        """
         try:
             (x, y) = tuple([int(v) for v in s.strip("()").split(",")])
         except ValueError:
@@ -368,6 +391,15 @@ class PEArrayModel():
         return (x, y)
 
     def __parse_input(self, dst, input_connection):
+        """Parses Input XML elements.
+
+            Args:
+                dst (str): destionation node name
+                input_connection (XML Element): an input to dst node
+
+            Returns:
+                dict: Parsed items.
+        """
         # get connection name
         label = input_connection.get("name")
         if label is None:
@@ -555,8 +587,16 @@ class PEArrayModel():
 
 
     def getFreeSEs(self, routed_graph, x_range=None, y_range=None):
-        """
+        """Gets unused SEs.
 
+            Args:
+                routed_graph (networkx graph): routed graph
+                Optional:
+                    x_range (range): width range
+                    y_range (range): column range
+
+            Reterns:
+                list: unused SEs
         """
 
         rtn_list = []
@@ -577,6 +617,17 @@ class PEArrayModel():
         return rtn_list
 
     def getStageDomains(self, preg_config):
+        """Gets resources for each pipeline stage
+
+            Args:
+                preg_config (list of Boolean): pipeline register configuration
+                                               if n-th value is True, n-th preg is activated
+
+            Returns:
+                list: resources for each pipeline stage
+                        1st index is to specify the stage
+                        2nd index is to specify the resource node
+        """
         stage = 0
         rtn_list = [[] for stage in range(sum(preg_config) + 1)]
 
@@ -599,6 +650,8 @@ class PEArrayModel():
         return rtn_list
 
     def getPregNumber(self):
+        """Returns pipeline register number of the architecture
+        """
         return len(self.__preg_positions)
 
     @staticmethod
@@ -661,13 +714,32 @@ class PEArrayModel():
             return self.__operation_list[x][y]
 
     def getOpConfValue(self, coord, opcode):
+        """Gets configration value of ALU
+
+            Args:
+                coord (tuple): coordinate of the ALU
+                opcode (str): opcode assigned to the ALU
+
+            Returns:
+                int: configration value
+        """
         x, y = coord
         return self.__config_op_table[x][y][opcode]
 
     def getNetConfValue(self, dst, src):
+        """Gets configration value of SE
+
+            Args:
+                dst: a node of SE output channel
+                src: a node connected to the output
+
+            Returns:
+                int: configration value
+        """
         return self.__config_net_table[dst][src]
 
     def getWireName(self, se):
+        """Gets an output channel name"""
         return self.__output_names[se]
 
 
