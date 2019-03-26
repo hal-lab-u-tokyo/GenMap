@@ -223,7 +223,7 @@ class AStarRouter(RouterBase):
                     dist = nx.astar_path_length(routed_graph, res_node, alu)
                 except nx.exception.NetworkXNoPath:
                     dist = PENALTY_CONST
-                dist_from_res[(r, v)][res_node] = dist
+                dist_from_res[(r, v)][res_node] = dist + 1
 
         # make pulp problem
         prob = pulp.LpProblem("Make Resouece Mapping", pulp.LpMinimize)
