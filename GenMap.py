@@ -58,7 +58,8 @@ if __name__ == '__main__':
     # load application dot file
     app = Application()
     if os.path.exists(args.dot_file):
-        app.read_dot(args.dot_file)
+        if app.read_dot(args.dot_file):
+            exit()
         app.setFrequency(args.freq, args.freq_unit)
     else:
         print("No such file: " + args.dot_file, file=sys.stderr)
