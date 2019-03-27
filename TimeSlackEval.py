@@ -62,8 +62,13 @@ class TimeSlackEval(EvalBase):
                 delays.append(sum([delay_table[v][body_bias[domain_table[v]]] for v in dp]))
             else:
                 delays.append(sum([list(delay_table[v].values())[0] for v in dp]))
-
-        time_slack = app.getClockPeriod(sim_params.getTimeUnit()) - max(delays)
+        try:
+            time_slack = app.getClockPeriod(sim_params.getTimeUnit()) - max(delays)
+        except ValueError:
+            import pickle
+            with open("dbg.dump", "wb") as f:
+                pickle.dump(individual.mapping, f)
+                pickle.dump(individual.routed_graph, f)
         if time_slack < 0:
             individual.invalidate()
 
