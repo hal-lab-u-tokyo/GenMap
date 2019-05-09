@@ -37,23 +37,24 @@ class Application():
             dag = nx.DiGraph(g)
             # check attributes of nodes
             for u, attr in dag.nodes(data=True):
+                print(u, attr)
                 if len(attr) == 1:
                     k, v = tuple(attr.items())[0]
                     if not k in ["op", "const", "input", "output"]:
                         print("App Error: Unknow attribute " + k)
                         return False
                 else:
-                    print("App Error: There is no or too much attributes for " + v)
+                    print("App Error: There is no or too much attributes for \"{0}\"".format(u))
                     return False
             # check attributes of edges
             for u1, u2, attr in dag.edges(data=True):
                 if len(attr) == 1:
                     k, v = tuple(attr.items())[0]
                     if not k in ["operand"]:
-                        print("App Error: Unknow attribute " + k)
+                        print("App Error: Unknow attribute \"{0}\" between \"{1}\" and \"{2}\"".format(k, u1, u2))
                         return False
                 elif len(attr) > 1:
-                    print("App Error: There are too much attributes for edge " + (u1, u2))
+                    print("App Error: There are too much attributes \"{0}\" and \"{1}\"".format(u1, u2))
                     return False
         else:
             print("App Error: " + file + " is not directed acyclic graph (DAG)")
