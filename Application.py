@@ -37,7 +37,6 @@ class Application():
             dag = nx.DiGraph(g)
             # check attributes of nodes
             for u, attr in dag.nodes(data=True):
-                print(u, attr)
                 if len(attr) == 1:
                     k, v = tuple(attr.items())[0]
                     if not k in ["op", "const", "input", "output"]:
