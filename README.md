@@ -44,7 +44,7 @@ If you want to exit this environment, just execute ``deactivate`` command.
 GenMap requires the following python libraries. Recommended version for each library is in the bracket.
     1. deap (1.0.1)
     1. pulp (1.6.8)
-    1. networks (2.2)
+    1. networkx (2.2)
     1. tqdm (4.31.1)
     1. matplotlib (3.0.0)
     1. pydot (1.4.1)
@@ -90,7 +90,7 @@ Please copy architecture definition file and simulation paramter file to working
 
 Please copy optimization setting to working directory.
 ```
-(GenMap_env) # cp ../GenMap/OptimizationParamters.xml ./
+(GenMap_env) # cp ../GenMap/OptimizationParameters.xml ./
 ```
 
 To run GenMap, please execute:
