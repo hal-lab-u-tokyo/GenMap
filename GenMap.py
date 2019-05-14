@@ -16,6 +16,7 @@ from MapWidthEval import MapWidthEval
 from PowerEval import PowerEval
 from OpMapWidthEval import OpMapWidthEval
 from TimeSlackEval import TimeSlackEval
+from EccEval import EccEval
 
 # standard libs
 from argparse import ArgumentParser
@@ -148,15 +149,15 @@ if __name__ == '__main__':
         exit()
 
     # setup optimization
-    objectives = [WireLengthEval, MapWidthEval, OpMapWidthEval, PowerEval, TimeSlackEval]
+    objectives = [WireLengthEval, MapWidthEval, OpMapWidthEval, PowerEval, TimeSlackEval, EccEval]
 
     if not args.nproc is None:
         success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
-                        [{}, {}, {}, {"duplicate_enable": args.duplicate_enable}, {}], \
+                        [{}, {}, {}, {"duplicate_enable": args.duplicate_enable}, {}, {}], \
                         proc_num = args.nproc)
     else:
         success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
-                        [{}, {}, {}, {"duplicate_enable": args.duplicate_enable}, {}])
+                        [{}, {}, {}, {"duplicate_enable": args.duplicate_enable}, {}, {}])
 
     # run optimization
     if success_setup:
