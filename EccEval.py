@@ -1,39 +1,5 @@
 from EvalBase import EvalBase
-
-
-CMASOTB2_PE_CONF_PARAM = [
-    {
-        'name': 'OPCODE',
-        'width': '4'
-    }, {
-        'name': 'SEL_A',
-        'width': '3'
-    }, {
-        'name': 'SEL_B',
-        'width': '3'
-    }, {
-        'name': 'OUT_A_NORTH',
-        'width': '3'
-    }, {
-        'name': 'OUT_A_SOUTH',
-        'width': '2'
-    }, {
-        'name': 'OUT_A_EAST',
-        'width': '3'
-    }, {
-        'name': 'OUT_A_WEST',
-        'width': '2'
-    }, {
-        'name': 'OUT_B_NORTH',
-        'width': '4'
-    }, {
-        'name': 'OUT_B_EAST',
-        'width': '3'
-    }, {
-        'name': 'OUT_B_WEST',
-        'width': '3'
-    }
-]
+from FaultArchModel import FaultArchModel, CMASOTB2_PE_CONF_PARAM
 
 class EccEval(EvalBase):
     def __init__(self):
@@ -44,15 +10,20 @@ class EccEval(EvalBase):
 
         PEs_conf = EccEval._get_PEs_conf(CGRA, app, individual)
 
-        for i in range(8):
-            for j in range(8):
+        faultArchModel_width = 8
+        faultArchModel_height = 8
+        faultArchModel = FaultArchModel(num_pes=faultArchModel_width*faultArchModel_height)
+
+        for i in range(faultArchModel_width):
+            for j in range(faultArchModel_height):
                 PE_conf = PEs_conf[i][j]
 
                 for conf_keys in CMASOTB2_PE_CONF_PARAM:
                     if not conf_keys['name'] in PE_conf:
                         PE_conf[conf_keys['name']] = None
 
-                print('PE_conf:', PE_conf)
+                pe_id = i + j * faultArchModel_height
+                # faultArchModel.check()
 
         return 0
 
