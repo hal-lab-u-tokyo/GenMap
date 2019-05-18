@@ -22,8 +22,8 @@ class EccEval(EvalBase):
                     if not conf_keys['name'] in PE_conf:
                         PE_conf[conf_keys['name']] = None
 
-                pe_id = i + j * faultArchModel_height
-                # faultArchModel.check()
+                PE_id = i + j * faultArchModel_height
+                faultArchModel.checkPeAvailablity(PE_id, PE_conf)
 
         return 0
 
