@@ -1,6 +1,8 @@
 from EvalBase import EvalBase
 from FaultArchModel import FaultArchModel, CMASOTB2_PE_CONF_PARAM
 
+DEBUG_FIND_BREAK = True
+
 class EccEval(EvalBase):
     def __init__(self):
         pass
@@ -12,7 +14,10 @@ class EccEval(EvalBase):
 
         faultArchModel_width = 8
         faultArchModel_height = 8
-        faultArchModel = FaultArchModel(num_pes=faultArchModel_width*faultArchModel_height)
+        faultArchModel = FaultArchModel(
+            num_pes=faultArchModel_width*faultArchModel_height,
+            stack0_rate=0.1, stack1_rate=0.1,
+            ecc=True)
 
         for i in range(faultArchModel_width):
             for j in range(faultArchModel_height):
@@ -23,8 +28,11 @@ class EccEval(EvalBase):
                         PE_conf[conf_keys['name']] = None
 
                 PE_id = i + j * faultArchModel_height
-                faultArchModel.checkPeAvailablity(PE_id, PE_conf)
-
+                if not faultArchModel.checkPeAvailablity(PE_id, PE_conf):
+                    return 1
+        if DEBUG_FIND_BREAK:
+            print("Find Vaild Mapping with ECC")
+            raise RuntimeError("Find Vaild Mapping with ECC")
         return 0
 
     @staticmethod
