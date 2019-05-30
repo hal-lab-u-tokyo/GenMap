@@ -16,7 +16,7 @@ from MapWidthEval import MapWidthEval
 from PowerEval import PowerEval
 from OpMapWidthEval import OpMapWidthEval
 from TimeSlackEval import TimeSlackEval
-from EccEval import EccEval
+from EccEval import EccEval, SeedMap
 
 # standard libs
 from argparse import ArgumentParser
@@ -27,6 +27,10 @@ import time
 import pickle
 import xml.etree.ElementTree as ET
 from datetime import datetime
+
+EccEval.seed_map = SeedMap()
+env_random_seed_num = int(os.getenv('GENMAP_RANDOM_SEED_NUM', '1000'))
+EccEval.seed_map.gen(env_random_seed_num)
 
 def parser():
     usage = 'Usage: python3 {0} [options...] dot_file frequency'.format(__file__)
@@ -183,13 +187,13 @@ if __name__ == '__main__':
         finally:
             # discard std input
             print("Please enter any keys\n")
-            _ = sys.stdin.read(1)
+            # _ = sys.stdin.read(1)
             # restore tty attr
             termios.tcsetattr(fd, termios.TCSANOW, old)
 
         # save results
         save_header = {"app": app, "arch": model, "opt_conf": tree_opt.getroot(),
-                        "sim_params": sim_params,
+                        "sim_params": sim_params,q
                         "eval_names": [obj.name() for obj in objectives],
                         "fitness_weights": tuple(-1.0 if obj.isMinimize() else 1.0 for obj in objectives)}
         save_data = {"hof": hof, "hypervolume": hv}
@@ -198,6 +202,8 @@ if __name__ == '__main__':
         with open(output_file_name, "wb") as file:
             pickle.dump(save_header, file)
             pickle.dump(save_data, file)
+
+        print("FIND AVAIL MAP LENGTH:", EccEval.seed_map.count)
 
     else:
         print("Fail to initilize")

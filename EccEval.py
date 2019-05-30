@@ -1,43 +1,85 @@
 from EvalBase import EvalBase
 from FaultArchModel import FaultArchModel, CMASOTB2_PE_CONF_PARAM
 
-DEBUG_FIND_BREAK = True
+class SeedMap(object):
+    def __init__(self):
+        import multiprocessing
+        self.vals = []
+        self.countTouching = multiprocessing.Value('i', 0)
+    
+    def gen(self, num):
+        import multiprocessing
+        if len(self.vals) != 0:
+            return
+        for i in range(num):
+            self.vals.append(multiprocessing.Value('i', 0))
+
+    def touch(self, i):
+        with self.countTouching.get_lock() and self.vals[i].get_lock():
+            if self.vals[i].value != 0:
+                return
+            self.countTouching.value += 1
+            self.vals[i].value = 1
+            print("Find Vaild Mapping(PE seed[", i, "])")
+            if self.countTouching.value == len(self.vals):
+                print("FIND AVAIL MAP LENGTH:", self.countTouching.value)
+                raise RuntimeError("this app is available with each seed!!!")
+
+    def isTouched(self, i):
+        return self.vals[i].value == 1
+    
+    @property
+    def count(self):
+        return self.countTouching.value
 
 class EccEval(EvalBase):
+    seed_map = None
+
     def __init__(self):
         pass
 
     @staticmethod
     def eval(CGRA, app, sim_params, individual):
+
+        
         import os
+
         PEs_conf = EccEval._get_PEs_conf(CGRA, app, individual)
 
         env_ecc = bool(int(os.getenv('GENMAP_ECC', '1')))
         env_stack_rate = float(os.getenv('GENMAP_STACK_RATE', '0.02'))
-        env_random_seed = int(os.getenv('GENMAP_RANDOM_SEED', '0'))
+        env_random_seed_start = int(os.getenv('GENMAP_RANDOM_SEED_START', '0'))
+        env_random_seed_num = int(os.getenv('GENMAP_RANDOM_SEED_NUM', '1000'))
 
         faultArchModel_width = 8
         faultArchModel_height = 8
-        faultArchModel = FaultArchModel(
-            num_pes=faultArchModel_width*faultArchModel_height,
-            stack0_rate=env_stack_rate/2, stack1_rate=env_stack_rate/2,
-            ecc=env_ecc,seed=env_random_seed)
 
-        for i in range(faultArchModel_width):
-            for j in range(faultArchModel_height):
-                PE_conf = PEs_conf[i][j]
+        for seed in range(env_random_seed_start, env_random_seed_start + env_random_seed_num):
+            if not EccEval.seed_map.isTouched(seed):
+                faultArchModel = FaultArchModel(
+                    num_pes=faultArchModel_width*faultArchModel_height,
+                    stack0_rate=env_stack_rate/2, stack1_rate=env_stack_rate/2,
+                    ecc=env_ecc,seed=seed)
 
-                for conf_keys in CMASOTB2_PE_CONF_PARAM:
-                    if not conf_keys['name'] in PE_conf:
-                        PE_conf[conf_keys['name']] = None
+                for i in range(faultArchModel_width):
+                    for j in range(faultArchModel_height):
+                        PE_conf = PEs_conf[i][j]
 
-                PE_id = i + j * faultArchModel_height
-                if not faultArchModel.checkPeAvailablity(PE_id, PE_conf):
-                    return 1
-        if DEBUG_FIND_BREAK:
-            print("Find Vaild Mapping with ECC")
-            raise RuntimeError("Find Vaild Mapping with ECC")
-        return 0
+                        for conf_keys in CMASOTB2_PE_CONF_PARAM:
+                            if not conf_keys['name'] in PE_conf:
+                                PE_conf[conf_keys['name']] = None
+
+                        PE_id = i + j * faultArchModel_height
+                        if not faultArchModel.checkPeAvailablity(PE_id, PE_conf):
+                            break
+                    else:
+                        continue
+                    break
+                else:
+                    # みつけた
+                    EccEval.seed_map.touch(seed)
+        
+        return 1
 
     @staticmethod
     def _get_PEs_conf(CGRA, app, individual):
@@ -105,7 +147,7 @@ class EccEval(EvalBase):
 
     @staticmethod
     def isMinimize():
-        return True
+        return False
 
     @staticmethod
     def name():
