@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
         # save results
         save_header = {"app": app, "arch": model, "opt_conf": tree_opt.getroot(),
-                        "sim_params": sim_params,q
+                        "sim_params": sim_params,
                         "eval_names": [obj.name() for obj in objectives],
                         "fitness_weights": tuple(-1.0 if obj.isMinimize() else 1.0 for obj in objectives)}
         save_data = {"hof": hof, "hypervolume": hv}
