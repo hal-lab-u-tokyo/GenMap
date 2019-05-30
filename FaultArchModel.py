@@ -42,7 +42,8 @@ class BitState(object):
     Stack1 = 2
 
 class FaultArchModel(object):
-    def __init__(self, num_pes=64, stack0_rate=0.0, stack1_rate=0.0, seed=None, ecc=True):
+    def __init__(self, num_pes=64, stack0_rate=0.0, stack1_rate=0.0, seed=0, ecc=True):
+        import os
         self._stack0_rate = stack0_rate
         self._stack1_rate = stack1_rate
         self._seed = seed

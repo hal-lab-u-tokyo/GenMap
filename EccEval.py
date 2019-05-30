@@ -9,15 +9,19 @@ class EccEval(EvalBase):
 
     @staticmethod
     def eval(CGRA, app, sim_params, individual):
-
+        import os
         PEs_conf = EccEval._get_PEs_conf(CGRA, app, individual)
+
+        env_ecc = bool(int(os.getenv('GENMAP_ECC', '1')))
+        env_stack_rate = float(os.getenv('GENMAP_STACK_RATE', '0.02'))
+        env_random_seed = int(os.getenv('GENMAP_RANDOM_SEED', '0'))
 
         faultArchModel_width = 8
         faultArchModel_height = 8
         faultArchModel = FaultArchModel(
             num_pes=faultArchModel_width*faultArchModel_height,
-            stack0_rate=0.1, stack1_rate=0.1,
-            ecc=True)
+            stack0_rate=env_stack_rate/2, stack1_rate=env_stack_rate/2,
+            ecc=env_ecc,seed=env_random_seed)
 
         for i in range(faultArchModel_width):
             for j in range(faultArchModel_height):
