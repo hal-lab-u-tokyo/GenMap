@@ -492,7 +492,7 @@ class PEArrayModel():
             node_name = ALU_node_exp.format(pos=pos)
         elif etype == "SE" and not pos is None and \
             not id is None and not link_name is None:
-            node_name = SE_node_exp.format(pos=pos, id=id, name=link_name)
+            node_name = SE_node_exp.format(pos=pos, id=se_id, name=link_name)
         elif etype == "Const" and not index is None:
             node_name = CONST_node_exp.format(index=index)
         elif etype == "IN_PORT" and not index is None:
