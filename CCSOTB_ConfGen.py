@@ -42,9 +42,9 @@ class CCSOTB_ConfGen(ConfGenBase):
         self.force_mode = args["force"]
 
         if os.path.exists(args["output_dir"]):
-            fig_filename = args["output_dir"] + "/" + args["prefex"] + "_map.png"
-            conf_filename = args["output_dir"] + "/" + args["prefex"] + "_conf.pkt"
-            info_filename = args["output_dir"] + "/" + args["prefex"] + "_info.txt"
+            fig_filename = args["output_dir"] + "/" + args["prefix"] + "_map.png"
+            conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.pkt"
+            info_filename = args["output_dir"] + "/" + args["prefix"] + "_info.txt"
 
             # check if files exist
             files_exist = False

@@ -5,7 +5,7 @@ from pathlib import Path
 class Application():
 
     TIME_UNIT = {"ps": 10**(-12), "ns": 10**(-9), "us": 10**(-6), "ms": 10**(-3)}
-    FREQ_PREFEX = {"G": 10**9, "M": 10**6, "k": 10**3}
+    FREQ_PREFIX = {"G": 10**9, "M": 10**6, "k": 10**3}
 
     def __init__(self):
         self.__DAG = nx.DiGraph()
@@ -73,20 +73,20 @@ class Application():
         """
         return self.__app_name
 
-    def setFrequency(self, f, prefex="M"):
+    def setFrequency(self, f, prefix="M"):
         """set operation frequency.
 
             Args:
                 f (float): Frequency
-                prefex (str): prefex of frequency unit
+                prefix (str): prefix of frequency unit
                     "G": GHz, "M": MHz, "k": kHz
 
             Return: None
         """
-        self.__Freq = float(f) * self.FREQ_PREFEX[prefex]
+        self.__Freq = float(f) * self.FREQ_PREFIX[prefix]
 
-    def getFrequency(self, prefex):
-        return self.__Freq / self.FREQ_PREFEX[prefex]
+    def getFrequency(self, prefix):
+        return self.__Freq / self.FREQ_PREFIX[prefix]
 
     def getClockPeriod(self, time_unit):
         """set operation frequency.

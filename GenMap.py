@@ -46,7 +46,7 @@ def parser():
     argparser.add_argument("--duplicate-enable",  action='store_true', \
                             help="enable duplication of data-flow mapping horizontally")
     argparser.add_argument("--freq-unit", type=str, choices=["M", "G", "k"], default="M",\
-                            help="specify the prefex of frequency prefex (default = M)")
+                            help="specify the prefix of frequency unit (default = M)")
     argparser.add_argument("--log", type=str, help="specify log file name (default: no logging)")
     argparser.add_argument("--nproc", type=int, help="specify the number of multi-process (default: cpu count)")
     args = argparser.parse_args()
