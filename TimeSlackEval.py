@@ -34,7 +34,7 @@ class TimeSlackEval(EvalBase):
         # get delay table for ALU
         op_attr = nx.get_node_attributes(app.getCompSubGraph(), "op")
         delay_table = {CGRA.getNodeName("ALU", pos): \
-                        sim_params.delay_info[op_attr[op_label]] \
+                        sim_params.delay_info[op_attr[op_label] if op_label in op_attr.keys() else "CAT" ] \
                             for op_label, pos in individual.mapping.items()}
 
         delay_table.update({v: sim_params.delay_info["SE"]\

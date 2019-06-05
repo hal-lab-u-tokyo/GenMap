@@ -235,7 +235,10 @@ class CCSOTB_ConfGen(ConfGenBase):
 
         # ALUs
         for op_label, (x, y) in individual.mapping.items():
-            opcode = comp_dfg.node[op_label]["op"]
+            if op_label in comp_dfg.nodes():
+                opcode = comp_dfg.node[op_label]["op"]
+            else:
+                opcode = "CAT"
             confs[x][y]["OPCODE"] = CGRA.getOpConfValue((x, y), opcode)
             alu = CGRA.get_PE_resources((x, y))["ALU"]
             pre_nodes = list(routed_graph.predecessors(alu))
