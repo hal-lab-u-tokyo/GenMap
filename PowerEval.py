@@ -88,7 +88,8 @@ class PowerEval(EvalBase):
                     values (str): opcode of the ALU
         """
         op_attr = nx.get_node_attributes(app.getCompSubGraph(), "op")
-        opcodes = {CGRA.getNodeName("ALU", pos): op_attr[op_label]\
+        opcodes = {CGRA.getNodeName("ALU", pos): op_attr[op_label] \
+                     if op_label in op_attr.keys() else "CAT" \
                          for op_label, pos in mapping.items()}
         return opcodes
 

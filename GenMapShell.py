@@ -231,8 +231,8 @@ class GenMapShell(Cmd):
                             default=self.header["app"].getAppName())
         parser.add_argument("-f", "--force", action='store_true', \
                             help="overwrite without prompt")
-        parser.add_argument("-p", "--prefex", type=str, \
-                            help="specify prefex of output file names (default: app_name)",\
+        parser.add_argument("-p", "--prefix", type=str, \
+                            help="specify prefix of output file names (default: app_name)",\
                             default=self.header["app"].getAppName())
         parser.add_argument("-s", "--style", nargs="+", default=[],\
                             help="Pass the space separated arguments to configuration generator")
