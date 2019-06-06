@@ -18,6 +18,7 @@ class PEArrayModel():
         Args:
             conf (XML Element): Specification of the PE array
             It must contain following attributes
+                name: architecture name
                 width: PE array width
                 height: PE array height
                 const_reg: the number of constant registers
@@ -91,6 +92,7 @@ class PEArrayModel():
         self.__network = nx.DiGraph()
         self.__width = 0
         self.__height = 0
+        self.__arch_name = ""
         self.__const_reg_range = []
         self.__in_port_range = []
         self.__out_port_range = []
@@ -136,6 +138,16 @@ class PEArrayModel():
         #    key:   SE node name
         #    value: output name defined by config file
         self.__output_names = {}
+
+        # get architecture name
+        name_str = conf.get("name")
+        if name_str == None:
+            raise self.InvalidConfigError("missing attribute of architecure name: name")
+        else:
+            if name_str == "":
+                raise ValueError("Ivalid attribute of archirecture name: name")
+            else:
+                self.__arch_name = name_str
 
         # init PE array width
         width_str = conf.get("width")
@@ -460,6 +472,17 @@ class PEArrayModel():
                 "conf_value": conf_val}
 
     # getter method
+    def getArchName(self):
+        '''Returns architecture name of this model
+
+        Args:
+            None
+
+        Return:
+            str: architecture name
+        '''
+        return self.__arch_name
+
     def getNetwork(self):
         '''Returns a networkx object as the PE array model
 

@@ -1,4 +1,4 @@
-<PEArray width="12" height="7" const_reg="14" input_port="12" output_port="12">
+<PEArray name="CCSOTB" width="12" height="7" const_reg="14" input_port="12" output_port="12">
 	<!-- ROW 00 -->
 	<PE coord="(0, 0)" bbdomain="domain0">
 		<ALU>
