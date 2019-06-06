@@ -37,7 +37,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
         app = header["app"]
 
         if CGRA.getArchName() != "CCSOTB2":
-            raise TypeError("This solution is not for CCSOTB2, but for", CGRA.getArchName())
+            raise TypeError("This solution is not for CCSOTB2, but for" + CGRA.getArchName())
 
         self.force_mode = args["force"]
 
