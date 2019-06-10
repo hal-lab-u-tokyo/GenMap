@@ -1,12 +1,13 @@
 from EvalBase import EvalBase
 from FaultArchModel import FaultArchModel, CMASOTB2_PE_CONF_PARAM
 
+
 class SeedMap(object):
     def __init__(self):
         import multiprocessing
         self.vals = []
         self.countTouching = multiprocessing.Value('i', 0)
-    
+
     def gen(self, num):
         import multiprocessing
         if len(self.vals) != 0:
@@ -20,17 +21,18 @@ class SeedMap(object):
                 return
             self.countTouching.value += 1
             self.vals[i].value = 1
-            print("Find Vaild Mapping(PE seed[", i, "])")
+            # print("Find Vaild Mapping(PE seed[", i, "])")
             if self.countTouching.value == len(self.vals):
-                print("FIND AVAIL MAP LENGTH:", self.countTouching.value)
+                # print("FIND AVAIL MAP LENGTH:", self.countTouching.value)
                 raise RuntimeError("this app is available with each seed!!!")
 
     def isTouched(self, i):
         return self.vals[i].value == 1
-    
+
     @property
     def count(self):
         return self.countTouching.value
+
 
 class EccEval(EvalBase):
     seed_map = None
@@ -41,7 +43,6 @@ class EccEval(EvalBase):
     @staticmethod
     def eval(CGRA, app, sim_params, individual):
 
-        
         import os
 
         PEs_conf = EccEval._get_PEs_conf(CGRA, app, individual)
@@ -54,12 +55,15 @@ class EccEval(EvalBase):
         faultArchModel_width = 8
         faultArchModel_height = 8
 
-        for seed in range(env_random_seed_start, env_random_seed_start + env_random_seed_num):
+        for seed in range(env_random_seed_start,
+                          env_random_seed_start + env_random_seed_num):
             if not EccEval.seed_map.isTouched(seed):
                 faultArchModel = FaultArchModel(
-                    num_pes=faultArchModel_width*faultArchModel_height,
-                    stack0_rate=env_stack_rate/2, stack1_rate=env_stack_rate/2,
-                    ecc=env_ecc,seed=seed)
+                    num_pes=faultArchModel_width * faultArchModel_height,
+                    stack0_rate=env_stack_rate / 2,
+                    stack1_rate=env_stack_rate / 2,
+                    ecc=env_ecc,
+                    seed=seed)
 
                 for i in range(faultArchModel_width):
                     for j in range(faultArchModel_height):
@@ -70,7 +74,8 @@ class EccEval(EvalBase):
                                 PE_conf[conf_keys['name']] = None
 
                         PE_id = i + j * faultArchModel_height
-                        if not faultArchModel.checkPeAvailablity(PE_id, PE_conf):
+                        if not faultArchModel.checkPeAvailablity(
+                                PE_id, PE_conf):
                             break
                     else:
                         continue
@@ -78,7 +83,7 @@ class EccEval(EvalBase):
                 else:
                     # みつけた
                     EccEval.seed_map.touch(seed)
-        
+
         return 1
 
     @staticmethod
