@@ -110,8 +110,8 @@ class FaultArchModel(object):
             encoded_possible_write_data = self._encode_ecc(possible_write_data)
             distance = self._calc_distance(model=model, write_data=encoded_possible_write_data)
             if distance <= CORRECTABLE_DISTANCE:
-                if distance == 0:
-                    return True
+                # if distance == 0:
+                return True
         return False
     
     def __is_all_none(self, write_data):
