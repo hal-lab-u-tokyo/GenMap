@@ -24,6 +24,7 @@ class SeedMap(object):
             # print("Find Vaild Mapping(PE seed[", i, "])")
             if self.countTouching.value == len(self.vals):
                 # print("FIND AVAIL MAP LENGTH:", self.countTouching.value)
+                print("this app is available with each seed!!!")
                 raise RuntimeError("this app is available with each seed!!!")
 
     def isTouched(self, i):
