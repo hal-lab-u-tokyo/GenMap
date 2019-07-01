@@ -36,7 +36,7 @@ class SeedMap(object):
 
 
 class EccEval(EvalBase):
-    seed_map = None
+    seed_maps = None
 
     def __init__(self):
         pass
@@ -56,34 +56,35 @@ class EccEval(EvalBase):
         faultArchModel_width = 8
         faultArchModel_height = 8
 
-        for seed in range(env_random_seed_start,
-                          env_random_seed_start + env_random_seed_num):
-            if not EccEval.seed_map.isTouched(seed):
-                faultArchModel = FaultArchModel(
-                    num_pes=faultArchModel_width * faultArchModel_height,
-                    stack0_rate=env_stack_rate / 2,
-                    stack1_rate=env_stack_rate / 2,
-                    ecc=env_ecc,
-                    seed=seed)
+        for seed_map in seed_maps:
+            for seed in range(env_random_seed_start,
+                            env_random_seed_start + env_random_seed_num):
+                if not seed_map.isTouched(seed):
+                    faultArchModel = FaultArchModel(
+                        num_pes=faultArchModel_width * faultArchModel_height,
+                        stack0_rate=env_stack_rate / 2,
+                        stack1_rate=env_stack_rate / 2,
+                        ecc=env_ecc,
+                        seed=seed)
 
-                for i in range(faultArchModel_width):
-                    for j in range(faultArchModel_height):
-                        PE_conf = PEs_conf[i][j]
+                    for i in range(faultArchModel_width):
+                        for j in range(faultArchModel_height):
+                            PE_conf = PEs_conf[i][j]
 
-                        for conf_keys in CMASOTB2_PE_CONF_PARAM:
-                            if not conf_keys['name'] in PE_conf:
-                                PE_conf[conf_keys['name']] = None
+                            for conf_keys in CMASOTB2_PE_CONF_PARAM:
+                                if not conf_keys['name'] in PE_conf:
+                                    PE_conf[conf_keys['name']] = None
 
-                        PE_id = i + j * faultArchModel_height
-                        if not faultArchModel.checkPeAvailablity(
-                                PE_id, PE_conf):
-                            break
+                            PE_id = i + j * faultArchModel_height
+                            if not faultArchModel.checkPeAvailablity(
+                                    PE_id, PE_conf):
+                                break
+                        else:
+                            continue
+                        break
                     else:
-                        continue
-                    break
-                else:
-                    # みつけた
-                    EccEval.seed_map.touch(seed)
+                        # みつけた
+                        seed_map.touch(seed - env_random_seed_start)
 
         return 1
 
