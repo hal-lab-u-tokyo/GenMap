@@ -34,7 +34,8 @@ for failure_rate in [0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.001, 0.002, 0.003
         seed_maps = {
             'failure_rate': failure_rate,
             'ecc_condition': ecc_condition,
-            'seed_map': SeedMap()
+            'seed_map': SeedMap(),
+            'fault_arch_models': {}
         }
 
 EccEval.seed_maps = seed_maps

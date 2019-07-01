@@ -56,17 +56,18 @@ class EccEval(EvalBase):
         faultArchModel_width = 8
         faultArchModel_height = 8
 
-        for seed_map in seed_maps:
+        for seed_map in EccEval.seed_maps:
             for seed in range(env_random_seed_start,
-                            env_random_seed_start + env_random_seed_num):
-                if not seed_map.isTouched(seed):
-                    faultArchModel = FaultArchModel(
+                              env_random_seed_start + env_random_seed_num):
+                if seed not in seed_map['fault_arch_models']:
+                    seed_map['fault_arch_models'][seed] = FaultArchModel(
                         num_pes=faultArchModel_width * faultArchModel_height,
                         stack0_rate=env_stack_rate / 2,
                         stack1_rate=env_stack_rate / 2,
                         ecc=env_ecc,
                         seed=seed)
-
+                if not seed_map.isTouched(seed):
+                    faultArchModel = seed_map['fault_arch_models'][seed]
                     for i in range(faultArchModel_width):
                         for j in range(faultArchModel_height):
                             PE_conf = PEs_conf[i][j]
