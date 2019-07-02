@@ -22,10 +22,6 @@ class SeedMap(object):
             self.countTouching.value += 1
             self.vals[i].value = 1
             # print("Find Vaild Mapping(PE seed[", i, "])")
-            if self.countTouching.value == len(self.vals):
-                # print("FIND AVAIL MAP LENGTH:", self.countTouching.value)
-                print("this app is available with each seed!!!")
-                raise RuntimeError("this app is available with each seed!!!")
 
     def isTouched(self, i):
         return self.vals[i].value == 1
@@ -36,7 +32,7 @@ class SeedMap(object):
 
 
 class EccEval(EvalBase):
-    seed_maps = None
+    conditions = None
 
     def __init__(self):
         pass
@@ -56,18 +52,18 @@ class EccEval(EvalBase):
         faultArchModel_width = 8
         faultArchModel_height = 8
 
-        for seed_map in EccEval.seed_maps:
+        for condition in EccEval.conditions:
             for seed in range(env_random_seed_start,
                               env_random_seed_start + env_random_seed_num):
-                if seed not in seed_map['fault_arch_models']:
-                    seed_map['fault_arch_models'][seed] = FaultArchModel(
+                if seed not in condition['fault_arch_models']:
+                    condition['fault_arch_models'][seed] = FaultArchModel(
                         num_pes=faultArchModel_width * faultArchModel_height,
                         stack0_rate=env_stack_rate / 2,
                         stack1_rate=env_stack_rate / 2,
                         ecc=env_ecc,
                         seed=seed)
-                if not seed_map.isTouched(seed):
-                    faultArchModel = seed_map['fault_arch_models'][seed]
+                if not condition['seed_map'].isTouched(seed):
+                    faultArchModel = condition['fault_arch_models'][seed]
                     for i in range(faultArchModel_width):
                         for j in range(faultArchModel_height):
                             PE_conf = PEs_conf[i][j]
@@ -85,7 +81,7 @@ class EccEval(EvalBase):
                         break
                     else:
                         # みつけた
-                        seed_map.touch(seed - env_random_seed_start)
+                        condition['seed_map'].touch(seed - env_random_seed_start)
 
         return 1
 

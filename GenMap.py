@@ -27,18 +27,18 @@ import pickle
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
-seed_maps = []
+conditions = []
 
 for failure_rate in [0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.001, 0.002, 0.003, 0.004, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]:
     for ecc_condition in [True, False]:
-        seed_maps = {
+        conditions = {
             'failure_rate': failure_rate,
             'ecc_condition': ecc_condition,
             'seed_map': SeedMap(),
             'fault_arch_models': {}
         }
 
-EccEval.seed_maps = seed_maps
+EccEval.conditions = conditions
 
 env_random_seed_num = int(os.getenv('GENMAP_RANDOM_SEED_NUM', '1000'))
 EccEval.seed_map.gen(env_random_seed_num)
@@ -214,7 +214,9 @@ if __name__ == '__main__':
             pickle.dump(save_header, file)
             pickle.dump(save_data, file)
 
-        print("FIND AVAIL MAP LENGTH:", EccEval.seed_map.count)
+        # print("FIND AVAIL MAP LENGTH:", EccEval.seed_map.count)
+        for condition in EccEval.conditions:
+            print('failure_rate: %f, ecc_condition: %d, result: %d' % (condition['failure_rate'], condition['ecc_condition'], condition['seed_map'].count))
 
     else:
         print("Fail to initilize")
