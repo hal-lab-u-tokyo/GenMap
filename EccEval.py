@@ -3,32 +3,26 @@ from FaultArchModel import FaultArchModel, CMASOTB2_PE_CONF_PARAM
 
 
 class SeedMap(object):
-    def __init__(self):
+    def __init__(self, num):
         import multiprocessing
-        self.vals = []
+        self.vals = multiprocessing.Array('i', [0] * num)
         self.countTouching = multiprocessing.Value('i', 0)
 
-    def gen(self, num):
-        import multiprocessing
-        if len(self.vals) != 0:
-            return
-        for i in range(num):
-            self.vals.append(multiprocessing.Value('i', 0))
-
     def touch(self, i):
-        with self.countTouching.get_lock() and self.vals[i].get_lock():
-            if self.vals[i].value != 0:
+        with self.countTouching.get_lock() and self.vals.get_lock():
+            if self.vals[i] != 0:
                 return
             self.countTouching.value += 1
-            self.vals[i].value = 1
-            # print("Find Vaild Mapping(PE seed[", i, "])")
+            self.vals[i] = 1
 
     def isTouched(self, i):
-        return self.vals[i].value == 1
+        with self.vals.get_lock():
+            return self.vals[i] == 1
 
     @property
     def count(self):
-        return self.countTouching.value
+        with self.countTouching.get_lock():
+            return self.countTouching.value
 
 
 class EccEval(EvalBase):
@@ -44,8 +38,6 @@ class EccEval(EvalBase):
 
         PEs_conf = EccEval._get_PEs_conf(CGRA, app, individual)
 
-        env_ecc = bool(int(os.getenv('GENMAP_ECC', '1')))
-        env_stack_rate = float(os.getenv('GENMAP_STACK_RATE', '0.02'))
         env_random_seed_start = int(os.getenv('GENMAP_RANDOM_SEED_START', '0'))
         env_random_seed_num = int(os.getenv('GENMAP_RANDOM_SEED_NUM', '1000'))
 
@@ -58,9 +50,9 @@ class EccEval(EvalBase):
                 if seed not in condition['fault_arch_models']:
                     condition['fault_arch_models'][seed] = FaultArchModel(
                         num_pes=faultArchModel_width * faultArchModel_height,
-                        stack0_rate=env_stack_rate / 2,
-                        stack1_rate=env_stack_rate / 2,
-                        ecc=env_ecc,
+                        stack0_rate=condition['failure_rate'] / 2,
+                        stack1_rate=condition['failure_rate'] / 2,
+                        ecc=condition['ecc_condition'],
                         seed=seed)
                 if not condition['seed_map'].isTouched(seed):
                     faultArchModel = condition['fault_arch_models'][seed]
