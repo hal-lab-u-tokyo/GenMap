@@ -42,14 +42,16 @@ class BitState(object):
     Stack1 = 2
 
 class FaultArchModel(object):
-    def __init__(self, num_pes=64, stack0_rate=0.0, stack1_rate=0.0, seed=0, ecc=True):
+    def __init__(self, num_pes=64, num_consts=16, stack0_rate=0.0, stack1_rate=0.0, seed=0, ecc=True):
         import os
         self._stack0_rate = stack0_rate
         self._stack1_rate = stack1_rate
         self._seed = seed
         self._num_pes = num_pes
+        self._num_consts = num_consts
         self._ecc = ecc
         self.model = None
+        self.const_model = None
         self._generateFaultModel()
     
     def _flat_for(self, a, f):
@@ -71,9 +73,12 @@ class FaultArchModel(object):
         np.random.seed(self._seed)
         if self._ecc:
             self.model = np.random.rand(self._num_pes, 3, 23)
+            self.const_model = np.random.rand(self._num_consts, 2, 23)
         else:
             self.model = np.random.rand(self._num_pes, 30)
+            self.const_model = np.random.rand(self._num_consts, 17)
         self._flat_for(self.model, self._func_assign_bit_state)
+        self._flat_for(self.const_model, self._func_assign_bit_state)
 
     def checkPeAvailablity(self, PE_id, PE_conf):
         if self.model is None:
@@ -153,6 +158,77 @@ class FaultArchModel(object):
 
         return result_list
 
+    def _checkNonEccPeAvailablity(self, PE_id, PE_conf):
+        pe_model = self.model[PE_id]
+        write_data = self._pack_raw_data_for_non_ecc(PE_conf)
+        distance = self._calc_distance(model=pe_model, write_data=write_data)
+
+        return distance == 0
+    # ---------------------
+
+    def checkAllConstAvailablity(self, const_data_array):
+        for i, const_data in enumerate(const_data_array):
+            if not self.checkConstAvailablity(i, const_data):
+                return False
+        return True
+
+    def checkConstAvailablity(self, const_id, const_data):
+        if self.const_model is None:
+            raise RuntimeError("FaultArchModel.const_model is None!")
+        
+        if self._ecc:
+            return self._checkEccConstAvailablity(const_id, const_data)
+        else:
+            return self._checkNonEccConstAvailablity(const_id, const_data)
+
+    def _checkNonEccConstAvailablity(self, const_id, const_data):
+        if const_data is None:
+            return True
+        const_model = self.const_model[const_id]
+        write_data = self._pack_const(const_data, 17)
+        distance = self._calc_distance(model=const_model, write_data=write_data)
+
+        return distance == 0
+    
+    def _checkEccConstAvailablity(self, const_id, const_data):
+        if const_data is None:
+            return True
+        ldata = const_data & 0b1111_1111_1111
+        hdata = const_data >> 12
+        const_model = self.const_model[const_id]
+        lwrite_data = self._pack_const(ldata, width=12)
+        lwrite_data_ecc = self._encode_ecc(lwrite_data)
+        hwrite_data = self._pack_const(hdata, width=12)
+        hwrite_data_ecc = self._encode_ecc(hwrite_data)
+
+        ldistance = self._calc_distance(model=const_model[0], write_data=lwrite_data_ecc)
+        hdistance = self._calc_distance(model=const_model[1], write_data=hwrite_data_ecc)
+
+        return ldistance <= CORRECTABLE_DISTANCE and hdistance <= CORRECTABLE_DISTANCE
+
+    def _pack_const(self, const_data, width):
+        result = []
+        for digit in range(width):
+                result.append((const_data >> (width - digit - 1)) & 1)
+        return result
+    # ---------------------
+
+    def _calc_distance(self, model, write_data):
+        distance = 0
+        if not len(model) == len(write_data):
+            raise RuntimeError('model length(%d) doesnt match write_data(%d)' % (len(model), len(write_data)))
+
+        for element in zip(model, write_data):
+            element_model = element[0]
+            element_write_data = element[1]
+
+            if element_model == BitState.Stack0 and element_write_data == 1:
+                distance += 1
+            elif element_model == BitState.Stack1 and element_write_data == 0:
+                distance += 1
+
+        return distance
+
     def __expand_bin(self, conf_name, conf_val):
         name = None
         width = None
@@ -173,29 +249,6 @@ class FaultArchModel(object):
                 result_list.append(None)
 
         return result_list
-
-    def _checkNonEccPeAvailablity(self, PE_id, PE_conf):
-        pe_model = self.model[PE_id]
-        write_data = self._pack_raw_data_for_non_ecc(PE_conf)
-        distance = self._calc_distance(model=pe_model, write_data=write_data)
-
-        return distance == 0
-
-    def _calc_distance(self, model, write_data):
-        distance = 0
-        if not len(model) == len(write_data):
-            raise RuntimeError("model length doesnt match write_data")
-
-        for element in zip(model, write_data):
-            element_model = element[0]
-            element_write_data = element[1]
-
-            if element_model == BitState.Stack0 and element_write_data == 1:
-                distance += 1
-            elif element_model == BitState.Stack1 and element_write_data == 0:
-                distance += 1
-
-        return distance
 
     def _pack_raw_data_for_non_ecc(self, PE_conf):
         import numpy as np

@@ -41,8 +41,6 @@ for failure_rate in [0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.001, 0.002, 0.003
 
 EccEval.conditions = conditions
 
-
-
 def parser():
     usage = 'Usage: python3 {0} [options...] dot_file frequency'.format(__file__)
     argparser = ArgumentParser(usage=usage)

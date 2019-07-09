@@ -36,7 +36,11 @@ class EccEval(EvalBase):
 
         import os
 
+        if not individual.isValid():
+            return 0
+
         PEs_conf = EccEval._get_PEs_conf(CGRA, app, individual)
+        const = EccEval.__get_const(CGRA, individual)
 
         env_random_seed_start = int(os.getenv('GENMAP_RANDOM_SEED_START', '0'))
         env_random_seed_num = int(os.getenv('GENMAP_RANDOM_SEED_NUM', '1000'))
@@ -45,11 +49,13 @@ class EccEval(EvalBase):
         faultArchModel_height = 8
 
         for condition in EccEval.conditions:
+
             for seed in range(env_random_seed_start,
                               env_random_seed_start + env_random_seed_num):
                 if seed not in condition['fault_arch_models']:
                     condition['fault_arch_models'][seed] = FaultArchModel(
                         num_pes=faultArchModel_width * faultArchModel_height,
+                        num_consts=16,
                         stack0_rate=condition['failure_rate'] / 2,
                         stack1_rate=condition['failure_rate'] / 2,
                         ecc=condition['ecc_condition'],
@@ -73,9 +79,27 @@ class EccEval(EvalBase):
                         break
                     else:
                         # みつけた
-                        condition['seed_map'].touch(seed - env_random_seed_start)
+                        if faultArchModel.checkAllConstAvailablity(const):
+                            condition['seed_map'].touch(seed - env_random_seed_start)
 
         return 1
+    
+    @staticmethod
+    def __get_const(CGRA, individual):
+        const_num = len(CGRA.getConstRegs())
+        const_conf = [None for i in range(const_num)]
+
+        if not individual.isValid():
+            return const_conf
+        routed_graph = individual.routed_graph
+
+        for i in range(const_num):
+            c_reg = CGRA.getNodeName("Const", index=i)
+            if c_reg in routed_graph.nodes():
+            # if not routed_graph.nodes[c_reg]['free']:
+                const_conf[i] = int(routed_graph.nodes[c_reg]["value"])
+
+        return const_conf
 
     @staticmethod
     def _get_PEs_conf(CGRA, app, individual):
