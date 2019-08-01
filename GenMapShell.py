@@ -149,7 +149,7 @@ class GenMapShell(Cmd):
         self.parse_filter(["--help"])
 
     def parse_filter(self, args):
-        usage = "filter {0} {1} {2}\nIt sorts filtered solutions".format(\
+        usage = "filter {0} {1} {2}\nIt filters solutions with a condition".format(\
                 self.__bold_font("objective"), \
                 self.__bold_font("comp_operator"),\
                 self.__bold_font("value"))
@@ -177,7 +177,7 @@ class GenMapShell(Cmd):
         print("Exiting the shell...")
         return True
 
-    def help_quit(self, _):
+    def help_quit(self):
         print("usage: quit\nExits the shell")
 
     def do_select(self, line):
@@ -211,7 +211,7 @@ class GenMapShell(Cmd):
             drawer.show()
 
     def help_view(self):
-        print("usage: view\nIt shows the selected solution")
+        print("usage: view\nIt visualizes the selected solution")
 
     def do_save(self, line):
         parsed_args = self.parse_save(line.split(" "))
@@ -224,7 +224,7 @@ class GenMapShell(Cmd):
                                          self.selected_id, vars(parsed_args))
 
     def parse_save(self, args):
-        usage = "save [options...]\nIt sorts filtered solutions"
+        usage = "save [options...]\nIt generates configuration files of selected solutions"
         parser = ArgumentParser(prog = "save", usage=usage)
         parser.add_argument("-o", "--output_dir", type=str, \
                             help="specify output directory name",\
@@ -295,6 +295,8 @@ class GenMapShell(Cmd):
         else:
             print("There is no hypervolume data")
 
+    def help_report_hypervolume(self):
+        print("usage: report_hypervolume\nIt shows hypervolume transition during optimization")
 
     @staticmethod
     def __bold_font(s):
