@@ -39,6 +39,9 @@ class CCSOTB_ConfGen(ConfGenBase):
         individual = data["hof"][individual_id]
         app = header["app"]
 
+        if CGRA.getArchName() != "CCSOTB":
+            raise TypeError("This solution is not for CCSOTB, but for " + CGRA.getArchName())
+
         self.force_mode = args["force"]
 
         if os.path.exists(args["output_dir"]):

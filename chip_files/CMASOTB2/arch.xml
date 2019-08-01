@@ -1,4 +1,4 @@
-<PEArray width="8" height="8" const_reg="16" input_port="8" output_port="8">
+<PEArray name="CMASOTB2" width="8" height="8" const_reg="16" input_port="8" output_port="8">
 	<!-- ROW 00 -->
 	<PE coord="(0, 0)" bbdomain="domain0">
 		<ALU>

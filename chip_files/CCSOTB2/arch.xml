@@ -1,4 +1,4 @@
-<PEArray width="12" height="8" const_reg="16" input_port="12" output_port="12">
+<PEArray name="CCSOTB2" width="12" height="8" const_reg="16" input_port="12" output_port="12">
 	<PREG vpos="1" />
 	<PREG vpos="2" />
 	<PREG vpos="3" />

@@ -31,6 +31,9 @@ class CMASOTB2_ConfGen(ConfGenBase):
         individual = data["hof"][individual_id]
         app = header["app"]
 
+        if CGRA.getArchName() != "CMASOTB2":
+            raise TypeError("This solution is not for CMASOTB2, but for " + CGRA.getArchName())
+
         self.force_mode = args["force"]
 
         if os.path.exists(args["output_dir"]):
