@@ -123,6 +123,12 @@ if __name__ == '__main__':
         output_file_name = app.getAppName() + ".dump"
     else:
         output_file_name = args.output
+        # check if output dir exists
+        output_dir = os.path.dirname(output_file_name)
+        if output_dir != "":
+            if not os.path.exists(output_dir):
+                print("output directory:", output_dir, "does not exist")
+                exit()
 
     # confirm overwite
     if os.path.exists(output_file_name):
