@@ -53,6 +53,10 @@ GenMap requires the following python libraries. Recommended version for each lib
 ```
 (GenMap_env) # pip3 install (package_name)[==version]
 ```
+ or 
+ ```
+ (GenMap_env) # pip3 install -r requirements.txt(in this repo)
+ ```
  
  5. Install GenMap
  ```
