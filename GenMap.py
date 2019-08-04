@@ -7,15 +7,15 @@ from Placer import Placer
 from Individual import Individual
 from NSGA2 import NSGA2
 
-# Router
-from AStarRouter import AStarRouter
+# # Router
+# from AStarRouter import AStarRouter
 
-# optimization objectives
-from WireLengthEval import WireLengthEval
-from MapWidthEval import MapWidthEval
-from PowerEval import PowerEval
-from OpMapWidthEval import OpMapWidthEval
-from TimeSlackEval import TimeSlackEval
+# # optimization objectives
+# from WireLengthEval import WireLengthEval
+# from MapWidthEval import MapWidthEval
+# from PowerEval import PowerEval
+# from OpMapWidthEval import OpMapWidthEval
+# from TimeSlackEval import TimeSlackEval
 
 # standard libs
 from argparse import ArgumentParser
@@ -43,8 +43,6 @@ def parser():
     argparser.add_argument("--simdata", type=str, help="specify simulation data file" + \
                             "(default = simdata.xml)", \
                             default="simdata.xml")
-    argparser.add_argument("--duplicate-enable",  action='store_true', \
-                            help="enable duplication of data-flow mapping horizontally")
     argparser.add_argument("--freq-unit", type=str, choices=["M", "G", "k"], default="M",\
                             help="specify the prefix of frequency unit (default = M)")
     argparser.add_argument("--log", type=str, help="specify log file name (default: no logging)")
@@ -147,22 +145,18 @@ if __name__ == '__main__':
         # make optimizer
         try:
             optimizer = NSGA2(tree_opt.getroot(), logfile=logfile)
-        except SimParameters.InvalidParameters as e:
-            print("Parameter import failed: ", e.args)
+        except (ValueError, TypeError) as e:
+            print("Config import failed: ", e.args[0])
+            exit()
     else:
         print("No such file: " + args.opt_conf, file=sys.stderr)
         exit()
 
-    # setup optimization
-    objectives = [WireLengthEval, MapWidthEval, OpMapWidthEval, PowerEval, TimeSlackEval]
 
     if not args.nproc is None:
-        success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
-                        [{}, {}, {}, {"duplicate_enable": args.duplicate_enable}, {}], \
-                        proc_num = args.nproc)
+        success_setup = optimizer.setup(model, app, sim_params, proc_num = args.nproc)
     else:
-        success_setup = optimizer.setup(model, app, sim_params, AStarRouter, objectives,\
-                        [{}, {}, {}, {"duplicate_enable": args.duplicate_enable}, {}])
+        success_setup = optimizer.setup(model, app, sim_params)
 
     # run optimization
     if success_setup:
@@ -193,6 +187,7 @@ if __name__ == '__main__':
             termios.tcsetattr(fd, termios.TCSANOW, old)
 
         # save results
+        objectives = optimizer.getObjectives()
         save_header = {"app": app, "arch": model, "opt_conf": tree_opt.getroot(),
                         "sim_params": sim_params,
                         "eval_names": [obj.name() for obj in objectives],

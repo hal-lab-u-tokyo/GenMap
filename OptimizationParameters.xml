@@ -1,5 +1,11 @@
 <Config>
-	<parameter name="Maximum generation" >300</parameter>
+	<Router>AStarRouter</Router>
+	<eval>WireLengthEval</eval>
+	<eval>MapWidthEval</eval>
+	<eval>OpMapWidthEval</eval>
+	<eval args='{"duplicate_enable": True}' >PowerEval</eval>
+	<eval>TimeSlackEval</eval>
+	<parameter name="Maximum generation" >20</parameter>
 	<parameter name="Maximum stall" >100</parameter>
 	<parameter name="Initial population size" >300</parameter>
 	<parameter name="Offspring size" >100</parameter>
@@ -11,5 +17,5 @@
 	<parameter name="Initial place iteration" >100</parameter>
 	<parameter name="Initial place count" >200</parameter>
 	<parameter name="Random place count" >100</parameter>
-	<parameter name="Topological sort probability" >0.0</parameter>
+	<parameter name="Topological sort probability" >0.5</parameter>
 </Config>

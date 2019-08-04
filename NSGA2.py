@@ -7,6 +7,7 @@ import numpy
 import copy
 from time import time
 from tqdm import tqdm
+from importlib import import_module
 
 from Individual import Individual
 from EvalBase import EvalBase
@@ -22,6 +23,11 @@ class NSGA2():
                 Optional:
                     logfile (_io.TextIOWrapper): log file
 
+            Raise:
+                If there exist invalid configurations and parameters, it will raise
+                ValueError.
+                Also, if router and objectives is not RouterBase and EvalBase class,
+                it will raise TypeError.
         """
         # initilize toolbox
         self.__toolbox = base.Toolbox()
@@ -44,6 +50,48 @@ class NSGA2():
             else:
                 raise ValueError("missing parameter name")
 
+        # get router
+        try:
+            router_name = config.find("Router").text
+        except AttributeError:
+            raise ValueError("missing Router class")
+        if router_name is None:
+            raise ValueError("Router class name is empty")
+        self.__router = getattr(import_module(router_name), router_name)
+        if not issubclass(self.__router, RouterBase):
+            raise TypeError(self.__router.__name__ + " is not RouterBase class")
+
+        # get objectives
+        eval_names = [ele.text for ele in config.iter("eval")]
+
+        if len(eval_names) == 0:
+            raise ValueError("At least, one objective is needed")
+        if None in eval_names:
+            raise ValueError("missing No." + str(eval_names.index(None) + 1) + " objective name")
+        self.__eval_list = []
+        for eval_name in eval_names:
+            evl = getattr(import_module(eval_name), eval_name)
+            if not issubclass(evl, EvalBase):
+                raise TypeError(evl.__name__ + " is not EvalBase class")
+            self.__eval_list.append(evl)
+
+        # get options for each objective
+        eval_args_str = [ele.get("args") for ele in config.iter("eval")]
+        self.__eval_args = []
+        for args in eval_args_str:
+            if args is None:
+                self.__eval_args.append({})
+            else:
+                try:
+                    args_obj = eval(args)
+                except (NameError, SyntaxError) as e:
+                    raise ValueError("Invalid arguments for No." + \
+                                     str(eval_args_str.index(args) + 1) + " objective")
+                if isinstance(args_obj, dict):
+                    self.__eval_args.append(args_obj)
+                else:
+                    raise ValueError("Arguments of evaluation function must be dict: " + str(args_obj))
+
         self.pop = []
         self.__placer = None
         self.__random_pop_args = []
@@ -59,56 +107,36 @@ class NSGA2():
         # regist log gile
         self.__logfile = logfile
 
+    def getObjectives(self):
+        return self.__eval_list
+
     def __getstate__(self):
         # make this instance hashable for pickle (needed to use multiprocessing)
         return {"pool": self}
 
 
-    def setup(self, CGRA, app, sim_params, router, eval_list, \
-                eval_args = None, proc_num = multiprocessing.cpu_count()):
+    def setup(self, CGRA, app, sim_params, proc_num = multiprocessing.cpu_count()):
         """Setup NSGA2 optimization
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
                 app (Application): an application to be optimized
-                router (RouterBase): a router in which a routing algorithm is implemented
-                eval_list (list of EvalBase): objective functions of the optimization
+                sim_params (SimParameters): a simulation parameters
                 Option:
-                    eval_args (list): list of kwargs(dict) for each evaluation.
                     proc_num (int): the number of process
                                     Default is equal to cpu count
 
             Returns:
                 bool: if the setup successes, return True, otherwise return False.
 
-            Raises:
-                TypeError: if arguments of router and eval_list are invalid instance, raise this exception.
         """
 
-        # check instance
-        for evl in eval_list:
-            if not issubclass(evl, EvalBase):
-                raise TypeError(evl.__name__ + "is not EvalBase class")
-
-        # check eval args
-        if not eval_args is None:
-            if len(eval_list) != len(eval_args):
-                raise TypeError("Inconsistent between evaluation list and their args")
-            for args in eval_args:
-                if not isinstance(args, dict):
-                    raise TypeError("eval_args must be list of dictionary")
-        else:
-            eval_args = [{} for evl in eval_list]
-
         # uni-objective optimization
-        if len(eval_list) == 1:
+        if len(self.__eval_list) == 1:
             self.__hv_logging = False
 
-        if not issubclass(router, RouterBase):
-            raise TypeError(router.__name__ + "is not RouterBase class")
-
         # initilize weights of network model
-        router.set_default_weights(CGRA)
+        self.__router.set_default_weights(CGRA)
 
         # obtain CGRA size
         width, height = CGRA.getSize()
@@ -137,7 +165,7 @@ class NSGA2():
             return False
 
         # instance setting used in NSGA2
-        creator.create("Fitness", base.Fitness, weights=tuple([-1.0 if evl.isMinimize() else 1.0 for evl in eval_list]))
+        creator.create("Fitness", base.Fitness, weights=tuple([-1.0 if evl.isMinimize() else 1.0 for evl in self.__eval_list]))
         creator.create("Individual", Individual, fitness=creator.Fitness)
 
         # setting multiprocessing
@@ -151,7 +179,7 @@ class NSGA2():
             self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
         self.__toolbox.register("random_individual", creator.Individual, CGRA)
-        self.__toolbox.register("evaluate", self.eval_objectives, eval_list, eval_args, CGRA, app, sim_params, router)
+        self.__toolbox.register("evaluate", self.eval_objectives, self.__eval_list, self.__eval_args, CGRA, app, sim_params, self.__router)
         self.__toolbox.register("mate", Individual.cxSet)
         self.__toolbox.register("mutate", Individual.mutSet, 0.5)
         self.__toolbox.register("select", tools.selNSGA2)
@@ -166,7 +194,7 @@ class NSGA2():
 
         # status display
         self.status_disp = [tqdm(total = 0, dynamic_ncols=True, desc=eval_cls.name(), bar_format="{desc}: {postfix}")\
-                            for eval_cls in eval_list]
+                            for eval_cls in self.__eval_list]
 
         return True
 
