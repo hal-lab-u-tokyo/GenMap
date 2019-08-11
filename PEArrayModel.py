@@ -175,6 +175,8 @@ class PEArrayModel():
             raise ValueError("Invalid PE array attribute: const_reg")
         else:
             self.__const_reg_range = list(range(int(const_str)))
+        for c_reg in self.__const_reg_range:
+            self.__network.add_node(CONST_node_exp.format(index=c_reg))
 
         # init PE array inport
         inport_str = conf.get("input_port")
@@ -184,6 +186,8 @@ class PEArrayModel():
             raise ValueError("Invalid PE array attribute: input_port")
         else:
             self.__in_port_range = list(range(int(inport_str)))
+        for iport in self.__in_port_range:
+            self.__network.add_node(IN_PORT_node_exp.format(index=iport))
 
         # init PE array outport
         outport_str = conf.get("output_port")

@@ -137,7 +137,7 @@ class CCSOTB_ConfGen(ConfGenBase):
         # Const Regs
         f.write("\n//Const Regs\n")
         for i in range(len(Const_conf)):
-            addr = CONST_BASEADDR + 4 * (i if i < 7 else i + 1) # skip const7 because of real chip bug
+            addr = CONST_BASEADDR + 4 * i
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                         vch=0, src=0, dst=1))
             f.write(TAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
