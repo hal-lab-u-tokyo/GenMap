@@ -152,7 +152,7 @@ class CCSOTB_ConfGen(ConfGenBase):
         ld_table_num = (width * ld_data_size // math.gcd(width, ld_data_size)) // ld_data_size
 
         for i in range(ld_table_num):
-            table = [v + ((ld_data_size * i) % width)for v in LD_conf["table"]]
+            table = [(v + (ld_data_size * i)) % width for v in LD_conf["table"]]
 
             addr = LD_DMANU_BASEADDR + (TABLE_OFFSET * i) + TABLE_FORMAER_OFFSET
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
@@ -175,7 +175,6 @@ class CCSOTB_ConfGen(ConfGenBase):
         f.write("\n//ST Table\n")
         st_data_size = len(ST_conf["mem_align"])
         st_table_num = (width * st_data_size // math.gcd(width, st_data_size)) // st_data_size
-
         for i in range(st_table_num):
             table = [ST_conf["table"][j - ((st_data_size * i) % width)] \
                         for j in range(len(ST_conf["table"]))]
