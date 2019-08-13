@@ -104,6 +104,9 @@ class NSGA2():
         except ImportError:
             self.__hv_logging = False
 
+        # manual ref point
+        self.__hv_refpoint = None
+
         # regist log gile
         self.__logfile = logfile
 
@@ -115,13 +118,18 @@ class NSGA2():
         return {"pool": self}
 
 
-    def setup(self, CGRA, app, sim_params, proc_num = multiprocessing.cpu_count()):
+    def setup(self, CGRA, app, sim_params, method, proc_num = multiprocessing.cpu_count()):
         """Setup NSGA2 optimization
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
                 app (Application): an application to be optimized
                 sim_params (SimParameters): a simulation parameters
+                method (str): initial mapping method
+                    available methods are follows:
+                        1. graphviz (default)
+                        2. tsort
+                        3. random
                 Option:
                     proc_num (int): the number of process
                                     Default is equal to cpu count
@@ -145,7 +153,7 @@ class NSGA2():
         comp_dfg = app.getCompSubGraph()
 
         # generate initial placer
-        self.__placer = Placer(iterations = self.__params["Initial place iteration"], \
+        self.__placer = Placer(method, iterations = self.__params["Initial place iteration"], \
                                 randomness = "Full")
 
         # make initial mappings
@@ -197,6 +205,30 @@ class NSGA2():
                             for eval_cls in self.__eval_list]
 
         return True
+
+    def set_ref_point(self, ref_point):
+        """Set manual ref point of hypervolume calculation
+
+            Args:
+                ref_point (list): value for each objective
+
+            Returns:
+                bool: whether setting is success of not
+        """
+        if not self.__hv_logging:
+            print("Hypervolume logging is disabled")
+            print("Ref-point option is ignored")
+            return True
+        else:
+            if len(self.__eval_list) < len(ref_point):
+                print("Too few of ref point values")
+                return False
+            elif len(self.__eval_list) > len(ref_point):
+                print("Too much of ref point values")
+                return False
+            else:
+                self.__hv_refpoint = [v for v in ref_point]
+                return True
 
     def random_population(self, n):
         """ Generate rondom mapping as a population.
@@ -364,8 +396,9 @@ class NSGA2():
         # Hypervolume evolution (if possible)
         if self.__hv_logging and len(hof) > 0:
             hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
-            ref_point = hv.refpoint(offset=0.1)   # Define global reference point
-            hypervolume_log = [self.hypervolume(fit).compute(ref_point) \
+            if self.__hv_refpoint is None:
+                self.__hv_refpoint = hv.refpoint(offset=0.1)   # Define global reference point
+            hypervolume_log = [self.hypervolume(fit).compute(self.__hv_refpoint) \
                                 if len(fit) > 0 else 0 for fit in fitness_hof_log]
             return hof, hypervolume_log
         else:

@@ -8,10 +8,15 @@ import multiprocessing as multi
 
 class Placer():
 
-    def __init__(self, iterations = 50, randomness = "Full"):
+    def __init__(self, method, iterations = 50, randomness = "Full"):
         """ Initializes this class
 
             Args:
+                method (str)    : initial mapping method
+                                    available methods are follows:
+                                        1. graphviz (default)
+                                        2. tsort
+                                        3. random
                 iterations (int): maximum iteration number for generating a node position.
                                   Default = 50
                 randomness (str): randomness of rounding.
@@ -20,6 +25,7 @@ class Placer():
         """
 
         self.__iterations = iterations
+        self.__method = method
         if not randomness in ["Full", "Partial"]:
             raise ValueError("Invalid randomness type: " + randomness)
         else:
@@ -39,25 +45,32 @@ class Placer():
             Returns:
                 list: a list of mappings
         """
-        mt_args = [(dag, random.randint(1, width), height) for i in range(count)]
-        p = Pool(proc_num)
-        results = p.map(self.mt_wrapper, mt_args)
-        p.close()
+        if self.__method == "graphviz":
+            mt_args = [(dag, random.randint(1, width), height) for i in range(count)]
 
-        init_mapping = []
-        init_hashable_mapping = set() # for checking dupulication
-        for mapping in results:
-            # remove invalid results
-            if not mapping is None:
-                if not mapping.values() in init_hashable_mapping:
-                    init_mapping.append(mapping)
-                    init_hashable_mapping.add(mapping.values())
+            p = Pool(proc_num)
+            results = p.map(self.mt_wrapper, mt_args)
+            p.close()
 
-        return init_mapping
+            init_mapping = []
+            init_hashable_mapping = set() # for checking dupulication
+            for mapping in results:
+                # remove invalid results
+                if not mapping is None:
+                    if not mapping.values() in init_hashable_mapping:
+                        init_mapping.append(mapping)
+                        init_hashable_mapping.add(mapping.values())
+            return init_mapping
 
+        elif self.__method == "tsort":
+            return self.make_random_mappings(dag, width, height, count, 1)
+
+        else:
+            return self.make_random_mappings(dag, width, height, count, 0)
 
     def mt_wrapper(self, args):
         return self.make_graphviz_mapping(*args)
+
 
     def make_graphviz_mapping(self, dag, width, height):
         """ Makes nodes position on the PE array.
