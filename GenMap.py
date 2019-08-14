@@ -46,8 +46,6 @@ def parser():
     argparser.add_argument("--init-map", type=str, help="specify mapping initilizing method" + \
                             "(default = graphviz)", \
                             default="graphviz", choices=["graphviz", "tsort", "random"])
-    argparser.add_argument("--ref-point", type=float, help="specify reference point for hypervolume calculation", \
-                            nargs="+")
     argparser.add_argument("--freq-unit", type=str, choices=["M", "G", "k"], default="M",\
                             help="specify the prefix of frequency unit (default = M)")
     argparser.add_argument("--log", type=str, help="specify log file name (default: no logging)")
@@ -156,12 +154,6 @@ if __name__ == '__main__':
     else:
         print("No such file: " + args.opt_conf, file=sys.stderr)
         exit()
-
-    # manual ref point setting
-    if not args.ref_point is None:
-        if not optimizer.set_ref_point(args.ref_point):
-            if input("Use auto ref point y/n? >> ") != 'y':
-                exit()
 
     if not args.nproc is None:
         success_setup = optimizer.setup(model, app, sim_params, args.init_map, proc_num = args.nproc)
