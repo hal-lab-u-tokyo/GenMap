@@ -14,6 +14,8 @@ from EvalBase import EvalBase
 from RouterBase import RouterBase
 from Placer import Placer
 
+REFPOITN_SCALE = 1.2
+
 class NSGA2():
     def __init__(self, config, logfile = None):
         """Constructor of the NSGA2 class.
@@ -397,9 +399,14 @@ class NSGA2():
         if self.__hv_logging and len(hof) > 0:
             hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
             if self.__hv_refpoint is None:
-                self.__hv_refpoint = hv.refpoint(offset=0.1)   # Define global reference point
-            hypervolume_log = [self.hypervolume(fit).compute(self.__hv_refpoint) \
+                # Define global reference point
+                self.__hv_refpoint = [ v * REFPOITN_SCALE for v in hv.refpoint(offset=0.1)]
+            try:
+                hypervolume_log = [self.hypervolume(fit).compute(self.__hv_refpoint) \
                                 if len(fit) > 0 else 0 for fit in fitness_hof_log]
+            except ValueError:
+                print("Invalid Ref Point")
+                return hof, None
             return hof, hypervolume_log
         else:
             return hof, None
