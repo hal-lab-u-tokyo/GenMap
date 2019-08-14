@@ -298,6 +298,12 @@ class GenMapShell(Cmd):
     def help_report_hypervolume(self):
         print("usage: report_hypervolume\nIt shows hypervolume transition during optimization")
 
+    def parse_report_hypervolume(self, line):
+        pass
+
+    def complete_report_hypervolume(self, text, line, begidx, endidx):
+        pass
+
     @staticmethod
     def __bold_font(s):
         return '\033[1m' + s + '\033[0m'

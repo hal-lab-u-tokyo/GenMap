@@ -106,9 +106,6 @@ class NSGA2():
         except ImportError:
             self.__hv_logging = False
 
-        # manual ref point
-        self.__hv_refpoint = None
-
         # regist log gile
         self.__logfile = logfile
 
@@ -208,29 +205,29 @@ class NSGA2():
 
         return True
 
-    def set_ref_point(self, ref_point):
-        """Set manual ref point of hypervolume calculation
+    # def set_ref_point(self, ref_point):
+    #     """Set manual ref point of hypervolume calculation
 
-            Args:
-                ref_point (list): value for each objective
+    #         Args:
+    #             ref_point (list): value for each objective
 
-            Returns:
-                bool: whether setting is success of not
-        """
-        if not self.__hv_logging:
-            print("Hypervolume logging is disabled")
-            print("Ref-point option is ignored")
-            return True
-        else:
-            if len(self.__eval_list) < len(ref_point):
-                print("Too few of ref point values")
-                return False
-            elif len(self.__eval_list) > len(ref_point):
-                print("Too much of ref point values")
-                return False
-            else:
-                self.__hv_refpoint = [v for v in ref_point]
-                return True
+    #         Returns:
+    #             bool: whether setting is success of not
+    #     """
+    #     if not self.__hv_logging:
+    #         print("Hypervolume logging is disabled")
+    #         print("Ref-point option is ignored")
+    #         return True
+    #     else:
+    #         if len(self.__eval_list) < len(ref_point):
+    #             print("Too few of ref point values")
+    #             return False
+    #         elif len(self.__eval_list) > len(ref_point):
+    #             print("Too much of ref point values")
+    #             return False
+    #         else:
+    #             self.__hv_refpoint = [v for v in ref_point]
+    #             return True
 
     def random_population(self, n):
         """ Generate rondom mapping as a population.
@@ -398,16 +395,17 @@ class NSGA2():
         # Hypervolume evolution (if possible)
         if self.__hv_logging and len(hof) > 0:
             hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
-            if self.__hv_refpoint is None:
-                # Define global reference point
-                self.__hv_refpoint = [ v * REFPOITN_SCALE for v in hv.refpoint(offset=0.1)]
-            try:
-                hypervolume_log = [self.hypervolume(fit).compute(self.__hv_refpoint) \
-                                if len(fit) > 0 else 0 for fit in fitness_hof_log]
-            except ValueError:
-                print("Invalid Ref Point")
-                return hof, None
-            return hof, hypervolume_log
+            # if self.__hv_refpoint is None:
+            #     # Define global reference point
+            #     self.__hv_refpoint = [ v * REFPOITN_SCALE for v in hv.refpoint(offset=0.1)]
+            # try:
+            #     hypervolume_log = [self.hypervolume(fit).compute(self.__hv_refpoint) \
+            #                     if len(fit) > 0 else 0 for fit in fitness_hof_log]
+            # except ValueError:
+            #     print("Invalid Ref Point")
+            #     return hof, None
+            # return hof, hypervolume_log
+            return hof, hv
         else:
             return hof, None
 
