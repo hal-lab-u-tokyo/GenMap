@@ -7,16 +7,6 @@ from Placer import Placer
 from Individual import Individual
 from NSGA2 import NSGA2
 
-# # Router
-# from AStarRouter import AStarRouter
-
-# # optimization objectives
-# from WireLengthEval import WireLengthEval
-# from MapWidthEval import MapWidthEval
-# from PowerEval import PowerEval
-# from OpMapWidthEval import OpMapWidthEval
-# from TimeSlackEval import TimeSlackEval
-
 # standard libs
 from argparse import ArgumentParser
 import sys
@@ -172,7 +162,7 @@ if __name__ == '__main__':
 
         try:
             termios.tcsetattr(fd, termios.TCSANOW, new)
-            hof, hv = optimizer.runOptimization()
+            hof, fitness_log = optimizer.runOptimization()
             elapsed_time = time.time() - start_time
             print("elapsed time:", elapsed_time, "[sec]")
         except KeyboardInterrupt:
@@ -194,7 +184,7 @@ if __name__ == '__main__':
                         "sim_params": sim_params,
                         "eval_names": [obj.name() for obj in objectives],
                         "fitness_weights": tuple(-1.0 if obj.isMinimize() else 1.0 for obj in objectives)}
-        save_data = {"hof": hof, "hypervolume": hv}
+        save_data = {"hof": hof, "fitness_log": fitness_log}
 
         print("Saving optimization results...")
         with open(output_file_name, "wb") as file:

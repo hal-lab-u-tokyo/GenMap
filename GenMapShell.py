@@ -25,6 +25,14 @@ class GenMapShell(Cmd):
         self.selected_id = -1
         self.conf_gen = conf_gen
 
+        # check hypervolume is available
+        self.__hv_enable = True
+        try:
+            from pygmo.core import hypervolume
+            self.hypervolume = hypervolume
+        except ImportError:
+            self.__hv_enable = False
+
     def do_EOF(self, arg):
         print()
         return self.do_quit(arg)
@@ -253,7 +261,7 @@ class GenMapShell(Cmd):
         # in case of output option, complete file/directory names
         if len(args) > 0:
             # only option flas
-            if args[-1] == "-o" or args[-1] == "--output":
+            if args[-1] == "-o" or args[-1] == "--output_dir":
                 if line[-1] != " ":
                     # insert spaca at the end of option flag
                     comp_args = [args[-1] + " "]
@@ -261,7 +269,7 @@ class GenMapShell(Cmd):
                     # scan current dir
                     comp_args = [f.name + ("/" if f.is_dir() else "")\
                                 for f in os.scandir()]
-            elif args[-2] == "-o" or args[-2] == "--output":
+            elif args[-2] == "-o" or args[-2] == "--output_dir":
                 # complement splash
                 if text[-2:] == "..":
                     text += "/"
@@ -286,23 +294,65 @@ class GenMapShell(Cmd):
         self.parse_save(["--help"])
 
     def do_report_hypervolume(self, line):
-        if not self.data["hypervolume"] is None:
-            import matplotlib.pyplot as plt
-            hv = self.data["hypervolume"]
-            gen = range(len(hv))
-            plt.plot(gen, hv)
-            plt.show()
+        if self.__hv_enable:
+            if len(self.header["eval_names"]) > 1:
+                parsed_args = self.parse_report_hypervolume(line.split(" "))
+
+                # get ref point
+                if parsed_args.ref_point is None:
+                    # use auto decided ref point
+                    hv = hypervolume([fit for sublist in self.data["fitness_log"] for fit in sublist])
+                    ref_point = hv.refpoint(offset=0.1)
+                    print("ref point: ", ref_point, "is used")
+                else:
+                    ref_point = parsed_args.ref_point
+                    if len(ref_point) != len(self.header["eval_names"]):
+                        print("Too few or too much values for ref point:", ref_pointref)
+                        return
+
+                # calculate hypervolume
+                try:
+                    hypervolume_log = [hypervolume(fit).compute(ref_point) \
+                                if len(fit) > 0 else 0 for fit in self.data["fitness_log"]]
+                except ValueError:
+                    print("Invalid Ref Point")
+                    return
+
+                # check report type
+                if parsed_args.type == "png":
+                    import matplotlib.pyplot as plt
+                    gen = range(len(hypervolume_log))
+                    plt.plot(gen, hypervolume_log)
+                    plt.show()
+                elif parsed_args.type == "csv":
+                    pass
+            else:
+                print("This is uni-objective optimization results")
+                print("Hypervolume cannot calculated")
         else:
-            print("There is no hypervolume data")
+            print("Hypervolume calculator is not available")
 
     def help_report_hypervolume(self):
-        print("usage: report_hypervolume\nIt shows hypervolume transition during optimization")
+        self.parse_report_hypervolume(["--help"])
 
-    def parse_report_hypervolume(self, line):
-        pass
+    def parse_report_hypervolume(self, args):
+        usage = "report_hypervolume [options...]\nIt shows hypervolume transition during optimization"
+        parser = ArgumentParser(prog = "report_hypervolume", usage=usage)
+        parser.add_argument("-t", "--type", type=str, choices=["png", "csv"], default="png",\
+                            help="specify report type")
+        parser.add_argument("-o", "--output", type=str, help="specify output file name")
+        parser.add_argument("--ref-point", type=float, args="+", \
+                            help="specify reference point for hypervolume calculation")
 
-    def complete_report_hypervolume(self, text, line, begidx, endidx):
-        pass
+        try:
+            parsed_args = parser.parse_args(args=args)
+        except SystemExit:
+            return None
+
+        return parsed_args
+
+    # def complete_report_hypervolume(self, text, line, begidx, endidx):
+    #     pass
 
     @staticmethod
     def __bold_font(s):

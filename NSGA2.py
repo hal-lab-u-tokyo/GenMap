@@ -14,8 +14,6 @@ from EvalBase import EvalBase
 from RouterBase import RouterBase
 from Placer import Placer
 
-REFPOITN_SCALE = 1.2
-
 class NSGA2():
     def __init__(self, config, logfile = None):
         """Constructor of the NSGA2 class.
@@ -59,7 +57,10 @@ class NSGA2():
             raise ValueError("missing Router class")
         if router_name is None:
             raise ValueError("Router class name is empty")
-        self.__router = getattr(import_module(router_name), router_name)
+        try:
+            self.__router = getattr(import_module(router_name), router_name)
+        except ModuleNotFoundError:
+            raise ValueError("Import Error for Router: " + router_name)
         if not issubclass(self.__router, RouterBase):
             raise TypeError(self.__router.__name__ + " is not RouterBase class")
 
@@ -72,7 +73,10 @@ class NSGA2():
             raise ValueError("missing No." + str(eval_names.index(None) + 1) + " objective name")
         self.__eval_list = []
         for eval_name in eval_names:
-            evl = getattr(import_module(eval_name), eval_name)
+            try:
+                evl = getattr(import_module(eval_name), eval_name)
+            except ModuleNotFoundError:
+                raise ValueError("Import Error for an objective: " + eval_name)
             if not issubclass(evl, EvalBase):
                 raise TypeError(evl.__name__ + " is not EvalBase class")
             self.__eval_list.append(evl)
@@ -97,14 +101,6 @@ class NSGA2():
         self.pop = []
         self.__placer = None
         self.__random_pop_args = []
-
-        # check if hypervolume is available
-        self.__hv_logging = True
-        try:
-            from pygmo.core import hypervolume
-            self.hypervolume = hypervolume
-        except ImportError:
-            self.__hv_logging = False
 
         # regist log gile
         self.__logfile = logfile
@@ -137,10 +133,6 @@ class NSGA2():
                 bool: if the setup successes, return True, otherwise return False.
 
         """
-
-        # uni-objective optimization
-        if len(self.__eval_list) == 1:
-            self.__hv_logging = False
 
         # initilize weights of network model
         self.__router.set_default_weights(CGRA)
@@ -204,30 +196,6 @@ class NSGA2():
                             for eval_cls in self.__eval_list]
 
         return True
-
-    # def set_ref_point(self, ref_point):
-    #     """Set manual ref point of hypervolume calculation
-
-    #         Args:
-    #             ref_point (list): value for each objective
-
-    #         Returns:
-    #             bool: whether setting is success of not
-    #     """
-    #     if not self.__hv_logging:
-    #         print("Hypervolume logging is disabled")
-    #         print("Ref-point option is ignored")
-    #         return True
-    #     else:
-    #         if len(self.__eval_list) < len(ref_point):
-    #             print("Too few of ref point values")
-    #             return False
-    #         elif len(self.__eval_list) > len(ref_point):
-    #             print("Too much of ref point values")
-    #             return False
-    #         else:
-    #             self.__hv_refpoint = [v for v in ref_point]
-    #             return True
 
     def random_population(self, n):
         """ Generate rondom mapping as a population.
@@ -392,21 +360,6 @@ class NSGA2():
         # eleminate invalid individuals
         hof = [ind for ind in hof if ind.isValid()]
 
-        # Hypervolume evolution (if possible)
-        if self.__hv_logging and len(hof) > 0:
-            hv = self.hypervolume([fit for sublist in fitness_hof_log for fit in sublist])
-            # if self.__hv_refpoint is None:
-            #     # Define global reference point
-            #     self.__hv_refpoint = [ v * REFPOITN_SCALE for v in hv.refpoint(offset=0.1)]
-            # try:
-            #     hypervolume_log = [self.hypervolume(fit).compute(self.__hv_refpoint) \
-            #                     if len(fit) > 0 else 0 for fit in fitness_hof_log]
-            # except ValueError:
-            #     print("Invalid Ref Point")
-            #     return hof, None
-            # return hof, hypervolume_log
-            return hof, hv
-        else:
-            return hof, None
+        return hof, fitness_hof_log
 
 

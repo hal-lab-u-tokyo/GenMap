@@ -1,6 +1,9 @@
-from Individual import Individual
 from GenMapShell import GenMapShell
 from ConfDrawer import ConfDrawer
+from Individual import Individual
+from Application import Application
+from PEArrayModel import PEArrayModel
+from SimParameters import SimParameters
 
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
