@@ -4,6 +4,8 @@ import prettytable
 import copy
 import readline
 import os
+import csv
+import re
 
 from ConfDrawer import ConfDrawer
 
@@ -297,35 +299,55 @@ class GenMapShell(Cmd):
         if self.__hv_enable:
             if len(self.header["eval_names"]) > 1:
                 parsed_args = self.parse_report_hypervolume(line.split(" "))
-
+                if parsed_args is None:
+                    return
                 # get ref point
                 if parsed_args.ref_point is None:
                     # use auto decided ref point
-                    hv = hypervolume([fit for sublist in self.data["fitness_log"] for fit in sublist])
+                    hv = self.hypervolume([fit for sublist in self.data["fitness_log"] for fit in sublist])
                     ref_point = hv.refpoint(offset=0.1)
                     print("ref point: ", ref_point, "is used")
                 else:
                     ref_point = parsed_args.ref_point
                     if len(ref_point) != len(self.header["eval_names"]):
-                        print("Too few or too much values for ref point:", ref_pointref)
+                        print("Too few or too much values for ref point:", ref_point)
                         return
 
                 # calculate hypervolume
                 try:
-                    hypervolume_log = [hypervolume(fit).compute(ref_point) \
+                    hypervolume_log = [self.hypervolume(fit).compute(ref_point) \
                                 if len(fit) > 0 else 0 for fit in self.data["fitness_log"]]
                 except ValueError:
                     print("Invalid Ref Point")
                     return
 
+                # get generation size
+                gen = range(len(hypervolume_log))
+
                 # check report type
                 if parsed_args.type == "png":
                     import matplotlib.pyplot as plt
-                    gen = range(len(hypervolume_log))
                     plt.plot(gen, hypervolume_log)
-                    plt.show()
+                    plt.xlabel("Generation")
+                    plt.ylabel("Hypervolume")
+                    if parsed_args.output is None:
+                        # show the graph
+                        plt.show()
+                    else:
+                        # save the graph
+                        try:
+                            plt.savefig(parsed_args.output)
+                        except PermissionError:
+                            print("Cannot creat file: Permission denied")
                 elif parsed_args.type == "csv":
-                    pass
+                    try:
+                        with open(parsed_args.output, 'w') as f:
+                            writer = csv.writer(f, lineterminator='\n')
+                            # first col: generation, second: hypervolume
+                            writer.writerow(["generation", "hypervolume"])
+                            writer.writerows([(g + 1, hv) for g, hv in zip(gen, hypervolume_log)])
+                    except PermissionError:
+                        print("Cannot creat file: Permission denied")
             else:
                 print("This is uni-objective optimization results")
                 print("Hypervolume cannot calculated")
@@ -341,18 +363,54 @@ class GenMapShell(Cmd):
         parser.add_argument("-t", "--type", type=str, choices=["png", "csv"], default="png",\
                             help="specify report type")
         parser.add_argument("-o", "--output", type=str, help="specify output file name")
-        parser.add_argument("--ref-point", type=float, args="+", \
+        parser.add_argument("--ref-point", type=float, nargs="+", \
                             help="specify reference point for hypervolume calculation")
 
         try:
-            parsed_args = parser.parse_args(args=args)
+            parsed_args = parser.parse_args(args=[argv for argv in args if argv != ""])
         except SystemExit:
+             return None
+
+        if parsed_args.type == "csv" and parsed_args.output is None:
+            print("For csv report, --output option is necessary")
             return None
 
         return parsed_args
 
-    # def complete_report_hypervolume(self, text, line, begidx, endidx):
-    #     pass
+    def complete_report_hypervolume(self, text, line, begidx, endidx):
+        args = line.split(" ")
+        args = [argv for argv in args if argv != ""]
+        if text == "":
+            args.append("")
+
+        OPTIONS = ["-t", "--type", "-o", "--output", "--ref-point"]
+
+        # in case of output option, complete file/directory names
+        if len(args) > 0:
+            if args[-2] == "-o" or args[-2] == "--output":
+                # complement splash
+                if text[-2:] == "..":
+                    text += "/"
+                pos = text.rfind("/")
+                if pos != -1:
+                    # extract upper directories
+                    dir_name = text[:pos+1]
+                    remains = text[pos+1:]
+                    # scan the upper directories
+                    files = os.scandir(dir_name)
+                    comp_args = [dir_name + f.name + ("/" if f.is_dir() else "")\
+                                for f in files if f.name.startswith(remains)]
+                else:
+                    # scan current dir
+                    files = os.scandir()
+                    comp_args = [f.name + ("/" if f.is_dir() else "")\
+                                for f in files if f.name.startswith(text)]
+            elif args[-2] == "-t" or args[-2] == "--type":
+                comp_args = [opt for opt in ["png ", "csv "] if not re.match("^" + text, opt) is None]
+            elif not args[-2] in OPTIONS:
+                comp_args = [opt + " " for opt in OPTIONS if not re.match("^" + text, opt) is None]
+
+        return comp_args
 
     @staticmethod
     def __bold_font(s):
