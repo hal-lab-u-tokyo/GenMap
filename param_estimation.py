@@ -228,8 +228,6 @@ if __name__ == "__main__":
     sim_params.switching_info["AND"] *= 0.6
     sim_params.change_unit_scale("energy", shell.getUnit())
 
-    # for k in sorted(sim_params.switching_info):
-    #     params.append(sim_params.switching_info[k])
 
     result = optimize.least_squares(cost_func, params, \
              args=(cases, model, sim_params), method="lm")
