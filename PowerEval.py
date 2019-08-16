@@ -5,6 +5,8 @@ import networkx as nx
 import pulp
 import copy
 
+import math
+
 PENALTY_COST = 1000
 
 class PowerEval(EvalBase):
@@ -199,7 +201,6 @@ class PowerEval(EvalBase):
                         Note that the value does not contain pipeline register &
                         clock tree energy.
         """
-
         graph = copy.deepcopy(individual.routed_graph)
         graph.add_node("root")
         nx.set_node_attributes(graph, 0, "switching")
@@ -208,12 +209,11 @@ class PowerEval(EvalBase):
 
         if CGRA.getPregNumber() != 0:
             stage_domains = CGRA.getStageDomains(individual.preg)
-            preg_flag = True
             nx.set_node_attributes(graph, -1, "stage")
             for v in graph.nodes():
                 graph.node[v]["stage"] = PowerEval.__getStageIndex(stage_domains, v)
         else:
-            preg_flag = False
+            nx.set_node_attributes(graph, -1, "stage")
 
         for i_port in set(individual.routed_graph.nodes()) & set(CGRA.getInputPorts()):
             graph.add_edge("root", i_port)
@@ -221,10 +221,9 @@ class PowerEval(EvalBase):
         # analyze distance from pipeline register
         for u, v in nx.bfs_edges(graph, "root"):
             if CGRA.isALU(v) or CGRA.isSE(v):
-                if preg_flag:
-                    if graph.node[u]["stage"] == graph.node[v]["stage"] and\
-                        graph.node[u]["len"] + 1 > graph.node[v]["len"]:
-                        graph.node[v]["len"] = graph.node[u]["len"] + 1
+                if graph.node[u]["stage"] == graph.node[v]["stage"] and\
+                    graph.node[u]["len"] + 1 > graph.node[v]["len"]:
+                    graph.node[v]["len"] = graph.node[u]["len"] + 1
 
         # evaluate glitch propagation
         traversed_list = []
@@ -235,11 +234,12 @@ class PowerEval(EvalBase):
                 traversed_list.append(v)
             if CGRA.isALU(v):
                 graph.node[v]["switching"] = sim_params.switching_info[opcodes[v]]
+            # propagation part
             if graph.node[v]["len"] > 0:
                 prev_sw = max([graph.node[prev]["switching"] for prev in graph.predecessors(v)])
                 if CGRA.isALU(v):
                     graph.node[v]["switching"] += sim_params.switching_propagation * \
-                                                    (sim_params.switching_decay ** (graph.node[v]["len"])) * \
+                                                    (sim_params.switching_decay ** graph.node[v]["len"]) * \
                                                     prev_sw
 
                 elif CGRA.isSE(v):
