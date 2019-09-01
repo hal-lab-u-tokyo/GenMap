@@ -100,6 +100,8 @@ class CCSOTB2_ConfGen(ConfGenBase):
                     f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
 
         # PREG Config
+        if len(PREG_conf) == 0:
+            PREG_conf = [False for i in range(7)]
         f.write("\n//PREG Config\n")
         addr = PREG_CONF_ADDR
         f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
