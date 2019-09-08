@@ -234,16 +234,14 @@ class PowerEval(EvalBase):
                 traversed_list.append(v)
             if CGRA.isALU(v):
                 graph.node[v]["switching"] = sim_params.switching_info[opcodes[v]]
+            elif CGRA.isSE(v):
+                graph.node[v]["switching"] = sim_params.se_weight
             # propagation part
             if graph.node[v]["len"] > 0:
                 prev_sw = max([graph.node[prev]["switching"] for prev in graph.predecessors(v)])
-                if CGRA.isALU(v):
-                    graph.node[v]["switching"] += sim_params.switching_propagation * \
-                                                    (sim_params.switching_decay ** graph.node[v]["len"]) * \
-                                                    prev_sw
-
-                elif CGRA.isSE(v):
-                    graph.node[v]["switching"] = prev_sw * sim_params.se_weight
+                graph.node[v]["switching"] += sim_params.switching_propagation * \
+                                                (sim_params.switching_decay ** graph.node[v]["len"]) * \
+                                                prev_sw
             else:
                 pass
 
