@@ -1,0 +1,53 @@
+<DATA>
+	<BiasRange>
+		<bias>0.0</bias>
+	</BiasRange>
+	<Delay unit="ns">
+		<ALU bias="0.0" op="ADD">2.81872</ALU>
+		<ALU bias="0.0" op="SUB">2.76132</ALU>
+		<ALU bias="0.0" op="MULT">3.7898</ALU>
+		<ALU bias="0.0" op="AND">1.05345</ALU>
+		<ALU bias="0.0" op="OR">1.03233</ALU>
+		<ALU bias="0.0" op="SL">1.47778</ALU>
+		<ALU bias="0.0" op="SR">1.66994</ALU>
+		<ALU bias="0.0" op="SRA">1.62968</ALU>
+		<ALU bias="0.0" op="XOR">1.17282</ALU>
+		<ALU bias="0.0" op="NOT">1.01224</ALU>
+		<ALU bias="0.0" op="SEL">1.34099</ALU>
+		<ALU bias="0.0" op="CAT">1.03102</ALU>
+		<ALU bias="0.0" op="NOP">0</ALU>
+		<ALU bias="0.0" op="EQL">1.36911</ALU>
+		<ALU bias="0.0" op="GT">1.02293</ALU>
+		<ALU bias="0.0" op="LT">1.21046</ALU>
+		<!-- delay of SE -->
+		<SE bias="0.0">0.2657837545</SE>
+	</Delay>
+	<Power>
+		<Static>
+		    <!-- we don't have data for leakage -->
+			<PE unit="mW" bias="0.0">0.0000</PE>
+		</Static>
+		<Dynamic>
+			<Energy unit="pJ">0.099</Energy>
+			<Propagation>1.325</Propagation>
+			<Decay>0.072</Decay>
+			<SE_weight>1</SE_weight>
+			<Switching op="ADD">17.1693</Switching>
+			<Switching op="SUB">20.0153</Switching>
+			<Switching op="MULT">31.4623</Switching>
+			<Switching op="SL">6.79133</Switching>
+			<Switching op="SR">4.97267</Switching>
+			<Switching op="SRA">7.31800</Switching>
+			<Switching op="AND">5.21700</Switching>
+			<Switching op="OR">16.9233</Switching>
+			<Switching op="NOT">11.1277</Switching>
+			<Switching op="XOR">20.997</Switching>
+			<Switching op="CAT">11.1437</Switching>
+			<Switching op="SEL">11.986</Switching>
+			<Switching op="GT">18.6567</Switching>
+			<Switching op="LT">18.3073</Switching>
+			<Switching op="EQL">28.609</Switching>
+		</Dynamic>
+	</Power>
+</DATA>
+

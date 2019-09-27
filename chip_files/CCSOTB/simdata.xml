@@ -140,13 +140,14 @@
 	</Delay>
 	<Power>
 		<Static>
-			<PE unit="mW" bias="-0.8">0.00019708</PE>
-			<PE unit="mW" bias="-0.6">0.00023604</PE>
-			<PE unit="mW" bias="-0.4">0.00029104</PE>
-			<PE unit="mW" bias="-0.2">0.00044916</PE>
-			<PE unit="mW" bias="0.0">0.00091895</PE>
-			<PE unit="mW" bias="0.2">0.0025277</PE>
-			<PE unit="mW" bias="0.4">0.00789708</PE>
+		  
+			<PE unit="mW" bias="-0.8">0.000252083</PE>
+			<PE unit="mW" bias="-0.6">0.000515625</PE>
+			<PE unit="mW" bias="-0.4">0.001128646</PE>
+			<PE unit="mW" bias="-0.2">0.002217188</PE>
+			<PE unit="mW" bias="0.0">0.00460625</PE>
+			<PE unit="mW" bias="0.2">0.010971354</PE>
+			<PE unit="mW" bias="0.4">0.030725521</PE>
 		</Static>
 		<Dynamic>
 			<Energy unit="pJ">0.099</Energy>
