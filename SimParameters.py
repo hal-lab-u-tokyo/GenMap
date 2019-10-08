@@ -61,6 +61,7 @@ class SimParameters():
             self.preg_leak = None
             self.preg_dynamic_energy = None
 
+        # it will be removed
         self.se_weight = 1.0
 
         # load each data

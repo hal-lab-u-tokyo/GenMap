@@ -150,25 +150,25 @@
 			<PE unit="mW" bias="0.4">0.030725521</PE>
 		</Static>
 		<Dynamic>
-			<Energy unit="pJ">0.099</Energy>
-			<Propagation>1.325</Propagation>
-			<Decay>0.072</Decay>
+			<Energy unit="pJ">0.0253</Energy>
+			<Propagation>0.91926</Propagation>
+			<Decay>1.00767</Decay>
 			<SE_weight>1</SE_weight>
-			<Switching op="ADD">17.1693</Switching>
-			<Switching op="SUB">20.0153</Switching>
-			<Switching op="MULT">31.4623</Switching>
-			<Switching op="SL">6.79133</Switching>
-			<Switching op="SR">4.97267</Switching>
-			<Switching op="SRA">7.31800</Switching>
-			<Switching op="AND">5.21700</Switching>
-			<Switching op="OR">16.9233</Switching>
-			<Switching op="NOT">11.1277</Switching>
-			<Switching op="XOR">20.997</Switching>
-			<Switching op="CAT">11.1437</Switching>
-			<Switching op="SEL">11.986</Switching>
-			<Switching op="GT">18.6567</Switching>
-			<Switching op="LT">18.3073</Switching>
-			<Switching op="EQL">28.609</Switching>
+			<Switching op="ADD">15.8003</Switching>
+			<Switching op="SUB"> 24.47</Switching>
+			<Switching op="MULT">24.037</Switching>
+			<Switching op="SL">8.762</Switching>
+			<Switching op="SR">6.398</Switching>
+			<Switching op="SRA">8.236</Switching>
+			<Switching op="AND">5.171</Switching>
+			<Switching op="OR">17.111</Switching>
+			<Switching op="NOT">11.122</Switching>
+			<Switching op="XOR">20.71</Switching>
+			<Switching op="CAT">10.986</Switching>
+			<Switching op="SEL">12.753</Switching>
+			<Switching op="GT">18.678</Switching>
+			<Switching op="LT">18.374</Switching>
+			<Switching op="EQL">28.966</Switching>
 		</Dynamic>
 	</Power>
 </DATA>

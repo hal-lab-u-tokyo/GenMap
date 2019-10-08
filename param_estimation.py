@@ -12,6 +12,8 @@ import os
 import re
 import readline
 import csv
+import math
+from argparse import ArgumentParser
 
 from scipy import optimize
 import networkx as nx
@@ -22,7 +24,6 @@ from deap import creator
 from multiprocessing import Pool
 import multiprocessing as multi
 import xml.etree.ElementTree as ET
-
 
 class MyShell(Cmd):
     prompt = "Param Estimator> "
@@ -38,6 +39,7 @@ class MyShell(Cmd):
         self.__resultlist = []
         self.__exec_flag = False
         self.__energy_unit = "pJ"
+        self.__op_sw_opt_rate = 0.0
 
     def do_EOF(self, arg):
         print()
@@ -117,9 +119,30 @@ class MyShell(Cmd):
 
             return comp_args
 
-    def do_execute(self, _):
-        self.__exec_flag = True
-        return True
+    def do_execute(self, line):
+        parsed_args = self.parse_execute([argv for argv in line.split(" ") if argv != ""])
+        if not parsed_args is None:
+            if len(self.__dumplist) > 0:
+                self.__exec_flag = True
+                self.__op_sw_opt_rate = parsed_args.op_sw_opt
+                return True
+            else:
+                print("At least, one input data is specified")
+
+    def parse_execute(self, args):
+        usage = "execute [--op-sw-opt rate(float)]\nIt executes parameter estimation"
+        parser = ArgumentParser(prog = "execute", usage=usage)
+        parser.add_argument("--op-sw-opt", type=float, default=0.0)
+
+        try:
+            parsed_args = parser.parse_args(args=args)
+        except SystemExit:
+            return None
+
+        return parsed_args
+
+    def help_execute(self):
+        self.parse_execute(["-h"])
 
     def get_files(self):
         return [(d, c) for d, c in zip(self.__dumplist, self.__resultlist) ]
@@ -137,15 +160,27 @@ class MyShell(Cmd):
     def getUnit(self):
         return self.__energy_unit
 
+    def getOpSwOptRate(self):
+        return self.__op_sw_opt_rate
+
 def cost_func(params, cases, CGRA, sim_params):
     print(params)
     sim_params.switching_energy = params[0]
     sim_params.switching_propagation = params[1]
     sim_params.switching_decay = params[2]
-    sim_params.se_weight = params[3]
 
-    # for k, v in zip(sorted(sim_params.switching_info), params[4:]):
-    #     sim_params.switching_info[k] = v
+    errs = [0.0 for i in range(len(cases))]
+
+    for i in range(len(cases)):
+        errs[i] = (abs(cases[i]["real"] - PowerEval.eval_glitch(CGRA, cases[i]["app"], sim_params, cases[i]["ind"])) \
+                        / cases[i]["real"])
+
+    return errs
+
+def cost_func2(params, cases, CGRA, sim_params, original_sw, weight):
+    for k, i in zip(sorted(sim_params.switching_info), range(len(params))):
+        sim_params.switching_info[k] = original_sw[i] * (1 + weight * math.tanh(params[i]))
+    print(["{0:.3f}".format(v) for v in sim_params.switching_info.values()])
     errs = [0.0 for i in range(len(cases))]
 
     for i in range(len(cases)):
@@ -210,9 +245,7 @@ if __name__ == "__main__":
     sim_params = header_list[0]["sim_params"]
 
     # set initial parameters
-    # params = [1., 1., 1., 1.]
-    params = [sim_params.switching_energy, sim_params.switching_propagation,\
-                     sim_params.switching_decay, sim_params.se_weight]
+    params = [1., 1., 1.]
 
     # set cases
     cases = []
@@ -225,7 +258,6 @@ if __name__ == "__main__":
     else:
         pass
 
-    sim_params.switching_info["AND"] *= 0.6
     sim_params.change_unit_scale("energy", shell.getUnit())
 
 
@@ -240,14 +272,42 @@ if __name__ == "__main__":
         sys.exit()
 
     params = result["x"]
-    print("Estimated parameters", params)
+    print("Estimated parameters")
+    print("switching energy", params[0])
+    print("switching propagation", params[1])
+    print("switching decay", params[2])
 
 
-    # final err calculation
+    # updated by estmiated params
     sim_params.switching_energy = params[0]
     sim_params.switching_propagation = params[1]
     sim_params.switching_decay = params[2]
-    sim_params.se_weight = params[3]
+
+    # second stage
+    if shell.getOpSwOptRate() != 0.0:
+        print("Running op switching count optimization")
+        weight = shell.getOpSwOptRate()
+        original_sw = [sim_params.switching_info[k] for k in sorted(sim_params.switching_info)]
+        params = [0 for i in original_sw]
+        
+        result = optimize.least_squares(cost_func2, params, \
+                                        args=(cases, model, sim_params, original_sw, weight), method="lm")
+
+        if result["success"]:
+            print("Estimatino was finished successfully")
+            print("status", result["status"])
+        else:
+            print("Fail to Estimation")
+            sys.exit()
+
+        params = result["x"]
+        print("Estimated parameters", params)
+        # updated by estimated params
+        for k, i in zip(sorted(sim_params.switching_info), range(len(original_sw))):
+            sim_params.switching_info[k] = original_sw[i] * ( 1 + weight * math.tanh(params[i]))
+
+        print(sim_params.switching_info)
+    
 
     sim = [0 for i in range(len(cases))]
     errs = [0 for i in range(len(cases))]
@@ -268,5 +328,6 @@ if __name__ == "__main__":
     print("ME=", sum(errs) / len(errs) * 100, "%")
     print("Min=", min_err * 100, "%", "case:", min_case, cases[min_case]["real"])
     print("Max=", max_err * 100, "%", "case:", max_case, cases[max_case]["real"])
+    print("Median=", sorted(errs)[len(errs) // 2] * 100, "%") 
 
 
