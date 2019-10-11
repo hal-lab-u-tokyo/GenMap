@@ -46,7 +46,7 @@ class PowerEval(EvalBase):
 
         # get body bias domain
         bb_domains = CGRA.getBBdomains()
-        if len(bb_domains) != 0 and len(sim_params.bias_range) > 0:
+        if len(bb_domains) != 0 and len(sim_params.bias_range) > 1:
             do_bb_opt = True
         else:
             do_bb_opt = False
