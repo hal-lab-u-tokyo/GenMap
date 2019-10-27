@@ -643,12 +643,16 @@ class PEArrayModel():
 
         return rtn_list
 
-    def getStageDomains(self, preg_config):
+    def getStageDomains(self, preg_config, remove_return_se = False):
         """Gets resources for each pipeline stage
 
             Args:
                 preg_config (list of Boolean): pipeline register configuration
                                                if n-th value is True, n-th preg is activated
+
+                Optional
+                    remove_return_se (Boolean): eliminates return only SE except for last stage
+                                        default: False
 
             Returns:
                 list: resources for each pipeline stage
@@ -662,6 +666,7 @@ class PEArrayModel():
         active_preg_positions = [self.__preg_positions[i] for i in range(len(self.__preg_positions)) if preg_config[i] == True]
 
         # get nodes for each stage
+        se_set = set()
         for y in range(self.__height):
             if stage < len(active_preg_positions):
                 if active_preg_positions[stage] <= y:
@@ -672,8 +677,12 @@ class PEArrayModel():
             for x in range(self.__width):
                 se_set = set([se for subset in self.__se_lists[(x, y)].values() for se in subset])
                 rtn_list[stage].extend([se for se in se_set if not se in self.__return_only_se])
+        else:
+            if remove_return_se:
+                rtn_list[-1].extend(list(set(self.__return_only_se) & se_set))
+            else:
+                rtn_list[-1].extend(self.__return_only_se)
 
-        rtn_list[-1].extend(self.__return_only_se)
         return rtn_list
 
     def getPregNumber(self):

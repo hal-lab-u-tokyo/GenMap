@@ -122,7 +122,7 @@ class AStarRouter(RouterBase):
         path_extend_nodes = []
         free_last_stage_SEs = set()
         if CGRA.getPregNumber() != 0:
-            stage_domains = CGRA.getStageDomains(preg_conf)
+            stage_domains = CGRA.getStageDomains(preg_conf, remove_return_se = True)
             if len(stage_domains) > 1:
                 last_stage_nodes = stage_domains[-1]
                 path_extend_nodes = [alu for alu in alu_list if not alu in last_stage_nodes]
