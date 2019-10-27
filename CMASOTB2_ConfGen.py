@@ -14,7 +14,7 @@ ALU_CONF_FORMAT_BIN = "{OPCODE:04b}_{SEL_A:03b}_{SEL_B:03b}"
 
 ALU_CONF_PKT = "100000_00000000000__1111__{CONF:s}__{ROW:08b}__{COL:08b} //PE Config\n"
 SE_CONF_PKT = "100001_0000__{CONF:s}__{ROW:08b}__{COL:08b} //SE Config\n"
-CONST_PKT = "100010_00_{index:04b}_000__{CONST:016b}__0000000000000000 //Constant\n"
+CONST_PKT = "100010_00_{index:04b}_00__{CONST:017b}__0000000000000000 //Constant\n"
 TAIL_PKT = "111111_000000_000_0000000000000000__0000000000000000 // others\n"
 
 TABLE_FORMAT = "{7:03b}_{6:03b}_{5:03b}_{4:03b}_{3:03b}_{2:03b}_{1:03b}_{0:03b}"
@@ -120,7 +120,11 @@ class CMASOTB2_ConfGen(ConfGenBase):
 
         # Const Regs
         for i in range(len(Const_conf)):
-            f.write(CONST_PKT.format(index=i, CONST=int(Const_conf[i])))
+            int_const = int(Const_conf[i])
+            if int_const < 0:
+                int_const = 0x1FFFF + (int_const + 1) # converting 17-bit two's complement
+            int_const &= 0x1FFFF
+            f.write(CONST_PKT.format(index=i, CONST=int_const))
         f.close()
 
         return True

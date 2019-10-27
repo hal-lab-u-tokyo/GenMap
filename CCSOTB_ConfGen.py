@@ -140,7 +140,12 @@ class CCSOTB_ConfGen(ConfGenBase):
             addr = CONST_BASEADDR + 4 * i
             f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                         vch=0, src=0, dst=1))
-            f.write(TAIL_FLIT.format(data="{0:032b}".format(int(Const_conf[i]))))
+            int_const = int(Const_conf[i])
+            if int_const < 0:
+                int_const = 0x1FFFF + (int_const + 1) # converting 17-bit two's complement
+            int_const &= 0x1FFFF
+
+            f.write(TAIL_FLIT.format(data="{0:032b}".format()))
 
         # duplicate table maps
         if duplicate:
