@@ -150,9 +150,9 @@
 			<PREG unit="uW">0.01187746</PREG>
 		</Static>
 		<Dynamic>
-			<Energy unit="pJ">0.099</Energy>
-			<Propagation>1.325</Propagation>
-			<Decay>0.072</Decay>
+			<Energy unit="pJ">0.05018</Energy>
+			<Propagation>0.1382</Propagation>
+			<Decay>1.1347</Decay>
 			<SE_weight>1</SE_weight>
 			<Switching op="ADD">17.1693</Switching>
 			<Switching op="SUB">20.0153</Switching>

@@ -13,17 +13,19 @@ import re
 import readline
 import csv
 import math
+from copy import copy
 from argparse import ArgumentParser
+import xml.etree.ElementTree as ET
+from multiprocessing import Pool
+import multiprocessing as multi
 
 from scipy import optimize
 import networkx as nx
 from deap import base
 from deap import creator
 
+ERR_TH = 0.35
 
-from multiprocessing import Pool
-import multiprocessing as multi
-import xml.etree.ElementTree as ET
 
 class MyShell(Cmd):
     prompt = "Param Estimator> "
@@ -37,6 +39,7 @@ class MyShell(Cmd):
         readline.set_completer_delims(new_delims)
         self.__dumplist = []
         self.__resultlist = []
+        self.__target_arch = None
         self.__exec_flag = False
         self.__energy_unit = "pJ"
         self.__op_sw_opt_rate = 0.0
@@ -89,13 +92,60 @@ class MyShell(Cmd):
 
         if text == "":
             args.append("")
-
         # check positional args
         file_postfix = None
         if len(args) == 2:
             file_postfix = "dump"
         elif len(args) == 3:
             file_postfix = "csv"
+
+        return self.__get_file_list(args, text, file_postfix)
+
+    def do_set_arch(self, line):
+        args = line.split(" ")
+        args = [argv for argv in args if argv != ""]
+        if len(args) == 0:
+            self.help_set_arch()
+            return
+        else:
+            if os.access(args[0], os.R_OK):
+                # parse XML file
+                try:
+                    tree_arch = ET.ElementTree(file=args[0])
+                except ET.ParseError as e:
+                    print("Parse Error ({0})".format(args[0]), e.args, file=sys.stderr)
+                    return
+                if tree_arch.getroot().tag == "PEArray":
+                    # make model instance
+                    try:
+                        self.__target_arch = PEArrayModel(tree_arch.getroot())
+                    except (ValueError, PEArrayModel.InvalidConfigError) as e:
+                        print("Invalid definition", e.args)
+                        return
+                else:
+                    print("Parse Error ({0})".format(args[0]), \
+                            "\nRoot tag name must be \"PEArray\"", file=sys.stderr)
+                    return
+            else:
+                print("No such file: " + args[0], file=sys.stderr)
+                return
+
+    def help_set_arch(self):
+        print("usage: set_arch arch_description.xml")
+
+    def complete_set_arch(self, text, line, begidx, endidx):
+        args = line.split(" ")
+        args = [argv for argv in args if argv != ""]
+
+        if text == "":
+            args.append("")
+        # check positional args
+        file_postfix = None
+        if len(args) == 2:
+            file_postfix = "xml"
+        return self.__get_file_list(args, text, file_postfix)
+
+    def __get_file_list(self, args, text, file_postfix):
 
         if not file_postfix is None:
             if text[-2:] == "..":
@@ -157,11 +207,18 @@ class MyShell(Cmd):
     def isExecute(self):
         return self.__exec_flag
 
+    def getTargetArch(self):
+        return self.__target_arch
+
     def getUnit(self):
         return self.__energy_unit
 
     def getOpSwOptRate(self):
         return self.__op_sw_opt_rate
+
+def mt_wrapper(args):
+    (CGRA, sim_params, c) = args
+    return abs(c["real"] - PowerEval.eval_glitch(CGRA, c["app"], sim_params, c["ind"])) / c["real"]
 
 def cost_func(params, cases, CGRA, sim_params):
     print(params)
@@ -171,9 +228,18 @@ def cost_func(params, cases, CGRA, sim_params):
 
     errs = [0.0 for i in range(len(cases))]
 
-    for i in range(len(cases)):
-        errs[i] = (abs(cases[i]["real"] - PowerEval.eval_glitch(CGRA, cases[i]["app"], sim_params, cases[i]["ind"])) \
-                        / cases[i]["real"])
+    if len([v for v in params if v < 0]) > 0:
+        return [10000000000 for i in range(len(cases))]
+
+    p = Pool(multi.cpu_count())
+    mt_args = [(CGRA, sim_params, cases[i]) for i in range(len(cases))]
+    errs = p.map(mt_wrapper, mt_args)
+    p.close()
+
+    # single process ver
+    # for i in range(len(cases)):
+    #     errs[i] = (abs(cases[i]["real"] - PowerEval.eval_glitch(CGRA, cases[i]["app"], sim_params, cases[i]["ind"])) \
+    #                     / cases[i]["real"])
 
     return errs
 
@@ -188,7 +254,6 @@ def cost_func2(params, cases, CGRA, sim_params, original_sw, weight):
                         / cases[i]["real"])
 
     return errs
-
 
 if __name__ == "__main__":
 
@@ -239,24 +304,41 @@ if __name__ == "__main__":
     if len(arch_set) > 1:
         print("Different architecture dumps are used", arch_set)
         sys.exit()
+    elif not shell.getTargetArch() is None and \
+            list(arch_set)[0] != shell.getTargetArch().getArchName():
+        print("Different architecture between specified({0}) one and dumps({1})".format(
+                    shell.getTargetArch().getArchName(), list(arch_set)[0]))
+        sys.exit()
 
     # get some instances from first dump
-    model = header_list[0]["arch"]
+    if shell.getTargetArch() is None:
+        model = header_list[0]["arch"]
+    else:
+        model = shell.getTargetArch()
     sim_params = header_list[0]["sim_params"]
 
     # set initial parameters
-    params = [1., 1., 1.]
+    params = [1., 1., 0.9]
 
     # set cases
     cases = []
-    if model.getPregNumber() == 0:
-        for head, data, real in zip(header_list, data_list, real_value_list):
-            for i in range(len(data["hof"])):
+    preg_num = model.getPregNumber()
+    preg_bin_str = "{0:0" + str(preg_num) + "b}"
+    for head, data, real in zip(header_list, data_list, real_value_list):
+        for i in range(len(data["hof"])):
+            if preg_num == 0:
                 if real[i][0] != "null" and real[i][0] != "":
                     f_value = float(real[i][0])
                     cases.append({"ind": data["hof"][i], "app": head["app"], "real": f_value})
-    else:
-        pass
+            else:
+                for preg in range(min(len(real[i]), 2**preg_num)):
+                    if real[i][preg] != "null" and real[i][preg] != "":
+                        f_value = float(real[i][preg])
+                        cases.append({"ind": copy(data["hof"][i]), "app": head["app"], "real": f_value})
+                        cases[-1]["ind"].preg = [f == "1" for f in preg_bin_str.format(preg)[::-1]]
+                        print(head["app"].getAppName(), "ID: ", i, "preg:", preg, "is applied real value", f_value)
+
+    print("Sample count: ", len(cases))
 
     sim_params.change_unit_scale("energy", shell.getUnit())
 
@@ -265,7 +347,7 @@ if __name__ == "__main__":
              args=(cases, model, sim_params), method="lm")
 
     if result["success"]:
-        print("Estimatino was finished successfully")
+        print("Estimation was finished successfully")
         print("status", result["status"])
     else:
         print("Fail to Estimation")
@@ -311,9 +393,13 @@ if __name__ == "__main__":
 
     sim = [0 for i in range(len(cases))]
     errs = [0 for i in range(len(cases))]
+
+    over_errs = []
     for i in range(len(cases)):
         sim[i] = PowerEval.eval_glitch(model, cases[i]["app"], sim_params, cases[i]["ind"])
         errs[i] = abs(cases[i]["real"] - sim[i])/ cases[i]["real"]
+        if errs[i] > ERR_TH:
+            over_errs.append(i)
 
     min_err = min(errs)
     min_case = errs.index(min_err)
@@ -323,9 +409,10 @@ if __name__ == "__main__":
     print("Report")
     print("seq\tmodel sim\treal\t\terror")
     for i in range(len(sim)):
-        print("{0:3d}\t{1:8.4f}\t{2:2.2f}\t\t{3:2.2f}%\t\t{4}".format(i, sim[i], cases[i]["real"], errs[i] * 100,\
+        print("{0:3d}\t{1:8.10f}\t{2:2.2f}\t\t{3:2.2f}%\t\t{4}".format(i, sim[i], cases[i]["real"], errs[i] * 100,\
             "lager" if sim[i] - cases[i]["real"] > 0 else "smaller"))
-    print("ME=", sum(errs) / len(errs) * 100, "%")
+    print("ME=", sum([errs[i] for i in range(len(errs)) if not i in over_errs]) / (len(errs) - len(over_errs)) * 100, "%")
+    print("over errs: ", len(over_errs))
     print("Min=", min_err * 100, "%", "case:", min_case, cases[min_case]["real"])
     print("Max=", max_err * 100, "%", "case:", max_case, cases[max_case]["real"])
     print("Median=", sorted(errs)[len(errs) // 2] * 100, "%") 
