@@ -50,6 +50,7 @@ GenMap requires the following python libraries. Recommended version for each lib
     1. pydot (1.4.1)
     1. pygmo (2.9)
     1. prettytable (0.7.2)
+    1. llvmlite (0.30.0)
 ```
 (GenMap_env) # pip3 install (package_name)[==version]
 ```

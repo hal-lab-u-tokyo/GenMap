@@ -6,3 +6,4 @@ PuLP==1.6.8
 pydot==1.4.1
 pygmo==2.9
 tqdm==4.31.1
+llvmlite==0.30.0

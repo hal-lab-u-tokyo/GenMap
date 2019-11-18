@@ -1,6 +1,6 @@
 from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
-
+from ConfLLVMIR import ConfLLVMIR
 import os
 
 # ADDRESS
@@ -18,7 +18,7 @@ PE_CONF_FORMAT_BIN = "0" * 12 + "_" + SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT
 PREG_CONF_FORMAT = "0" * 25 + "_" + "{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
 
 TABLE_FORMAT = "0000_0000_{5:04b}_{4:04b}_{3:04b}_{2:04b}_{1:04b}_{0:04b}"
-TABLE_FORMAER_OFFSET = 4
+TABLE_FORMER_OFFSET = 4
 TABLE_LATTER_OFFSET = 8
 TABLE_MASK_FORMAT = "0000_0000_0000_0000_0000_{11:01b}_{10:01b}_{9:01b}_{8:01b}" + \
                     "_{7:01b}_{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
@@ -42,44 +42,161 @@ class CCSOTB2_ConfGen(ConfGenBase):
         self.force_mode = args["force"]
 
         if os.path.exists(args["output_dir"]):
-            fig_filename = args["output_dir"] + "/" + args["prefix"] + "_map.png"
-            conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.pkt"
-            info_filename = args["output_dir"] + "/" + args["prefix"] + "_info.txt"
+            if "llvm-ir" in args["style"]:
+                # set same name for file check later
+                fig_save_enable = info_save_enable = False
+                fig_filename = info_filename = ""
+                conf_save_enable = True
+                conf_filename = args["output_dir"] + "/" + args["prefix"] + ".ll"
+            else:
+                fig_save_enable = info_save_enable = conf_save_enable = True
+                fig_filename = args["output_dir"] + "/" + args["prefix"] + "_map.png"
+                conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.pkt"
+                info_filename = args["output_dir"] + "/" + args["prefix"] + "_info.txt"
 
             # check if files exist
             files_exist = False
             if self.force_mode != True:
-                files_exist |= os.path.exists(fig_filename)
-                files_exist |= os.path.exists(conf_filename)
-                files_exist |= os.path.exists(info_filename)
+                files_exist |= (os.path.exists(fig_filename) & fig_save_enable)
+                files_exist |= (os.path.exists(conf_filename) & conf_save_enable)
+                files_exist |= (os.path.exists(info_filename) & info_save_enable)
 
             # mapping figure
             if files_exist:
                 print("some file exist")
             else:
-                drawer = ConfDrawer(CGRA, individual)
-                drawer.draw_PEArray(CGRA, individual, app)
-                drawer.save(fig_filename)
+                if fig_save_enable:
+                    drawer = ConfDrawer(CGRA, individual)
+                    drawer.draw_PEArray(CGRA, individual, app)
+                    drawer.save(fig_filename)
 
                 # make configurations
                 PE_confs = self.make_PE_conf(CGRA, app, individual)
                 ld_conf = self.make_LD_Dmanu(CGRA, individual.routed_graph)
                 st_conf = self.make_ST_Dmanu(CGRA, individual.routed_graph)
                 const_conf = self.make_Const(CGRA, individual.routed_graph)
+
+                dup_count = 1
                 if "duplicate" in args["style"]:
                     map_width = individual.getEvaluatedData("map_width")
                     if map_width is None:
                         print("duplicate option ignored because map width was not evaluated")
                     else:
-                        self.duplicate(CGRA, PE_confs, ld_conf, st_conf, map_width)
+                        dup_count = self.duplicate(CGRA, PE_confs, ld_conf, st_conf, map_width)
 
-                self.save_conf(CGRA, PE_confs, const_conf, ld_conf, st_conf, individual.preg, \
+                if "llvm-ir" in args["style"]:
+                    ir_maker = ConfLLVMIR()
+                    self.export_conf_llvmir(ir_maker, CGRA, PE_confs, const_conf, ld_conf, st_conf, \
+                                            individual.preg, dup_count)
+                    self.export_info_llvmir(ir_maker, header, individual, individual_id, ld_conf, st_conf)
+                    print(ir_maker.get_IR())
+                else:
+                    self.save_conf(CGRA, PE_confs, const_conf, ld_conf, st_conf, individual.preg, \
                                      conf_filename)
 
-                self.save_info(header, individual, individual_id, ld_conf, st_conf,\
-                        info_filename)
+                if info_save_enable:
+                    self.save_info(header, individual, individual_id, ld_conf, st_conf,\
+                                    info_filename)
         else:
             print("No such direcotry: ", args["output_dir"])
+
+    def export_conf_llvmir(self, IR_MAKER, CGRA, PE_confs, Const_conf, LD_conf,\
+                             ST_conf, PREG_conf, DUPLICATE_COUNT):
+
+        width, height = CGRA.getSize()
+
+        # PE config
+        pe_conf_pair = [[], []]
+        for x in range(width):
+            for y in range(height):
+                if len(PE_confs[x][y]) > 0:
+                    addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
+                    for filed in CONF_FIELDS:
+                        if not filed in PE_confs[x][y]:
+                            PE_confs[x][y][filed] = 0
+                    pe_conf_pair[0].append(addr)
+                    pe_conf_pair[1].append(int(PE_CONF_FORMAT_BIN.format(**PE_confs[x][y]), 2))
+
+        IR_MAKER.add_variable("__conf_len", len(pe_conf_pair[0]))
+        IR_MAKER.add_array("__conf_addrs", pe_conf_pair[0])
+        IR_MAKER.add_array("__conf_data", pe_conf_pair[1])
+
+        # PREG Config
+        if len(PREG_conf) == 0:
+            PREG_conf = [False for i in range(7)]
+        IR_MAKER.add_variable("__preg_conf", int(PREG_CONF_FORMAT.format(*PREG_conf), 2))
+
+        # Const Regs
+        const_arr = []
+        for i in range(len(Const_conf)):
+            int_const = int(Const_conf[i])
+            if int_const < 0:
+                int_const = 0x1FFFF + (int_const + 1) # converting 17-bit two's complement
+            int_const &= 0x1FFFF
+            const_arr.append(int_const)
+        IR_MAKER.add_array("__const_data", const_arr)
+
+        # LD table
+        IR_MAKER.add_variable("__ld_table_former", \
+                    int(TABLE_FORMAT.format(*LD_conf["table"][0:6]), 2))
+        IR_MAKER.add_variable("__ld_table_latter", \
+                    int(TABLE_FORMAT.format(*LD_conf["table"][6:12]), 2))
+        IR_MAKER.add_variable("__ld_table_mask", \
+                    int(TABLE_MASK_FORMAT.format(*LD_conf["mask"]), 2))
+
+        # ST table
+        IR_MAKER.add_variable("__st_table_former", \
+                    int(TABLE_FORMAT.format(*ST_conf["table"][0:6]), 2))
+        IR_MAKER.add_variable("__st_table_latter", \
+                    int(TABLE_FORMAT.format(*ST_conf["table"][6:12]), 2))
+        IR_MAKER.add_variable("__st_table_mask", \
+                    int(TABLE_MASK_FORMAT.format(*ST_conf["mask"]), 2))
+
+        # duplicate size
+        IR_MAKER.add_variable("__duplicate_size", DUPLICATE_COUNT)
+
+    def export_info_llvmir(self, IR_MAKER, header, individual, individual_id, LD_conf, ST_conf):
+        app = header["app"]
+        sim_params = header["sim_params"]
+
+        # save ID
+        IR_MAKER.add_metadata("solution ID", individual_id)
+
+        # save app name
+        IR_MAKER.add_variable("__appname", app.getAppName())
+
+        # save frequency
+        IR_MAKER.add_metadata("Clock Frequncy", "{0}MHz".format(app.getFrequency("M")))
+
+        # units setting
+        IR_MAKER.add_metadata("Units setting", \
+            "Time: " + sim_params.getTimeUnit() + \
+            " Power: " + sim_params.getPowerUnit() + \
+            " Energy: " + sim_params.getEnergyUnit())
+
+        # evaluated data
+        for eval_name, value in zip(header["eval_names"], individual.fitness.values):
+            IR_MAKER.add_metadata(eval_name, value)
+
+        # Other data
+        leak = individual.getEvaluatedData("leakage_power")
+        dynamic = individual.getEvaluatedData("dynamic_power")
+        if not leak is None:
+            IR_MAKER.add_metadata("Leakage Power", leak)
+
+        if not dynamic is None:
+            IR_MAKER.add_metadata("Dynamic Power", dynamic)
+
+        body_bias = individual.getEvaluatedData("body_bias")
+        if not body_bias is None:
+            bb_data = ""
+            for domain, voltage in body_bias.items():
+                bb_data += "{0}: {1} V ".format(domain, voltage)
+            IR_MAKER.add_metadata("Bias voltage", bb_data)
+
+        # data memory alignment
+        IR_MAKER.add_metadata("Input data alignment", LD_conf["mem_align"])
+        IR_MAKER.add_metadata("Output data alignment", ST_conf["mem_align"])
 
     def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename):
 
@@ -122,7 +239,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         # LD table
         f.write("\n//LD Table\n")
-        addr = LD_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
+        addr = LD_DMANU_BASEADDR + TABLE_FORMER_OFFSET
         f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                 vch=0, src=0, dst=1))
         f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][0:6])))
@@ -141,7 +258,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         # ST table
         f.write("\n//ST Table\n")
-        addr = ST_DMANU_BASEADDR + TABLE_FORMAER_OFFSET
+        addr = ST_DMANU_BASEADDR + TABLE_FORMER_OFFSET
         f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
                                                 vch=0, src=0, dst=1))
         f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][0:6])))
@@ -187,6 +304,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
             for out_idx in range(out_num):
                 st_conf["mem_align"].append(st_conf["mem_align"][out_idx] + "_(" + str(dup_count) + ")")
 
+        return dup_count + 1
 
     def make_PE_conf(self, CGRA, app, individual):
         width, height = CGRA.getSize()
