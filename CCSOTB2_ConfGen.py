@@ -47,7 +47,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 fig_save_enable = info_save_enable = False
                 fig_filename = info_filename = ""
                 conf_save_enable = True
-                conf_filename = args["output_dir"] + "/" + args["prefix"] + ".ll"
+                conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.ll"
             else:
                 fig_save_enable = info_save_enable = conf_save_enable = True
                 fig_filename = args["output_dir"] + "/" + args["prefix"] + "_map.png"
@@ -89,7 +89,8 @@ class CCSOTB2_ConfGen(ConfGenBase):
                     self.export_conf_llvmir(ir_maker, CGRA, PE_confs, const_conf, ld_conf, st_conf, \
                                             individual.preg, dup_count)
                     self.export_info_llvmir(ir_maker, header, individual, individual_id, ld_conf, st_conf)
-                    print(ir_maker.get_IR())
+                    with open(conf_filename, "w") as f:
+                        f.writelines(ir_maker.get_IR())
                 else:
                     self.save_conf(CGRA, PE_confs, const_conf, ld_conf, st_conf, individual.preg, \
                                      conf_filename)
