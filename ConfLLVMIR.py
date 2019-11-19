@@ -28,6 +28,7 @@ class ConfLLVMIR(object):
             store_data.initializer = ll.Constant(i32, data)
             store_data.align = 4
         elif type(data) is str:
+            data += "\0"
             store_data = ll.GlobalVariable(self.__module, ll.ArrayType(i8, len(data)), name)
             store_data.initializer = ll.Constant(ll.ArrayType(i8, len(data)), bytearray(data.encode()))
             store_data.align = 16
