@@ -183,7 +183,7 @@ class PowerEval(EvalBase):
                             bbv_assign[domain] = bbv
                 individual.saveEvaluatedData("body_bias", bbv_assign)
             else:
-                individual.saveEvaluatedData("body_bias", None)
+                individual.saveEvaluatedData("body_bias", {})
                 individual.invalidate()
         else:
             PE_leak = sim_params.PE_leak[0]

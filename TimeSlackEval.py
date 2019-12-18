@@ -24,14 +24,23 @@ class TimeSlackEval(EvalBase):
 
         """
 
-        if individual.isValid() == False:
-            return PENALTY_COST
-
         body_bias = individual.getEvaluatedData("body_bias")
+        fastest_mode = False
+
+        if individual.isValid() == False:
+            if not body_bias is None:
+                if len(body_bias) == 0:
+                    # in case of failure in body bias assign
+                    fastest_mode = True
+            else:
+                return PENALTY_COST
+
 
         delays = []
 
         # get delay table for ALU
+        # key:      node name of ALU
+        # value:    list of delay value for each body bias voltage
         op_attr = nx.get_node_attributes(app.getCompSubGraph(), "op")
         delay_table = {CGRA.getNodeName("ALU", pos): \
                         sim_params.delay_info[op_attr[op_label] if op_label in op_attr.keys() else "CAT" ] \
@@ -44,6 +53,10 @@ class TimeSlackEval(EvalBase):
             pass
         else:
             domains = CGRA.getBBdomains()
+            if fastest_mode:
+                # find fastest body bias voltage
+                fastest_bb = sorted(sim_params.delay_info["SE"])[-1]
+                body_bias = {domain_name: fastest_bb for domain_name in domains.keys()}
             domain_table = {}
             for v in individual.routed_graph.nodes():
                 for domain_name, resources in domains.items():
@@ -56,7 +69,6 @@ class TimeSlackEval(EvalBase):
                             domain_table[v] = domain_name
                             break
 
-        delays = []
         for dp in DataPathAnalysis.get_data_path(CGRA, individual):
             if not body_bias is None:
                 delays.append(sum([delay_table[v][body_bias[domain_table[v]]] for v in dp]))
