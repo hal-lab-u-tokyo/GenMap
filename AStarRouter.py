@@ -7,6 +7,14 @@ USED_LINK_WEIGHT = 10000
 ALU_OUT_WEIGTH = 1000
 PENALTY_CONST = 1000
 
+# setting up for pulp
+solver = pulp.GUROBI(msg = 0)
+if solver.available():
+    # print message
+    pulp.LpProblem().solve(solver)
+else:
+    solver = pulp.PULP_CBC_CMD(threads = 1)
+
 class AStarRouter(RouterBase):
 
     class InfeasibleRouting(Exception):
@@ -248,7 +256,7 @@ class AStarRouter(RouterBase):
                     prob += isMap[e1][r] + isMap[e2][r] <= 1
 
         # solve this ILP
-        stat = prob.solve()
+        stat = prob.solve(solver)
         result = prob.objective.value()
 
         # check result

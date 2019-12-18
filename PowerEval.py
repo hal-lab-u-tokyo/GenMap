@@ -10,6 +10,15 @@ import math
 PENALTY_COST = 1000
 MIN_SW = 1.5 # lower limit of SE's switching count 
 
+# setting up for pulp
+solver = pulp.GUROBI(msg = 0)
+if solver.available():
+    # print message
+    pulp.LpProblem().solve(solver)
+else:
+    solver = pulp.PULP_CBC_CMD(threads = 1)
+
+
 class PowerEval(EvalBase):
     class DependencyError (Exception):
         pass
@@ -160,7 +169,7 @@ class PowerEval(EvalBase):
                                     for bbv in sim_params.bias_range]) <= max_lat
 
             # solve this ILP
-            stat = problem.solve()
+            stat = problem.solve(solver)
             result = problem.objective.value()
             leak_power = pulp.value(problem.objective)
 
