@@ -153,30 +153,37 @@ if __name__ == '__main__':
     # run optimization
     if success_setup:
         # tty echo off
-        fd = sys.stdin.fileno()
-        old = termios.tcgetattr(fd)
-        new = termios.tcgetattr(fd)
-        new[3] &= ~(termios.ECHO | termios.ICANON)
+        if sys.stdin.isatty():
+            fd = sys.stdin.fileno()
+            old = termios.tcgetattr(fd)
+            new = termios.tcgetattr(fd)
+            new[3] &= ~(termios.ECHO | termios.ICANON)
+            tty_off = True
+        else:
+            tty_off = False
 
         start_time = time.time()
 
         try:
-            termios.tcsetattr(fd, termios.TCSANOW, new)
+            if tty_off:
+                termios.tcsetattr(fd, termios.TCSANOW, new)
             hof, fitness_log = optimizer.runOptimization()
             elapsed_time = time.time() - start_time
             print("elapsed time:", elapsed_time, "[sec]")
         except KeyboardInterrupt:
             # exit safety
-            termios.tcsetattr(fd, termios.TCSANOW, old)
+            if tty_off:
+                termios.tcsetattr(fd, termios.TCSANOW, old)
             if not logfile is None:
                 logfile.close()
             sys.exit()
         finally:
-            # discard std input
-            print("Please enter any keys\n")
-            _ = sys.stdin.read(1)
-            # restore tty attr
-            termios.tcsetattr(fd, termios.TCSANOW, old)
+            if tty_off:
+                # discard std input
+                print("Please enter any keys\n")
+                _ = sys.stdin.read(1)
+                # restore tty attr
+                termios.tcsetattr(fd, termios.TCSANOW, old)
 
         # save results
         objectives = optimizer.getObjectives()
