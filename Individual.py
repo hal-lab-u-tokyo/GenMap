@@ -96,6 +96,8 @@ class Individual():
         child2.routed_graph = father.model.getNetwork()
         child1.invalidate()
         child2.invalidate()
+        child1.__userData = {}
+        child2.__userData = {}
 
         # set crossover point
         cx_point = random.randint(0, len(father.mapping) - 1)
@@ -232,6 +234,8 @@ class Individual():
         ind.invalidate()
         # init graph
         ind.routed_graph = ind.model.getNetwork()
+        # reset user data
+        ind.__userData = {}
 
         return ind,
 

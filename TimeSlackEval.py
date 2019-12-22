@@ -49,9 +49,7 @@ class TimeSlackEval(EvalBase):
         delay_table.update({v: sim_params.delay_info["SE"]\
                             for v in individual.routed_graph.nodes() if CGRA.isSE(v)})
 
-        if body_bias is None:
-            pass
-        else:
+        if not body_bias is None:
             domains = CGRA.getBBdomains()
             if fastest_mode:
                 # find fastest body bias voltage
