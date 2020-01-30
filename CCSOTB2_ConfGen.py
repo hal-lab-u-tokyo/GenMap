@@ -1,6 +1,5 @@
 from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
-from ConfLLVMIR import ConfLLVMIR
 import os
 
 # ADDRESS
@@ -30,7 +29,7 @@ TAIL_FLIT = "010_{data:s}\n"
 MSG_TYPES = {"SW": 1}
 
 class CCSOTB2_ConfGen(ConfGenBase):
-    # def generate(self, CGRA, app, individual, eval_list, args):
+
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
         individual = data["hof"][individual_id]
@@ -43,6 +42,12 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         if os.path.exists(args["output_dir"]):
             if "llvm-ir" in args["style"]:
+                # check if llvmlite is avaiable
+                try:
+                    from ConfLLVMIR import ConfLLVMIR
+                except ImportError:
+                    print("Cannot import llvmlite. Please install it by \"pip3 install llvmlite\"")
+                    return
                 # set same name for file check later
                 fig_save_enable = info_save_enable = False
                 fig_filename = info_filename = ""
@@ -101,8 +106,21 @@ class CCSOTB2_ConfGen(ConfGenBase):
         else:
             print("No such direcotry: ", args["output_dir"])
 
+
     def export_conf_llvmir(self, IR_MAKER, CGRA, PE_confs, Const_conf, LD_conf,\
                              ST_conf, PREG_conf, DUPLICATE_COUNT):
+        """exports configration data as LLVM IR
+
+            Args:
+                IR_MAKER (ConfLLVMIR)       : an instance of ConfLLVMIR
+                CGRA (PEArrayModel)         : the target architecture
+                PE_confs (dict of 2D list)  : configuration of each PE
+                Const_conf (list)           : a list of const value
+                LD_conf (dict)              : configuration of LD table
+                ST_conf (dict)              : configuration of ST table
+                PREG_conf (list of bool)    : flag of pipeline registers
+                DUPLICATE_COUNT (int)       : count of mapping duplication
+        """
 
         width, height = CGRA.getSize()
 
@@ -157,6 +175,16 @@ class CCSOTB2_ConfGen(ConfGenBase):
         IR_MAKER.add_variable("__duplicate_size", DUPLICATE_COUNT)
 
     def export_info_llvmir(self, IR_MAKER, header, individual, individual_id, LD_conf, ST_conf):
+        """exports mapping information as LLVM IR
+
+            Args:
+                IR_MAKER (ConfLLVMIR)       : an instance of ConfLLVMIR
+                header (dict)               : header of dumpfile
+                individual (Individual)     : selected inidividual to be generated
+                individual_id (int)         : ID of the selected individual
+                LD_conf (dict)              : configuration of LD table
+                ST_conf (dict)              : configuration of ST table
+        """
         app = header["app"]
         sim_params = header["sim_params"]
 
@@ -200,6 +228,20 @@ class CCSOTB2_ConfGen(ConfGenBase):
         IR_MAKER.add_metadata("Output data alignment", ST_conf["mem_align"])
 
     def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename):
+        """save configration data
+
+            Args:
+                CGRA (PEArrayModel)         : the target architecture
+                PE_confs (dict of 2D list)  : configuration of each PE
+                Const_conf (list)           : a list of const value
+                LD_conf (dict)              : configuration of LD table
+                ST_conf (dict)              : configuration of ST table
+                PREG_conf (list of bool)    : flag of pipeline registers
+                filename (str)              : filename to save the configration
+
+            Returns:
+                bool: whether the configration is saved successfully or not
+        """
 
         f = open(filename, "w")
         width, height = CGRA.getSize()
@@ -280,6 +322,17 @@ class CCSOTB2_ConfGen(ConfGenBase):
         return True
 
     def duplicate(self, CGRA, PE_confs, ld_conf, st_conf, map_width):
+        """duplicate mapping horizontally
+            Args:
+                CGRA (PEArrayModel)         : the target architecture
+                PE_confs (dict of 2D list)  : configuration of each PE
+                ld_conf (dict)              : configuration of LD table
+                st_conf (dict)              : configuration of ST table
+                map_width (int)             : witdh of the mapping
+
+            Returns:
+                int: duplication count
+        """
         width, height = CGRA.getSize()
         out_num = len(st_conf["mem_align"])
         in_num = len(ld_conf["mem_align"])
@@ -308,6 +361,19 @@ class CCSOTB2_ConfGen(ConfGenBase):
         return dup_count + 1
 
     def make_PE_conf(self, CGRA, app, individual):
+        """analyzes PE configuration from mapping results
+            Args:
+                CGRA (PEArrayModel)         : the target architecture
+                app (Application)           : the target application
+                individual (Individual)     : selected inidividual to be generated
+
+            Returns:
+                dict of 2D list: configuration of each PE
+                    key of the dict:    SE_OUTPUT's name or ALU fields
+                    value of the dict:  configuration value
+
+        """
+
         width, height = CGRA.getSize()
 
         comp_dfg = app.getCompSubGraph()
@@ -366,6 +432,20 @@ class CCSOTB2_ConfGen(ConfGenBase):
         pass
 
     def make_LD_Dmanu(self, CGRA, routed_graph):
+        """analyzes LD table from mapping results
+            Args:
+                CGRA (PEArrayModel)             : the target architecture
+                app (Application)               : the target application
+                routed_graph (networkx DiGraph) : routed graph on PE array resources
+
+            Returns:
+                dict: a generated table
+                    keys and values
+                    table       : transfer table
+                    mask        : transfer mask
+                    mem_align   : data alignment of input data
+
+        """
 
         aligned_input_data = list(set([routed_graph.nodes[i]["map"] for i in CGRA.getInputPorts() \
                                 if i in routed_graph.nodes()]))
@@ -385,6 +465,20 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
 
     def make_ST_Dmanu(self, CGRA, routed_graph):
+        """analyzes ST table from mapping results
+            Args:
+                CGRA (PEArrayModel)             : the target architecture
+                app (Application)               : the target application
+                routed_graph (networkx DiGraph) : routed graph on PE array resources
+
+            Returns:
+                dict: a generated table
+                    keys and values
+                    table       : transfer table
+                    mask        : transfer mask
+                    mem_align   : data alignment of output data
+
+        """
 
         aligned_output_data = list(set([routed_graph.nodes[i]["map"] for i in CGRA.getOutputPorts() \
                                 if i in routed_graph.nodes()]))
@@ -410,6 +504,16 @@ class CCSOTB2_ConfGen(ConfGenBase):
         return st_conf
 
     def make_Const(self, CGRA, routed_graph):
+        """analyzes value of constant register from mapping results
+            Args:
+                CGRA (PEArrayModel)             : the target architecture
+                app (Application)               : the target application
+                routed_graph (networkx DiGraph) : routed graph on PE array resources
+
+            Returns:
+                list of int: const values
+        """
+
         const_num = len(CGRA.getConstRegs())
         const_conf = [0 for i in range(const_num)]
 
@@ -421,6 +525,18 @@ class CCSOTB2_ConfGen(ConfGenBase):
         return const_conf
 
     def save_info(self, header, individual, individual_id, LD_conf, ST_conf, filename):
+        """save information data
+
+            Args:
+                header (dict)               : header of dumpfile
+                individual (Individual)     : selected inidividual to be generated
+                individual_id (int)         : ID of the selected individual
+                LD_conf (dict)              : configuration of LD table
+                ST_conf (dict)              : configuration of ST table
+                filename (str)              : filename to save the configration
+
+        """
+
         app = header["app"]
         sim_params = header["sim_params"]
 

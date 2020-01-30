@@ -78,9 +78,3 @@ class ConfLLVMIR(object):
         for metadata in self.__module.metadata:
             parsed_ir += str(metadata) + "\n"
         return parsed_ir
-
-if __name__ == "__main__":
-    a = ConfLLVMIR()
-    a.add_variable("test", 0)
-    a.add_metadata("meta", "this is meta")
-    print(a.get_IR())
