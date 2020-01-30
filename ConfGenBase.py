@@ -54,6 +54,14 @@ class ConfGenBase(metaclass=ABCMeta):
 
     @abstractmethod
     def generate(self, header, data, individual_id, args):
+        """Generates configuration data for the target architecture
+
+            Args:
+                header (dict)       : header of dumpfile
+                data (dict)         : data of dumpfile
+                individual_id (int) : selected solution ID to be generated
+                args (list)         : options from command line
+        """
         pass
 
 if __name__ == '__main__':
