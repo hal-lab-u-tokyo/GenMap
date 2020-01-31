@@ -77,7 +77,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
                 # make configurations
                 PE_confs = self.make_PE_conf(CGRA, app, individual)
-                print(PE_confs)
                 ld_conf = self.make_LD_Dmanu(CGRA, individual.routed_graph)
                 st_conf = self.make_ST_Dmanu(CGRA, individual.routed_graph)
                 const_conf = self.make_Const(CGRA, individual.routed_graph)
