@@ -1,19 +1,31 @@
+import os
+
 from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
-import os
+from ConfCompress import ConfCompressor
 
 # ADDRESS
 CONST_BASEADDR = 0x00_3000
 LD_DMANU_BASEADDR = 0x00_5000
 ST_DMANU_BASEADDR = 0x00_6000
+ALU_RMC_ADDR = 0x20_0000
+SE_RMC_ADDR = 0x21_0000
 PE_CONF_BASEADDR = 0x28_0000
 PREG_CONF_ADDR = 0x26_0000
 
 # DATA FOMRATS
+CONF_FORMAT = {'OPCODE': 4, 'SEL_A': 3, 'SEL_B': 3, 'OUT_NORTH': 3, 'OUT_SOUTH': 2, 'OUT_EAST': 3, 'OUT_WEST': 2}
+RMC_PATTERN = [('OPCODE', 'SEL_A', 'SEL_B'), ('OUT_NORTH', 'OUT_SOUTH', 'OUT_EAST', 'OUT_WEST')]
+
 CONF_FIELDS = ["OUT_NORTH", "OUT_SOUTH", "OUT_EAST", "OUT_WEST", "OPCODE", "SEL_A", "SEL_B"]
 SE_CONF_FORMAT_BIN = "{OUT_NORTH:03b}_{OUT_SOUTH:02b}_{OUT_EAST:03b}_{OUT_WEST:02b}"
 ALU_CONF_FORMAT_BIN = "{OPCODE:04b}_{SEL_A:03b}_{SEL_B:03b}"
 PE_CONF_FORMAT_BIN = "0" * 12 + "_" + SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT_BIN
+BITMAPS_BIN = "{rows[7]:01b}{rows[6]:01b}{rows[5]:01b}{rows[4]:01b}{rows[3]:01b}{rows[2]:01b}{rows[1]:01b}{rows[0]:01b}_" + \
+                "{cols[11]:01b}{cols[10]:01b}{cols[9]:01b}{cols[8]:01b}{cols[7]:01b}{cols[6]:01b}" + \
+                "{cols[5]:01b}{cols[4]:01b}{cols[3]:01b}{cols[2]:01b}{cols[1]:01b}{cols[0]:01b}"
+ALU_RMC_FORMAT_BIN = "00__" + BITMAPS_BIN + ALU_CONF_FORMAT_BIN
+SE_RMC_FORMAT_BIN = "00__" + BITMAPS_BIN + SE_CONF_FORMAT_BIN
 PREG_CONF_FORMAT = "0" * 25 + "_" + "{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
 
 TABLE_FORMAT = "0000_0000_{5:04b}_{4:04b}_{3:04b}_{2:04b}_{1:04b}_{0:04b}"
@@ -30,6 +42,12 @@ MSG_TYPES = {"SW": 1}
 
 class CCSOTB2_ConfGen(ConfGenBase):
 
+    def __init__(self):
+        # override style option setting
+        self.style_types = {"llvm-ir": bool, "romultic": str, "duplicate": bool}
+        self.style_choises = {"romultic": ["espresso", "ILP"]}
+        self.style_default = {"llvm-ir": False, "romultic": None, "duplicate": False}
+
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
         individual = data["hof"][individual_id]
@@ -39,9 +57,17 @@ class CCSOTB2_ConfGen(ConfGenBase):
             raise TypeError("This solution is not for CCSOTB2, but for " + CGRA.getArchName())
 
         self.force_mode = args["force"]
+        style_opt = self.style_args_parser(args["style"])
+
+        # error in arguments
+        if style_opt is None:
+            return
+
+        rmc_flag = not style_opt["romultic"] is None
 
         if os.path.exists(args["output_dir"]):
-            if "llvm-ir" in args["style"]:
+            # check export format
+            if style_opt["llvm-ir"]:
                 # check if llvmlite is avaiable
                 try:
                     from ConfLLVMIR import ConfLLVMIR
@@ -68,28 +94,39 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
             # mapping figure
             if files_exist:
-                print("some file exist")
+                print("Cannot overwrite existing files")
             else:
-                if fig_save_enable:
-                    drawer = ConfDrawer(CGRA, individual)
-                    drawer.draw_PEArray(CGRA, individual, app)
-                    drawer.save(fig_filename)
-
                 # make configurations
                 PE_confs = self.make_PE_conf(CGRA, app, individual)
                 ld_conf = self.make_LD_Dmanu(CGRA, individual.routed_graph)
                 st_conf = self.make_ST_Dmanu(CGRA, individual.routed_graph)
                 const_conf = self.make_Const(CGRA, individual.routed_graph)
 
+                # enable multicasting
+                if rmc_flag:
+                    compressor = ConfCompressor(CGRA, CONF_FORMAT, PE_confs)
+                    print("Now compressing configuration data....")
+                    if style_opt["romultic"] == "espresso":
+                        try:
+                            rmc_confs = compressor.compress_espresso(RMC_PATTERN)
+                        except RuntimeError as e:
+                            print(e)
+                            return
+                    elif style_opt["romultic"] == "ILP":
+                        rmc_confs = compressor.compress_coarse_grain_ILP(RMC_PATTERN)
+
+                    print("Finish compressing: configuration data size", len(rmc_confs))
+
                 dup_count = 1
-                if "duplicate" in args["style"]:
+                if style_opt["duplicate"]:
                     map_width = individual.getEvaluatedData("map_width")
                     if map_width is None:
                         print("duplicate option ignored because map width was not evaluated")
                     else:
-                        dup_count = self.duplicate(CGRA, PE_confs, ld_conf, st_conf, map_width)
+                        dup_count = self.duplicate(CGRA, rmc_confs if rmc_flag else PE_confs,
+                                                    ld_conf, st_conf, map_width, rmc_flag)
 
-                if "llvm-ir" in args["style"]:
+                if style_opt["llvm-ir"]:
                     ir_maker = ConfLLVMIR()
                     self.export_conf_llvmir(ir_maker, CGRA, PE_confs, const_conf, ld_conf, st_conf, \
                                             individual.preg, dup_count)
@@ -97,12 +134,17 @@ class CCSOTB2_ConfGen(ConfGenBase):
                     with open(conf_filename, "w") as f:
                         f.writelines(ir_maker.get_IR())
                 else:
-                    self.save_conf(CGRA, PE_confs, const_conf, ld_conf, st_conf, individual.preg, \
-                                     conf_filename)
+                    self.save_conf(CGRA, rmc_confs if rmc_flag else PE_confs, const_conf, \
+                                    ld_conf, st_conf, individual.preg, conf_filename, rmc_flag)
 
                 if info_save_enable:
                     self.save_info(header, individual, individual_id, ld_conf, st_conf,\
                                     info_filename)
+
+                if fig_save_enable:
+                    drawer = ConfDrawer(CGRA, individual)
+                    drawer.draw_PEArray(CGRA, individual, app)
+                    drawer.save(fig_filename)
         else:
             print("No such direcotry: ", args["output_dir"])
 
@@ -227,7 +269,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
         IR_MAKER.add_metadata("Input data alignment", LD_conf["mem_align"])
         IR_MAKER.add_metadata("Output data alignment", ST_conf["mem_align"])
 
-    def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename):
+    def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename, isRomultic):
         """save configration data
 
             Args:
@@ -238,6 +280,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 ST_conf (dict)              : configuration of ST table
                 PREG_conf (list of bool)    : flag of pipeline registers
                 filename (str)              : filename to save the configration
+                isRomultic (bool)           : enable romultic
 
             Returns:
                 bool: whether the configration is saved successfully or not
@@ -248,16 +291,31 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         # PE config
         f.write("\n//PE Config\n")
-        for x in range(width):
-            for y in range(height):
-                if len(PE_confs[x][y]) > 0:
-                    addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
-                    for filed in CONF_FIELDS:
-                        if not filed in PE_confs[x][y]:
-                            PE_confs[x][y][filed] = 0
-                    f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                vch=0, src=0, dst=1))
-                    f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
+        if isRomultic:
+            for entry in PE_confs:
+                confs = {"rows": entry["rows"], "cols": entry["cols"]}
+                confs.update(entry["conf"])
+                if set(entry["conf"].keys()) == set(RMC_PATTERN[0]):
+                    # ALU multicasting
+                    f.write(HEAD_FLIT.format(addr=ALU_RMC_ADDR, mt=MSG_TYPES["SW"], \
+                                                    vch=0, src=0, dst=1))
+                    f.write(TAIL_FLIT.format(data=ALU_RMC_FORMAT_BIN.format(**confs)))
+                else:
+                    # SE multicasting
+                    f.write(HEAD_FLIT.format(addr=SE_RMC_ADDR, mt=MSG_TYPES["SW"], \
+                                                    vch=0, src=0, dst=1))
+                    f.write(TAIL_FLIT.format(data=SE_RMC_FORMAT_BIN.format(**confs)))
+        else:
+            for x in range(width):
+                for y in range(height):
+                    if len(PE_confs[x][y]) > 0:
+                        addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
+                        for filed in CONF_FIELDS:
+                            if not filed in PE_confs[x][y]:
+                                PE_confs[x][y][filed] = 0
+                        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                    vch=0, src=0, dst=1))
+                        f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
 
         # PREG Config
         if len(PREG_conf) == 0:
@@ -321,14 +379,16 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         return True
 
-    def duplicate(self, CGRA, PE_confs, ld_conf, st_conf, map_width):
+    def duplicate(self, CGRA, PE_confs, ld_conf, st_conf, map_width, isRomultic):
         """duplicate mapping horizontally
             Args:
-                CGRA (PEArrayModel)         : the target architecture
-                PE_confs (dict of 2D list)  : configuration of each PE
-                ld_conf (dict)              : configuration of LD table
-                st_conf (dict)              : configuration of ST table
-                map_width (int)             : witdh of the mapping
+                CGRA (PEArrayModel)                 : the target architecture
+                PE_confs (dict of 2D list OR
+                          list of dict (romultic) ) : configuration of each PE
+                ld_conf (dict)                      : configuration of LD table
+                st_conf (dict)                      : configuration of ST table
+                map_width (int)                     : witdh of the mapping
+                isRomultic (bool)                   : enabled romultic
 
             Returns:
                 int: duplication count
@@ -344,8 +404,12 @@ class CCSOTB2_ConfGen(ConfGenBase):
                                             + in_num * dup_count
                 ld_conf["mask"][dest_x] = ld_conf["mask"][x]
 
-                for y in range(height):
-                    PE_confs[dest_x][y] = PE_confs[x][y]
+                if isRomultic:
+                    for entry in PE_confs:
+                        entry["cols"][dest_x] = entry["cols"][x]
+                else:
+                    for y in range(height):
+                        PE_confs[dest_x][y] = PE_confs[x][y]
             # ST table
             for out_idx in range(out_num):
                 st_conf["table"][out_idx + dup_count * out_num] = st_conf["table"][out_idx] + map_width * dup_count

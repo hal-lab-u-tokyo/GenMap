@@ -230,8 +230,11 @@ class GenMapShell(Cmd):
             if self.selected_id < 0:
                 print("save: a solution is not selected")
             else:
-                self.conf_gen.generate(self.header, self.data,\
+                try:
+                    self.conf_gen.generate(self.header, self.data,\
                                          self.selected_id, vars(parsed_args))
+                except TypeError as e:
+                    print(e)
 
     def parse_save(self, args):
         usage = "save [options...]\nIt generates configuration files of selected solutions"

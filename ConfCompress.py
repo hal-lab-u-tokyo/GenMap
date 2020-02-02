@@ -5,7 +5,7 @@ import copy
 
 from PEArrayModel import PEArrayModel
 
-class Compressor(object):
+class ConfCompressor(object):
     """docstring for Compressor"""
     def __init__(self, CGRA, conf_formats, conf_data):
         self.__arch = CGRA
@@ -241,7 +241,7 @@ class Compressor(object):
                     for y in range(height):
                         if max_pattern["rows"][y] == 1:
                             self.__update((x,y), max_pattern["conf"])
-            print(max_pattern)
+
             romultic_data.append(max_pattern)
 
         return romultic_data
@@ -264,7 +264,7 @@ class Compressor(object):
                 RuntimeError
         """
         if not self.__espresso_enabled:
-            raise RuntimeError(["Cannot import PyEDA. Please install it by \"pip3 install pyeda\""])
+            raise RuntimeError("Cannot import PyEDA. Please install it by \"pip3 install pyeda\"")
 
         # import needed modules
         from pyeda.inter import exprvars
@@ -355,7 +355,7 @@ class Compressor(object):
                     for y in range(height):
                         if max_pattern["rows"][y] == 1:
                             self.__update((x,y), max_pattern["conf"])
-            print(max_pattern)
+
             romultic_data.append(max_pattern)
 
         return romultic_data
