@@ -4044,7 +4044,7 @@
 		</SE>
 	</PE>
 	<!-- ROW 06 -->
-	<PE coord="(0, 6)" bbdomain="domain6">
+	<PE coord="(0, 6)" bbdomain="domain2">
 		<ALU>
 			<operation value="0" >NOP</operation>
 			<operation value="1" >ADD</operation>

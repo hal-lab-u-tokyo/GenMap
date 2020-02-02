@@ -151,7 +151,7 @@ class CCSOTB_ConfGen(ConfGenBase):
                 int_const = 0x1FFFF + (int_const + 1) # converting 17-bit two's complement
             int_const &= 0x1FFFF
 
-            f.write(TAIL_FLIT.format(data="{0:032b}".format()))
+            f.write(TAIL_FLIT.format(data="{0:032b}".format(int_const)))
 
         # duplicate table maps
         if duplicate:
