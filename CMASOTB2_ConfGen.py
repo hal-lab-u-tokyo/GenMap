@@ -25,7 +25,11 @@ ST_TABLE_PKT = "0100000_{index:04b}0_0_{TABLE:s} //ST TABLE\n"
 ST_MASK_PKT  = "0100000_{index:04b}1_0_00000000_00000000{MASK:s} //ST MASK\n"
 
 class CMASOTB2_ConfGen(ConfGenBase):
-    # def generate(self, CGRA, app, individual, eval_list, args):
+    def __init__(self):
+        # override style option setting
+        self.style_types = {"duplicate": bool}
+        self.style_default = {"duplicate": False}
+
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
         individual = data["hof"][individual_id]
@@ -64,7 +68,8 @@ class CMASOTB2_ConfGen(ConfGenBase):
                 ld_conf = self.make_LD_Dmanu(CGRA, individual.routed_graph)
                 st_conf = self.make_ST_Dmanu(CGRA, individual.routed_graph)
                 const_conf = self.make_Const(CGRA, individual.routed_graph)
-                if "duplicate" in args["style"]:
+
+                if style_opt["duplicate"]:
                     map_width = individual.getEvaluatedData("map_width")
                     if map_width is None:
                         print("duplicate option ignored because map width was not evaluated")

@@ -24,8 +24,8 @@ PE_CONF_FORMAT_BIN = "0" * 12 + "_" + SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT
 BITMAPS_BIN = "{rows[7]:01b}{rows[6]:01b}{rows[5]:01b}{rows[4]:01b}{rows[3]:01b}{rows[2]:01b}{rows[1]:01b}{rows[0]:01b}_" + \
                 "{cols[11]:01b}{cols[10]:01b}{cols[9]:01b}{cols[8]:01b}{cols[7]:01b}{cols[6]:01b}" + \
                 "{cols[5]:01b}{cols[4]:01b}{cols[3]:01b}{cols[2]:01b}{cols[1]:01b}{cols[0]:01b}"
-ALU_RMC_FORMAT_BIN = "00__" + BITMAPS_BIN + ALU_CONF_FORMAT_BIN
-SE_RMC_FORMAT_BIN = "00__" + BITMAPS_BIN + SE_CONF_FORMAT_BIN
+ALU_RMC_FORMAT_BIN = "00_" + BITMAPS_BIN + ALU_CONF_FORMAT_BIN
+SE_RMC_FORMAT_BIN = "00_" + BITMAPS_BIN + SE_CONF_FORMAT_BIN
 PREG_CONF_FORMAT = "0" * 25 + "_" + "{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
 
 TABLE_FORMAT = "0000_0000_{5:04b}_{4:04b}_{3:04b}_{2:04b}_{1:04b}_{0:04b}"
@@ -128,8 +128,9 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
                 if style_opt["llvm-ir"]:
                     ir_maker = ConfLLVMIR()
-                    self.export_conf_llvmir(ir_maker, CGRA, PE_confs, const_conf, ld_conf, st_conf, \
-                                            individual.preg, dup_count)
+                    self.export_conf_llvmir(ir_maker, CGRA, rmc_confs if rmc_flag else PE_confs,\
+                                            const_conf, ld_conf, st_conf, \
+                                            individual.preg, dup_count, rmc_flag)
                     self.export_info_llvmir(ir_maker, header, individual, individual_id, ld_conf, st_conf)
                     with open(conf_filename, "w") as f:
                         f.writelines(ir_maker.get_IR())
@@ -150,7 +151,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
 
     def export_conf_llvmir(self, IR_MAKER, CGRA, PE_confs, Const_conf, LD_conf,\
-                             ST_conf, PREG_conf, DUPLICATE_COUNT):
+                             ST_conf, PREG_conf, DUPLICATE_COUNT, isRomultic):
         """exports configration data as LLVM IR
 
             Args:
@@ -162,25 +163,49 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 ST_conf (dict)              : configuration of ST table
                 PREG_conf (list of bool)    : flag of pipeline registers
                 DUPLICATE_COUNT (int)       : count of mapping duplication
+                isRomultic (bool)           : enable romultic
         """
 
         width, height = CGRA.getSize()
 
         # PE config
         pe_conf_pair = [[], []]
-        for x in range(width):
-            for y in range(height):
-                if len(PE_confs[x][y]) > 0:
-                    addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
-                    for filed in CONF_FIELDS:
-                        if not filed in PE_confs[x][y]:
-                            PE_confs[x][y][filed] = 0
-                    pe_conf_pair[0].append(addr)
-                    pe_conf_pair[1].append(int(PE_CONF_FORMAT_BIN.format(**PE_confs[x][y]), 2))
+        se_rmc_conf = []
+        alu_rmc_conf = []
+        IR_MAKER.add_variable("__isRomultic", 1 if isRomultic else 0)
+        if isRomultic:
+            for entry in PE_confs:
+                confs = {"rows": entry["rows"], "cols": entry["cols"]}
+                confs.update(entry["conf"])
+                if set(entry["conf"].keys()) == set(RMC_PATTERN[0]):
+                    alu_rmc_conf.append(int(ALU_RMC_FORMAT_BIN.format(**confs), 2))
+                else:
+                    se_rmc_conf.append(int(SE_RMC_FORMAT_BIN.format(**confs), 2))
+
+            IR_MAKER.add_array("__conf_alu_rmc", alu_rmc_conf)
+            IR_MAKER.add_array("__conf_se_rmc", se_rmc_conf)
+            # fill empty data
+            IR_MAKER.add_array("__conf_addrs", [0])
+            IR_MAKER.add_array("__conf_data", [0])
+        else:
+            for x in range(width):
+                for y in range(height):
+                    if len(PE_confs[x][y]) > 0:
+                        addr = ((12 * y + x) * 0x200) + PE_CONF_BASEADDR
+                        for filed in CONF_FIELDS:
+                            if not filed in PE_confs[x][y]:
+                                PE_confs[x][y][filed] = 0
+                        pe_conf_pair[0].append(addr)
+                        pe_conf_pair[1].append(int(PE_CONF_FORMAT_BIN.format(**PE_confs[x][y]), 2))
+            IR_MAKER.add_array("__conf_addrs", pe_conf_pair[0])
+            IR_MAKER.add_array("__conf_data", pe_conf_pair[1])
+            # fill empty data
+            IR_MAKER.add_array("__conf_alu_rmc", [0])
+            IR_MAKER.add_array("__conf_se_rmc", [0])
 
         IR_MAKER.add_variable("__conf_len", len(pe_conf_pair[0]))
-        IR_MAKER.add_array("__conf_addrs", pe_conf_pair[0])
-        IR_MAKER.add_array("__conf_data", pe_conf_pair[1])
+        IR_MAKER.add_variable("__alu_rmc_len", len(alu_rmc_conf))
+        IR_MAKER.add_variable("__se_rmc_len", len(se_rmc_conf))
 
         # PREG Config
         if len(PREG_conf) == 0:

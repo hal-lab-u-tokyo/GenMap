@@ -33,7 +33,11 @@ TAIL_FLIT = "010_{data:s}\n"
 MSG_TYPES = {"SW": 1}
 
 class CCSOTB_ConfGen(ConfGenBase):
-    # def generate(self, CGRA, app, individual, eval_list, args):
+    def __init__(self):
+        # override style option setting
+        self.style_types = {"duplicate": bool}
+        self.style_default = {"duplicate": False}
+
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
         individual = data["hof"][individual_id]
@@ -43,6 +47,8 @@ class CCSOTB_ConfGen(ConfGenBase):
             raise TypeError("This solution is not for CCSOTB, but for " + CGRA.getArchName())
 
         self.force_mode = args["force"]
+
+        style_opt = self.style_args_parser(args["style"])
 
         if os.path.exists(args["output_dir"]):
             fig_filename = args["output_dir"] + "/" + args["prefix"] + "_map.png"
@@ -72,7 +78,7 @@ class CCSOTB_ConfGen(ConfGenBase):
 
                 duplicate_flag = False
                 map_width = 0
-                if "duplicate" in args["style"]:
+                if style_opt["duplicate"]:
                     map_width = individual.getEvaluatedData("map_width")
                     if map_width is None:
                         print("duplicate option ignored because map width was not evaluated")

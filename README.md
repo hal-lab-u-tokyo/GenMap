@@ -40,7 +40,13 @@ It will create "GenMap_env" directory. You can use your favorite directory name.
 ```
 If you want to exit this environment, just execute ``deactivate`` command.
 
-4. Install Python Libraries
+
+4. Install GenMap
+ ```
+(GenMap_env) # git clone git@github.com:hungalab/GenMap.git
+```
+
+5. Install Python Libraries
 GenMap requires the following python libraries. Recommended version for each library is in the bracket.
     1. deap (1.0.1)
     1. pulp (1.6.8)
@@ -50,7 +56,9 @@ GenMap requires the following python libraries. Recommended version for each lib
     1. pydot (1.4.1)
     1. pygmo (2.9)
     1. prettytable (0.7.2)
-    1. llvmlite (0.30.0)
+Optional
+    1. llvmlite (0.30.0) (necesssary to export configuration as LLVM-IR)
+    1. pyeda (0.28.0) (necessary for configuration compression using espresso)
 ```
 (GenMap_env) # pip3 install (package_name)[==version]
 ```
@@ -58,11 +66,6 @@ GenMap requires the following python libraries. Recommended version for each lib
  ```
  (GenMap_env) # pip3 install -r requirements.txt(in this repo)
  ```
- 
- 5. Install GenMap
- ```
-(GenMap_env) # git clone git@github.com:hungalab/GenMap.git
-```
 
 # Supported Architectures
 GenMap supports following CMA architectures by default:
