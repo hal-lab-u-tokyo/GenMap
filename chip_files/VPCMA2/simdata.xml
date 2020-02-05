@@ -1,0 +1,176 @@
+<DATA>
+	<BiasRange>
+		<bias>-0.8</bias>
+		<bias>-0.6</bias>
+		<bias>-0.4</bias>
+		<bias>-0.2</bias>
+		<bias>0.0</bias>
+		<bias>0.2</bias>
+		<bias>0.4</bias>
+	</BiasRange>
+	<Delay unit="ns">
+		<!-- bias -0.8 -->
+		<ALU bias="-0.8" op="ADD">29.344940</ALU>
+		<ALU bias="-0.8" op="SUB">29.435688</ALU>
+		<ALU bias="-0.8" op="MULT">38.816224</ALU>
+		<ALU bias="-0.8" op="AND">11.388048</ALU>
+		<ALU bias="-0.8" op="OR">11.019721</ALU>
+		<ALU bias="-0.8" op="SL">15.444752</ALU>
+		<ALU bias="-0.8" op="SR">16.898334</ALU>
+		<ALU bias="-0.8" op="SRA">16.588202</ALU>
+		<ALU bias="-0.8" op="XOR">12.185914</ALU>
+		<ALU bias="-0.8" op="NOT">11.377673</ALU>
+		<ALU bias="-0.8" op="SEL">14.479319</ALU>
+		<ALU bias="-0.8" op="CAT">11.006769</ALU>
+		<ALU bias="-0.8" op="NOP">0.000000</ALU>
+		<ALU bias="-0.8" op="EQL">14.539652</ALU>
+		<ALU bias="-0.8" op="GT">11.258234</ALU>
+		<ALU bias="-0.8" op="LT">12.849984</ALU>
+		<!-- bias -0.6 -->
+		<ALU bias="-0.6" op="ADD">22.761630</ALU>
+		<ALU bias="-0.6" op="SUB">22.710074</ALU>
+		<ALU bias="-0.6" op="MULT">30.261421</ALU>
+		<ALU bias="-0.6" op="AND">8.712048</ALU>
+		<ALU bias="-0.6" op="OR">8.473348</ALU>
+		<ALU bias="-0.6" op="SL">11.948978</ALU>
+		<ALU bias="-0.6" op="SR">13.237146</ALU>
+		<ALU bias="-0.6" op="SRA">12.959858</ALU>
+		<ALU bias="-0.6" op="XOR">9.448544</ALU>
+		<ALU bias="-0.6" op="NOT">8.601716</ALU>
+		<ALU bias="-0.6" op="SEL">11.119239</ALU>
+		<ALU bias="-0.6" op="CAT">8.460130</ALU>
+		<ALU bias="-0.6" op="NOP">0.000000</ALU>
+		<ALU bias="-0.6" op="EQL">11.184677</ALU>
+		<ALU bias="-0.6" op="GT">8.566836</ALU>
+		<ALU bias="-0.6" op="LT">10.064778</ALU>
+		<!-- bias -0.4 -->
+		<ALU bias="-0.4" op="ADD">17.932724</ALU>
+		<ALU bias="-0.4" op="SUB">17.777088</ALU>
+		<ALU bias="-0.4" op="MULT">23.879930</ALU>
+		<ALU bias="-0.4" op="AND">6.771678</ALU>
+		<ALU bias="-0.4" op="OR">6.608665</ALU>
+		<ALU bias="-0.4" op="SL">9.369219</ALU>
+		<ALU bias="-0.4" op="SR">10.475340</ALU>
+		<ALU bias="-0.4" op="SRA">10.236729</ALU>
+		<ALU bias="-0.4" op="XOR">7.416315</ALU>
+		<ALU bias="-0.4" op="NOT">6.615075</ALU>
+		<ALU bias="-0.4" op="SEL">8.655257</ALU>
+		<ALU bias="-0.4" op="CAT">6.594145</ALU>
+		<ALU bias="-0.4" op="NOP">0.000000</ALU>
+		<ALU bias="-0.4" op="EQL">8.732561</ALU>
+		<ALU bias="-0.4" op="GT">6.625909</ALU>
+		<ALU bias="-0.4" op="LT">8.019024</ALU>
+		<!-- bias -0.2 -->
+		<ALU bias="-0.2" op="ADD">14.205207</ALU>
+		<ALU bias="-0.2" op="SUB">13.981236</ALU>
+		<ALU bias="-0.2" op="MULT">18.986241</ALU>
+		<ALU bias="-0.2" op="AND">5.320378</ALU>
+		<ALU bias="-0.2" op="OR">5.208117</ALU>
+		<ALU bias="-0.2" op="SL">7.420922</ALU>
+		<ALU bias="-0.2" op="SR">8.349998</ALU>
+		<ALU bias="-0.2" op="SRA">8.152446</ALU>
+		<ALU bias="-0.2" op="XOR">5.884405</ALU>
+		<ALU bias="-0.2" op="NOT">5.151778</ALU>
+		<ALU bias="-0.2" op="SEL">6.795545</ALU>
+		<ALU bias="-0.2" op="CAT">5.196301</ALU>
+		<ALU bias="-0.2" op="NOP">0.000000</ALU>
+		<ALU bias="-0.2" op="EQL">6.891033</ALU>
+		<ALU bias="-0.2" op="GT">5.186815</ALU>
+		<ALU bias="-0.2" op="LT">6.205635</ALU>
+		<!-- bias 0.0 -->
+		<ALU bias="0.0" op="ADD">11.274892</ALU>
+		<ALU bias="0.0" op="SUB">11.045261</ALU>
+		<ALU bias="0.0" op="MULT">15.159216</ALU>
+		<ALU bias="0.0" op="AND">4.213800</ALU>
+		<ALU bias="0.0" op="OR">4.129335</ALU>
+		<ALU bias="0.0" op="SL">5.911130</ALU>
+		<ALU bias="0.0" op="SR">6.679759</ALU>
+		<ALU bias="0.0" op="SRA">6.518734</ALU>
+		<ALU bias="0.0" op="XOR">4.691289</ALU>
+		<ALU bias="0.0" op="NOT">4.048976</ALU>
+		<ALU bias="0.0" op="SEL">5.363962</ALU>
+		<ALU bias="0.0" op="CAT">4.124082</ALU>
+		<ALU bias="0.0" op="NOP">0.000000</ALU>
+		<ALU bias="0.0" op="EQL">5.476436</ALU>
+		<ALU bias="0.0" op="GT">4.091727</ALU>
+		<ALU bias="0.0" op="LT">4.841837</ALU>
+		<!-- bias 0.2 -->
+		<ALU bias="0.2" op="ADD">8.950884</ALU>
+		<ALU bias="0.2" op="SUB">8.704022</ALU>
+		<ALU bias="0.2" op="MULT">12.108036</ALU>
+		<ALU bias="0.2" op="AND">3.347119</ALU>
+		<ALU bias="0.2" op="OR">3.280625</ALU>
+		<ALU bias="0.2" op="SL">4.717187</ALU>
+		<ALU bias="0.2" op="SR">5.344903</ALU>
+		<ALU bias="0.2" op="SRA">5.216164</ALU>
+		<ALU bias="0.2" op="XOR">3.741586</ALU>
+		<ALU bias="0.2" op="NOT">3.191805</ALU>
+		<ALU bias="0.2" op="SEL">4.234857</ALU>
+		<ALU bias="0.2" op="CAT">3.276939</ALU>
+		<ALU bias="0.2" op="NOP">0.000000</ALU>
+		<ALU bias="0.2" op="EQL">4.362786</ALU>
+		<ALU bias="0.2" op="GT">3.236236</ALU>
+		<ALU bias="0.2" op="LT">3.792174</ALU>
+		<!-- bias 0.4 -->
+		<ALU bias="0.4" op="ADD">7.039211</ALU>
+		<ALU bias="0.4" op="SUB">6.814639</ALU>
+		<ALU bias="0.4" op="MULT">9.626077</ALU>
+		<ALU bias="0.4" op="AND">2.649244</ALU>
+		<ALU bias="0.4" op="OR">2.595994</ALU>
+		<ALU bias="0.4" op="SL">3.754763</ALU>
+		<ALU bias="0.4" op="SR">4.256926</ALU>
+		<ALU bias="0.4" op="SRA">4.156394</ALU>
+		<ALU bias="0.4" op="XOR">2.970312</ALU>
+		<ALU bias="0.4" op="NOT">2.510715</ALU>
+		<ALU bias="0.4" op="SEL">3.329761</ALU>
+		<ALU bias="0.4" op="CAT">2.596002</ALU>
+		<ALU bias="0.4" op="NOP">0.000000</ALU>
+		<ALU bias="0.4" op="EQL">3.469663</ALU>
+		<ALU bias="0.4" op="GT">2.554940</ALU>
+		<ALU bias="0.4" op="LT">2.967261</ALU>
+
+		<!-- delay of SE -->
+		<SE bias="-0.8">2.698253214</SE>
+		<SE bias="-0.6">2.105483346</SE>
+		<SE bias="-0.4">1.665553821</SE>
+		<SE bias="-0.2">1.328082623</SE>
+		<SE bias="0.0">1.063135018</SE>
+		<SE bias="0.2">.851392103</SE>
+		<SE bias="0.4">0.678849349</SE>
+	</Delay>
+	<Power>
+		<Static>
+			<PE unit="mW" bias="-0.8">0.00019708</PE>
+			<PE unit="mW" bias="-0.6">0.00023604</PE>
+			<PE unit="mW" bias="-0.4">0.00029104</PE>
+			<PE unit="mW" bias="-0.2">0.00044916</PE>
+			<PE unit="mW" bias="0.0">0.00091895</PE>
+			<PE unit="mW" bias="0.2">0.0025277</PE>
+			<PE unit="mW" bias="0.4">0.00789708</PE>
+			<PREG unit="uW">0.01187746</PREG>
+		</Static>
+		<Dynamic>
+			<Energy unit="pJ">0.05018</Energy>
+			<Propagation>0.1382</Propagation>
+			<Decay>1.1347</Decay>
+			<SE_weight>1</SE_weight>
+			<Switching op="ADD">17.1693</Switching>
+			<Switching op="SUB">20.0153</Switching>
+			<Switching op="MULT">31.4623</Switching>
+			<Switching op="SL">6.79133</Switching>
+			<Switching op="SR">4.97267</Switching>
+			<Switching op="SRA">7.31800</Switching>
+			<Switching op="AND">5.21700</Switching>
+			<Switching op="OR">16.9233</Switching>
+			<Switching op="NOT">11.1277</Switching>
+			<Switching op="XOR">20.997</Switching>
+			<Switching op="CAT">11.1437</Switching>
+			<Switching op="SEL">11.986</Switching>
+			<Switching op="GT">18.6567</Switching>
+			<Switching op="LT">18.3073</Switching>
+			<Switching op="EQL">28.609</Switching>
+			<PREG unit="pJ">4.002153</PREG>
+		</Dynamic>
+	</Power>
+</DATA>
+

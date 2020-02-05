@@ -10,22 +10,27 @@ LD_DMANU_BASEADDR = 0x00_5000
 ST_DMANU_BASEADDR = 0x00_6000
 ALU_RMC_ADDR = 0x20_0000
 SE_RMC_ADDR = 0x21_0000
+CONST_SEL_RMC_ADDR = 0x22_0000
 PE_CONF_BASEADDR = 0x28_0000
+CONST_SEL_BASEADDR = 0x29_0000
 PREG_CONF_ADDR = 0x26_0000
 
-# DATA FOMRATS
-CONF_FORMAT = {'OPCODE': 4, 'SEL_A': 3, 'SEL_B': 3, 'OUT_NORTH': 3, 'OUT_SOUTH': 2, 'OUT_EAST': 3, 'OUT_WEST': 2}
-RMC_PATTERN = [['OPCODE', 'SEL_A', 'SEL_B'], ['OUT_NORTH', 'OUT_SOUTH', 'OUT_EAST', 'OUT_WEST']]
+# DATA FOMRATS for RoMultiC
+CONF_FORMAT = {'OPCODE': 4, 'SEL_A': 3, 'SEL_B': 3, 'OUT_NORTH': 3, 'OUT_SOUTH': 3, 'OUT_EAST': 3, 'OUT_WEST': 3, 'CONST_SEL': 4}
+RMC_PATTERN = [['OPCODE', 'SEL_A', 'SEL_B'], ['OUT_NORTH', 'OUT_SOUTH', 'OUT_EAST', 'OUT_WEST'], ['CONST_SEL']]
 
-CONF_FIELDS = ["OUT_NORTH", "OUT_SOUTH", "OUT_EAST", "OUT_WEST", "OPCODE", "SEL_A", "SEL_B"]
-SE_CONF_FORMAT_BIN = "{OUT_NORTH:03b}_{OUT_SOUTH:02b}_{OUT_EAST:03b}_{OUT_WEST:02b}"
+CONF_FIELDS = ["OUT_NORTH", "OUT_SOUTH", "OUT_EAST", "OUT_WEST", "OPCODE", "SEL_A", "SEL_B", "CONST_SEL"]
+SE_CONF_FORMAT_BIN = "{OUT_NORTH:03b}_{OUT_SOUTH:03b}_{OUT_EAST:03b}_{OUT_WEST:03b}"
 ALU_CONF_FORMAT_BIN = "{OPCODE:04b}_{SEL_A:03b}_{SEL_B:03b}"
-PE_CONF_FORMAT_BIN = "0" * 12 + "_" + SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT_BIN
+CONST_CONF_FORMAT_BIN = "0" * 8 + "_{CONST_SEL[5]:04b}_{CONST_SEL[4]:04b}_{CONST_SEL[3]:04b}_" + \
+                        "{CONST_SEL[2]:04b}_{CONST_SEL[1]:04b}_{CONST_SEL[0]:04b}"
+PE_CONF_FORMAT_BIN = "0" * 10 + "_" + SE_CONF_FORMAT_BIN + "_" + ALU_CONF_FORMAT_BIN
 BITMAPS_BIN = "{rows[7]:01b}{rows[6]:01b}{rows[5]:01b}{rows[4]:01b}{rows[3]:01b}{rows[2]:01b}{rows[1]:01b}{rows[0]:01b}_" + \
                 "{cols[11]:01b}{cols[10]:01b}{cols[9]:01b}{cols[8]:01b}{cols[7]:01b}{cols[6]:01b}" + \
                 "{cols[5]:01b}{cols[4]:01b}{cols[3]:01b}{cols[2]:01b}{cols[1]:01b}{cols[0]:01b}"
-ALU_RMC_FORMAT_BIN = "00_" + BITMAPS_BIN + "_" + ALU_CONF_FORMAT_BIN
-SE_RMC_FORMAT_BIN = "00_" + BITMAPS_BIN + "_" + SE_CONF_FORMAT_BIN
+ALU_RMC_FORMAT_BIN = BITMAPS_BIN + "_00_" +  ALU_CONF_FORMAT_BIN
+SE_RMC_FORMAT_BIN = BITMAPS_BIN + "_" + SE_CONF_FORMAT_BIN
+CONST_SEL_RMC_FORMAT_BIN = BITMAPS_BIN + "_" + "0" * 8 + "_{CONST_SEL:04b}"
 PREG_CONF_FORMAT = "0" * 25 + "_" + "{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
 
 TABLE_FORMAT = "0000_0000_{5:04b}_{4:04b}_{3:04b}_{2:04b}_{1:04b}_{0:04b}"
@@ -34,8 +39,15 @@ TABLE_LATTER_OFFSET = 8
 TABLE_MASK_FORMAT = "0000_0000_0000_0000_0000_{11:01b}_{10:01b}_{9:01b}_{8:01b}" + \
                     "_{7:01b}_{6:01b}_{5:01b}_{4:01b}_{3:01b}_{2:01b}_{1:01b}_{0:01b}"
 TABLE_MASK_OFFSET = 12
+TABLE_STRIDE_FORMAT = "0000_0000_{3:06b}_{2:06b}_{1:06b}_{0:06b}"
+TABLE_STRIDE_0T3_OFFSET = 16
+TABLE_STRIDE_4T7_OFFSET = 20
+TABLE_STRIDE_8T11_OFFSET = 24
 
+# remdata format
+REMDATA_FORMAT = "0" * 10 + "__"+ "{addr:022b}\t//Ad\n" + "{data:s}\n"
 
+# Packet format
 HEAD_FLIT = "001_{addr:022b}_{mt:03b}_{vch:03b}_{src:02b}_{dst:02b}\n"
 TAIL_FLIT = "010_{data:s}\n"
 MSG_TYPES = {"SW": 1}
@@ -44,17 +56,21 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
     def __init__(self):
         # override style option setting
-        self.style_types = {"llvm-ir": bool, "romultic": str, "duplicate": bool}
-        self.style_choises = {"romultic": ["espresso", "ILP"]}
-        self.style_default = {"llvm-ir": False, "romultic": None, "duplicate": False}
+        self.style_types = {"format": str, "romultic": str, "duplicate": bool}
+        self.style_choises = {"romultic": ["espresso", "ILP"], "format": ["packet", "remdata", "llvm-ir"]}
+        self.style_default = {"format": "packet", "romultic": None, "duplicate": False}
+        self.export_remdata = False
+        self.export_packet = False
+        self.export_llvmir = False
+        self.romultic_enabled = False
 
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
         individual = data["hof"][individual_id]
         app = header["app"]
 
-        if CGRA.getArchName() != "CCSOTB2":
-            raise TypeError("This solution is not for CCSOTB2, but for " + CGRA.getArchName())
+        if CGRA.getArchName() != "VPCMA2":
+            raise TypeError("This solution is not for VPCMA2, but for " + CGRA.getArchName())
 
         self.force_mode = args["force"]
         style_opt = self.style_args_parser(args["style"])
@@ -63,11 +79,14 @@ class CCSOTB2_ConfGen(ConfGenBase):
         if style_opt is None:
             return
 
-        rmc_flag = not style_opt["romultic"] is None
+        self.export_remdata = style_opt["format"] == "remdata"
+        self.export_packet = style_opt["format"] == "packet"
+        self.export_llvmir = style_opt["format"] == "llvm-ir"
+        self.romultic_enabled = not style_opt["romultic"] is None
 
         if os.path.exists(args["output_dir"]):
             # check export format
-            if style_opt["llvm-ir"]:
+            if self.export_llvmir:
                 # check if llvmlite is avaiable
                 try:
                     from ConfLLVMIR import ConfLLVMIR
@@ -82,7 +101,10 @@ class CCSOTB2_ConfGen(ConfGenBase):
             else:
                 fig_save_enable = info_save_enable = conf_save_enable = True
                 fig_filename = args["output_dir"] + "/" + args["prefix"] + "_map.png"
-                conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.pkt"
+                if self.export_packet:
+                    conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.pkt"
+                elif self.export_remdata:
+                    conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.dat"
                 info_filename = args["output_dir"] + "/" + args["prefix"] + "_info.txt"
 
             # check if files exist
@@ -103,19 +125,19 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 const_conf = self.make_Const(CGRA, individual.routed_graph)
 
                 # enable multicasting
-                if rmc_flag:
+                if self.romultic_enabled:
                     compressor = ConfCompressor(CGRA, CONF_FORMAT, PE_confs)
                     print("Now compressing configuration data....")
                     if style_opt["romultic"] == "espresso":
                         try:
-                            rmc_confs = compressor.compress_espresso(RMC_PATTERN)
+                            PE_confs = compressor.compress_espresso(RMC_PATTERN)
                         except RuntimeError as e:
                             print(e)
                             return
                     elif style_opt["romultic"] == "ILP":
-                        rmc_confs = compressor.compress_coarse_grain_ILP(RMC_PATTERN)
+                        PE_confs = compressor.compress_coarse_grain_ILP(RMC_PATTERN)
 
-                    print("Finish compressing: configuration data size", len(rmc_confs))
+                    print("Finish compressing: configuration data size", len(PE_confs))
 
                 dup_count = 1
                 if style_opt["duplicate"]:
@@ -123,20 +145,19 @@ class CCSOTB2_ConfGen(ConfGenBase):
                     if map_width is None:
                         print("duplicate option ignored because map width was not evaluated")
                     else:
-                        dup_count = self.duplicate(CGRA, rmc_confs if rmc_flag else PE_confs,
-                                                    ld_conf, st_conf, map_width, rmc_flag)
+                        dup_count = self.duplicate(CGRA, PE_confs, ld_conf, st_conf, map_width)
 
-                if style_opt["llvm-ir"]:
+                if self.export_llvmir:
                     ir_maker = ConfLLVMIR()
-                    self.export_conf_llvmir(ir_maker, CGRA, rmc_confs if rmc_flag else PE_confs,\
+                    self.export_conf_llvmir(ir_maker, CGRA, PE_confs,\
                                             const_conf, ld_conf, st_conf, \
-                                            individual.preg, dup_count, rmc_flag)
+                                            individual.preg, dup_count)
                     self.export_info_llvmir(ir_maker, header, individual, individual_id, ld_conf, st_conf)
                     with open(conf_filename, "w") as f:
                         f.writelines(ir_maker.get_IR())
                 else:
-                    self.save_conf(CGRA, rmc_confs if rmc_flag else PE_confs, const_conf, \
-                                    ld_conf, st_conf, individual.preg, conf_filename, rmc_flag)
+                    self.save_conf(CGRA, PE_confs, const_conf, \
+                                    ld_conf, st_conf, individual.preg, conf_filename)
 
                 if info_save_enable:
                     self.save_info(header, individual, individual_id, ld_conf, st_conf,\
@@ -151,7 +172,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
 
     def export_conf_llvmir(self, IR_MAKER, CGRA, PE_confs, Const_conf, LD_conf,\
-                             ST_conf, PREG_conf, DUPLICATE_COUNT, isRomultic):
+                             ST_conf, PREG_conf, DUPLICATE_COUNT):
         """exports configration data as LLVM IR
 
             Args:
@@ -163,7 +184,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 ST_conf (dict)              : configuration of ST table
                 PREG_conf (list of bool)    : flag of pipeline registers
                 DUPLICATE_COUNT (int)       : count of mapping duplication
-                isRomultic (bool)           : enable romultic
         """
 
         width, height = CGRA.getSize()
@@ -172,22 +192,28 @@ class CCSOTB2_ConfGen(ConfGenBase):
         pe_conf_pair = [[], []]
         se_rmc_conf = []
         alu_rmc_conf = []
-        IR_MAKER.add_variable("__isRomultic", 1 if isRomultic else 0)
-        if isRomultic:
+        const_sel_conf = []
+        IR_MAKER.add_variable("__isRomultic", 1 if self.romultic_enabled else 0)
+        if self.romultic_enabled:
             for entry in PE_confs:
                 confs = {"rows": entry["rows"], "cols": entry["cols"]}
                 confs.update(entry["conf"])
                 if set(entry["conf"].keys()) == set(RMC_PATTERN[0]):
                     alu_rmc_conf.append(int(ALU_RMC_FORMAT_BIN.format(**confs), 2))
-                else:
+                elif  set(entry["conf"].keys()) == set(RMC_PATTERN[1]):
                     se_rmc_conf.append(int(SE_RMC_FORMAT_BIN.format(**confs), 2))
+                else:
+                    const_sel_conf.append(int(CONST_SEL_RMC_FORMAT_BIN.format(**confs), 2))
 
             IR_MAKER.add_array("__conf_alu_rmc", alu_rmc_conf)
             IR_MAKER.add_array("__conf_se_rmc", se_rmc_conf)
+            IR_MAKER.add_array("__conf_const_sel_rmc", const_sel_conf)
             # fill empty data
             IR_MAKER.add_array("__conf_addrs", [0])
             IR_MAKER.add_array("__conf_data", [0])
+            IR_MAKER.add_array("__conf_const_sel", [0])
         else:
+            const_sels = [0 for i in range(width * height)]
             for x in range(width):
                 for y in range(height):
                     if len(PE_confs[x][y]) > 0:
@@ -195,10 +221,16 @@ class CCSOTB2_ConfGen(ConfGenBase):
                         for filed in CONF_FIELDS:
                             if not filed in PE_confs[x][y]:
                                 PE_confs[x][y][filed] = 0
+                        const_sels[y * width + x] = PE_confs[x][y]["CONST_SEL"]
                         pe_conf_pair[0].append(addr)
                         pe_conf_pair[1].append(int(PE_CONF_FORMAT_BIN.format(**PE_confs[x][y]), 2))
+
+            # const sels
+            packed_const_sels = [int(CONST_CONF_FORMAT_BIN.format(CONST_SEL = const_sels[6*i:6*i+6]), 2)\
+                                     for i in range((width * height) // 6)]
             IR_MAKER.add_array("__conf_addrs", pe_conf_pair[0])
             IR_MAKER.add_array("__conf_data", pe_conf_pair[1])
+            IR_MAKER.add_array("__conf_const_sel", packed_const_sels)
             # fill empty data
             IR_MAKER.add_array("__conf_alu_rmc", [0])
             IR_MAKER.add_array("__conf_se_rmc", [0])
@@ -206,6 +238,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
         IR_MAKER.add_variable("__conf_len", len(pe_conf_pair[0]))
         IR_MAKER.add_variable("__alu_rmc_len", len(alu_rmc_conf))
         IR_MAKER.add_variable("__se_rmc_len", len(se_rmc_conf))
+        IR_MAKER.add_variable("__conf_const_sel_rmc_len", len(se_rmc_conf))
 
         # PREG Config
         if len(PREG_conf) == 0:
@@ -294,7 +327,15 @@ class CCSOTB2_ConfGen(ConfGenBase):
         IR_MAKER.add_metadata("Input data alignment", LD_conf["mem_align"])
         IR_MAKER.add_metadata("Output data alignment", ST_conf["mem_align"])
 
-    def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename, isRomultic):
+    def __write_data(self, file, addr, data):
+        if self.export_packet:
+            file.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
+                                                    vch=0, src=0, dst=1))
+            file.write(TAIL_FLIT.format(data=data))
+        elif self.export_remdata:
+            file.write(REMDATA_FORMAT.format(addr=addr, data=data))
+
+    def save_conf(self, CGRA, PE_confs, Const_conf, LD_conf, ST_conf, PREG_conf, filename):
         """save configration data
 
             Args:
@@ -305,7 +346,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 ST_conf (dict)              : configuration of ST table
                 PREG_conf (list of bool)    : flag of pipeline registers
                 filename (str)              : filename to save the configration
-                isRomultic (bool)           : enable romultic
 
             Returns:
                 bool: whether the configration is saved successfully or not
@@ -316,21 +356,22 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         # PE config
         f.write("\n//PE Config\n")
-        if isRomultic:
+        if self.romultic_enabled:
             for entry in PE_confs:
                 confs = {"rows": entry["rows"], "cols": entry["cols"]}
                 confs.update(entry["conf"])
                 if set(entry["conf"].keys()) == set(RMC_PATTERN[0]):
                     # ALU multicasting
-                    f.write(HEAD_FLIT.format(addr=ALU_RMC_ADDR, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-                    f.write(TAIL_FLIT.format(data=ALU_RMC_FORMAT_BIN.format(**confs)))
-                else:
+                    self.__write_data(f, ALU_RMC_ADDR,ALU_RMC_FORMAT_BIN.format(**confs))
+                elif set(entry["conf"].keys()) == set(RMC_PATTERN[1]):
                     # SE multicasting
-                    f.write(HEAD_FLIT.format(addr=SE_RMC_ADDR, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-                    f.write(TAIL_FLIT.format(data=SE_RMC_FORMAT_BIN.format(**confs)))
+                    self.__write_data(f, SE_RMC_ADDR, data=SE_RMC_FORMAT_BIN.format(**confs))
+                else:
+                    # Const SEL multicasting
+                    self.__write_data(f, CONST_SEL_RMC_ADDR, CONST_SEL_RMC_FORMAT_BIN.format(**confs))
+
         else:
+            const_sels = [0 for i in range(width * height)]
             for x in range(width):
                 for y in range(height):
                     if len(PE_confs[x][y]) > 0:
@@ -338,73 +379,62 @@ class CCSOTB2_ConfGen(ConfGenBase):
                         for filed in CONF_FIELDS:
                             if not filed in PE_confs[x][y]:
                                 PE_confs[x][y][filed] = 0
-                        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                    vch=0, src=0, dst=1))
-                        f.write(TAIL_FLIT.format(data=PE_CONF_FORMAT_BIN.format(**PE_confs[x][y])))
+                        const_sels[y * width + x] = PE_confs[x][y]["CONST_SEL"]
+                        self.__write_data(f, addr, PE_CONF_FORMAT_BIN.format(**PE_confs[x][y]))
+
+            # Const sel
+            f.write("\n//Const SEL\n")
+            for i in range((width * height) // 6):
+                self.__write_data(f, CONST_SEL_BASEADDR + 4 * i, \
+                    CONST_CONF_FORMAT_BIN.format(CONST_SEL = const_sels[6*i:6*i+6]))
 
         # PREG Config
         if len(PREG_conf) == 0:
             PREG_conf = [False for i in range(7)]
         f.write("\n//PREG Config\n")
         addr = PREG_CONF_ADDR
-        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                    vch=0, src=0, dst=1))
-        f.write(TAIL_FLIT.format(data=PREG_CONF_FORMAT.format(*PREG_conf)))
+        self.__write_data(f, addr, PREG_CONF_FORMAT.format(*PREG_conf))
 
         # Const Regs
         f.write("\n//Const Regs\n")
         for i in range(len(Const_conf)):
             addr = CONST_BASEADDR + 4 * i
-            f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                        vch=0, src=0, dst=1))
             int_const = int(Const_conf[i])
             if int_const < 0:
                 int_const = 0x1FFFF + (int_const + 1) # converting 17-bit two's complement
             int_const &= 0x1FFFF
-            f.write(TAIL_FLIT.format(data="{0:032b}".format(int_const)))
+            self.__write_data(f, addr, "{0:032b}".format(int_const))
 
         # LD table
         f.write("\n//LD Table\n")
         addr = LD_DMANU_BASEADDR + TABLE_FORMER_OFFSET
-        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                vch=0, src=0, dst=1))
-        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][0:6])))
+        self.__write_data(f, addr,TABLE_FORMAT.format(*LD_conf["table"][0:6]))
 
         addr = LD_DMANU_BASEADDR + TABLE_LATTER_OFFSET
-        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                vch=0, src=0, dst=1))
-        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*LD_conf["table"][6:12])))
+        self.__write_data(f, addr, TABLE_FORMAT.format(*LD_conf["table"][6:12]))
 
 
         addr = LD_DMANU_BASEADDR + TABLE_MASK_OFFSET
-        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                vch=0, src=0, dst=1))
-        f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*LD_conf["mask"])))
+        self.__write_data(f, addr, TABLE_MASK_FORMAT.format(*LD_conf["mask"]))
 
 
         # ST table
         f.write("\n//ST Table\n")
         addr = ST_DMANU_BASEADDR + TABLE_FORMER_OFFSET
-        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                vch=0, src=0, dst=1))
-        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][0:6])))
+        self.__write_data(f, addr, TABLE_FORMAT.format(*ST_conf["table"][0:6]))
 
         addr = ST_DMANU_BASEADDR + TABLE_LATTER_OFFSET
-        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                vch=0, src=0, dst=1))
-        f.write(TAIL_FLIT.format(data=TABLE_FORMAT.format(*ST_conf["table"][6:12])))
+        self.__write_data(f, addr, TABLE_FORMAT.format(*ST_conf["table"][6:12]))
 
 
         addr = ST_DMANU_BASEADDR + TABLE_MASK_OFFSET
-        f.write(HEAD_FLIT.format(addr=addr, mt=MSG_TYPES["SW"], \
-                                                vch=0, src=0, dst=1))
-        f.write(TAIL_FLIT.format(data=TABLE_MASK_FORMAT.format(*ST_conf["mask"])))
+        self.__write_data(f, addr, TABLE_MASK_FORMAT.format(*ST_conf["mask"]))
 
         f.close()
 
         return True
 
-    def duplicate(self, CGRA, PE_confs, ld_conf, st_conf, map_width, isRomultic):
+    def duplicate(self, CGRA, PE_confs, ld_conf, st_conf, map_width):
         """duplicate mapping horizontally
             Args:
                 CGRA (PEArrayModel)                 : the target architecture
@@ -413,7 +443,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
                 ld_conf (dict)                      : configuration of LD table
                 st_conf (dict)                      : configuration of ST table
                 map_width (int)                     : witdh of the mapping
-                isRomultic (bool)                   : enabled romultic
 
             Returns:
                 int: duplication count
@@ -429,7 +458,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
                                             + in_num * dup_count
                 ld_conf["mask"][dest_x] = ld_conf["mask"][x]
 
-                if isRomultic:
+                if self.romultic_enabled:
                     for entry in PE_confs:
                         entry["cols"][dest_x] = entry["cols"][x]
                 else:
@@ -471,6 +500,8 @@ class CCSOTB2_ConfGen(ConfGenBase):
 
         confs = [ [ {} for y in range(height)] for x in range(width)]
 
+        const_regs = [CGRA.getNodeName("Const", index=i) for i in range(len(CGRA.getConstRegs()))]
+
         # ALUs
         for op_label, (x, y) in individual.mapping.items():
             if op_label in comp_dfg.nodes():
@@ -480,6 +511,13 @@ class CCSOTB2_ConfGen(ConfGenBase):
             confs[x][y]["OPCODE"] = CGRA.getOpConfValue((x, y), opcode)
             alu = CGRA.get_PE_resources((x, y))["ALU"]
             pre_nodes = list(routed_graph.predecessors(alu))
+
+            # decode consts
+            for v in pre_nodes:
+                if v in const_regs:
+                    confs[x][y]["CONST_SEL"] = const_regs.index(v)
+                    break
+
             operands = {routed_graph.edges[(v, alu)]["operand"]: v \
                         for v in pre_nodes\
                         if "operand" in routed_graph.edges[(v, alu)]}
