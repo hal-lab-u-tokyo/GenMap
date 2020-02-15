@@ -8,6 +8,7 @@ import copy
 from time import time
 from tqdm import tqdm
 from importlib import import_module
+import signal
 
 from Individual import Individual
 from EvalBase import EvalBase
@@ -105,6 +106,12 @@ class NSGA2():
         # regist log gile
         self.__logfile = logfile
 
+        # for quit flag
+        self.__quit = False
+
+    def __quit_handler(self, signum, frame):
+        self.__quit = True
+
     def getObjectives(self):
         return self.__eval_list
 
@@ -194,6 +201,10 @@ class NSGA2():
         # status display
         self.status_disp = [tqdm(total = 0, dynamic_ncols=True, desc=eval_cls.name(), bar_format="{desc}: {postfix}")\
                             for eval_cls in self.__eval_list]
+
+        # register handler
+        signal.signal(signal.SIGUSR1, self.__quit_handler)
+        signal.siginterrupt(signal.SIGUSR1, False)
 
         return True
 
@@ -346,6 +357,9 @@ class NSGA2():
                     self.__logfile.write("\t{obj}: min = {min}, max = {max}\n".format(\
                                             obj = self.status_disp[i].desc, min = stats["min"][i],\
                                             max=stats["max"][i]))
+
+            if self.__quit:
+                break;
 
         self.__pool.close()
         self.__pool.join()
