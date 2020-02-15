@@ -1,4 +1,8 @@
 from EvalBase import EvalBase
+import networkx as nx
+import os
+import signal
+import math
 
 class MapWidthEval(EvalBase):
     def __init__(self):
@@ -33,6 +37,13 @@ class MapWidthEval(EvalBase):
                         break
         map_width = max(x_coords) + 1
         individual.saveEvaluatedData("map_width", map_width)
+
+        min_map = max(len(set(nx.get_node_attributes(app.getInputSubGraph(), "input").keys())),\
+                      len(set(nx.get_node_attributes(app.getOutputSubGraph(), "output").keys())),\
+                      math.ceil(len(app.getCompSubGraph().nodes()) / height))
+
+        if min_map == map_width:
+            os.kill(os.getpgid(os.getpid()), signal.SIGUSR1)
         return map_width
 
     @staticmethod
