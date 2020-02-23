@@ -196,10 +196,17 @@ class GenMapShell(Cmd):
             self.help_select()
         else:
             try:
-                sol_id = int(args[0])
+                if args[0] == "-":
+                    # select the top solution
+                    sol_id = list(self.data["hof"]).index(self.filtered_sols[0])
+                else:
+                    sol_id = int(args[0])
             except ValueError:
                 print("select: {0} is not integer value".format(args[0]))
                 return;
+            except IndexError:
+                print("select: no solution satisfying condition(s)")
+                return
             if sol_id >= len(self.data["hof"]):
                 print("select: ID {0}  is out of range".format(args[0]))
             else:
