@@ -6,6 +6,7 @@ GenMap requires some additional packages. So, you have to have root privileges t
 
 ### Supported OS
 1. CentOS 7
+1. CentOS 8
 
 ### Required Packages
 1. git
@@ -19,9 +20,17 @@ GenMap requires some additional packages. So, you have to have root privileges t
 We recommend to install GenMap on a virtual python environment to avoid python library conflicts.
 
 1. Install above packages (as necessary)
+
+For CentOS7, 
 ```
  $ yum install git python36 python36-devel python36-libs python36-tkinter graphviz
 ```
+
+For CentOS8, 
+```
+ $ dnf install git python36 python36-devel python3-libs python3-tkinter graphviz
+```
+
 Perhaps, you need to add a yum repository to install python3.
 ```
 sudo yum install https://centos7.iuscommunity.org/ius-release.rpm
@@ -56,9 +65,10 @@ GenMap requires the following python libraries. Recommended version for each lib
     1. pydot (1.4.1)
     1. pygmo (2.9)
     1. prettytable (0.7.2)
-Optional
+    * Optional
     1. llvmlite (0.30.0) (necesssary to export configuration as LLVM-IR)
     1. pyeda (0.28.0) (necessary for configuration compression using espresso)
+    
 ```
 (GenMap_env) # pip3 install (package_name)[==version]
 ```
