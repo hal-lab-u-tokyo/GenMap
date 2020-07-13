@@ -189,6 +189,9 @@ class Application():
 
         return subg
 
+    def getDAG(self):
+        return self.__DAG
+
     def hasConst(self):
         """Returns wheather the application has constant values or not.
         """
