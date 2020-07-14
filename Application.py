@@ -27,6 +27,9 @@ class Application():
         except FileNotFoundError:
             print(file + " is not found")
             return False
+        except TypeError:
+            print(file + " cannot load as dot file")
+            return False
 
         # get app name
         path = Path(file)
