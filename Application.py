@@ -193,10 +193,47 @@ class Application():
         return subg
 
     def getDAG(self):
-        return self.__DAG
+        return copy.deepcopy(self.__DAG)
 
     def hasConst(self):
         """Returns wheather the application has constant values or not.
         """
         return len(nx.get_node_attributes(self.__DAG, "const").keys()) > 0
+
+    def extractSubApp(self, op_node_list, new_oport):
+        """Extracts sub application
+
+            Args:
+                op_node_list (list): operational nodes list to be left for
+                                        extracted sub application
+                new_oport (dict): specifys output port creation
+                                    keys: sink op node name
+                                    values: new oport name
+        """
+
+        # remove other op nodes
+        subg = copy.deepcopy(self.__DAG)
+        op_nodes = set(nx.get_node_attributes(subg, "op").keys())
+        subg.remove_nodes_from(op_nodes - set(op_node_list))
+
+        # remove unused const, iport, oport
+        remove_nodes = []
+        for v in subg.nodes():
+            if subg.degree(v) == 0:
+                remove_nodes.append(v)
+        subg.remove_nodes_from(remove_nodes)
+
+        # create new oport
+        for sink, oport in new_oport.items():
+            subg.add_node(oport, output="True")
+            subg.add_edge(sink, oport)
+
+        # create new application instance
+        ret_app = Application()
+        ret_app.__DAG = subg
+        ret_app.__Freq = self.__Freq
+        ret_app.__app_name = self.__app_name
+
+        return ret_app
+
 
