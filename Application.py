@@ -200,12 +200,15 @@ class Application():
         """
         return len(nx.get_node_attributes(self.__DAG, "const").keys()) > 0
 
-    def extractSubApp(self, op_node_list, new_oport):
+    def extractSubApp(self, op_node_list, new_iport, new_oport):
         """Extracts sub application
 
             Args:
                 op_node_list (list): operational nodes list to be left for
                                         extracted sub application
+                new_iport (dict): specifys input port creation
+                                    keys: source op node name
+                                    values: new iport name
                 new_oport (dict): specifys output port creation
                                     keys: sink op node name
                                     values: new oport name
@@ -222,6 +225,11 @@ class Application():
             if subg.degree(v) == 0:
                 remove_nodes.append(v)
         subg.remove_nodes_from(remove_nodes)
+
+        # create new inport
+        for src, iport in new_iport.items():
+            subg.add_node(iport, input="True")
+            subg.add_edge(iport, src)
 
         # create new oport
         for sink, oport in new_oport.items():
