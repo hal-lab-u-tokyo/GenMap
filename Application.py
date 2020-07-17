@@ -219,13 +219,6 @@ class Application():
         op_nodes = set(nx.get_node_attributes(subg, "op").keys())
         subg.remove_nodes_from(op_nodes - set(op_node_list))
 
-        # remove unused const, iport, oport
-        remove_nodes = []
-        for v in subg.nodes():
-            if subg.degree(v) == 0:
-                remove_nodes.append(v)
-        subg.remove_nodes_from(remove_nodes)
-
         # create new inport
         for src, iport in new_iport.items():
             subg.add_node(iport, input="True")
@@ -235,6 +228,13 @@ class Application():
         for sink, oport in new_oport.items():
             subg.add_node(oport, output="True")
             subg.add_edge(sink, oport)
+
+        # remove unused const, iport, oport
+        remove_nodes = []
+        for v in subg.nodes():
+            if subg.degree(v) == 0:
+                remove_nodes.append(v)
+        subg.remove_nodes_from(remove_nodes)
 
         # create new application instance
         ret_app = Application()
