@@ -214,10 +214,24 @@ class Application():
                                     values: new oport name
         """
 
-        # remove other op nodes
-        subg = copy.deepcopy(self.__DAG)
-        op_nodes = set(nx.get_node_attributes(subg, "op").keys())
-        subg.remove_nodes_from(op_nodes - set(op_node_list))
+        # get extracted nodes
+        remain_nodes = []
+        remain_nodes.extend(op_node_list)
+        for v in nx.get_node_attributes(self.__DAG, "input").keys():
+            if len(set(self.__DAG.successors(v)) & set(op_node_list)) > 0:
+                remain_nodes.append(v)
+        for v in nx.get_node_attributes(self.__DAG, "output").keys():
+            if len(set(self.__DAG.predecessors(v)) & set(op_node_list)) > 0:
+                remain_nodes.append(v)
+        for v in nx.get_node_attributes(self.__DAG, "const").keys():
+            if len(set(self.__DAG.successors(v)) & set(op_node_list)) > 0:
+                remain_nodes.append(v)
+
+        # make subgraph
+        subg_tmp = self.__DAG.subgraph(remain_nodes)
+        subg = nx.DiGraph()
+        subg.add_nodes_from(subg_tmp.nodes(data=True))
+        subg.add_edges_from(subg_tmp.edges(data=True))
 
         # create new inport
         for src, iport in new_iport.items():
@@ -229,12 +243,12 @@ class Application():
             subg.add_node(oport, output="True")
             subg.add_edge(sink, oport)
 
-        # remove unused const, iport, oport
-        remove_nodes = []
-        for v in subg.nodes():
-            if subg.degree(v) == 0:
-                remove_nodes.append(v)
-        subg.remove_nodes_from(remove_nodes)
+        # # remove unused const, iport, oport
+        # remove_nodes = []
+        # for v in subg.nodes():
+        #     if subg.degree(v) == 0:
+        #         remove_nodes.append(v)
+        # subg.remove_nodes_from(remove_nodes)
 
         # create new application instance
         ret_app = Application()
@@ -245,3 +259,8 @@ class Application():
         return ret_app
 
 
+    def getInputCount(self):
+        return len(nx.get_node_attributes(self.__DAG, "input").keys())
+
+    def getOutputCount(self):
+        return len(nx.get_node_attributes(self.__DAG, "output").keys())
