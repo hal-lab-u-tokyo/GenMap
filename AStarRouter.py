@@ -71,7 +71,7 @@ class AStarRouter(RouterBase):
 
         const_map = AStarRouter.__resource_mapping(CGRA, CGRA.getConstRegs(), const_DFG, mapping, routed_graph)
         if const_map is None:
-            return PENALTY_CONST
+            return PENALTY_CONST * len(list(const_DFG.edges()))
         else:
             # save const mapping
             nx.set_node_attributes(routed_graph, {c_reg: edges[0][0] \
@@ -93,7 +93,7 @@ class AStarRouter(RouterBase):
     def input_routing(CGRA, in_DFG, mapping, routed_graph, **info):
         input_map = AStarRouter.__resource_mapping(CGRA, CGRA.getInputPorts(), in_DFG, mapping, routed_graph)
         if input_map is None:
-            return PENALTY_CONST
+            return PENALTY_CONST * len(list(in_DFG.edges()))
         else:
             # save input mapping
             nx.set_node_attributes(routed_graph, {i_port: edges[0][0] \

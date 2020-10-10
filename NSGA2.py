@@ -244,22 +244,23 @@ class NSGA2():
         # get a graph which the application to be mapped
         g = individual.routed_graph
         cost = 0
+
         # comp routing
         cost += router.comp_routing(CGRA, app.getCompSubGraph(), individual.mapping, g)
         if cost > penalty:
-            individual.routing_cost = cost + penalty
+            individual.routing_cost = cost + penalty * 40
             return
 
         # const routing
         cost += router.const_routing(CGRA, app.getConstSubGraph(), individual.mapping, g)
         if cost > penalty:
-            individual.routing_cost = cost + penalty
+            individual.routing_cost = cost + penalty * 30
             return
 
         # input routing
         cost += router.input_routing(CGRA, app.getInputSubGraph(), individual.mapping, g)
         if cost > penalty:
-            individual.routing_cost = cost + penalty
+            individual.routing_cost = cost + penalty * 20
             return
 
         # output routing
@@ -270,7 +271,7 @@ class NSGA2():
             cost += router.output_routing(CGRA, app.getOutputSubGraph(), individual.mapping, g)
 
         if cost > penalty:
-            individual.routing_cost = cost + penalty
+            individual.routing_cost = cost + penalty * 10
         else:
             # obtain valid routing
             individual.routing_cost = cost

@@ -27,6 +27,9 @@ class Application():
         except FileNotFoundError:
             print(file + " is not found")
             return False
+        except TypeError:
+            print(file + " cannot load as dot file")
+            return False
 
         # get app name
         path = Path(file)
@@ -189,8 +192,75 @@ class Application():
 
         return subg
 
+    def getDAG(self):
+        return copy.deepcopy(self.__DAG)
+
     def hasConst(self):
         """Returns wheather the application has constant values or not.
         """
         return len(nx.get_node_attributes(self.__DAG, "const").keys()) > 0
 
+    def extractSubApp(self, op_node_list, new_iport, new_oport):
+        """Extracts sub application
+
+            Args:
+                op_node_list (list): operational nodes list to be left for
+                                        extracted sub application
+                new_iport (dict): specifys input port creation
+                                    keys: source op node name
+                                    values: new iport name
+                new_oport (dict): specifys output port creation
+                                    keys: sink op node name
+                                    values: new oport name
+        """
+
+        # get extracted nodes
+        remain_nodes = []
+        remain_nodes.extend(op_node_list)
+        for v in nx.get_node_attributes(self.__DAG, "input").keys():
+            if len(set(self.__DAG.successors(v)) & set(op_node_list)) > 0:
+                remain_nodes.append(v)
+        for v in nx.get_node_attributes(self.__DAG, "output").keys():
+            if len(set(self.__DAG.predecessors(v)) & set(op_node_list)) > 0:
+                remain_nodes.append(v)
+        for v in nx.get_node_attributes(self.__DAG, "const").keys():
+            if len(set(self.__DAG.successors(v)) & set(op_node_list)) > 0:
+                remain_nodes.append(v)
+
+        # make subgraph
+        subg_tmp = self.__DAG.subgraph(remain_nodes)
+        subg = nx.DiGraph()
+        subg.add_nodes_from(subg_tmp.nodes(data=True))
+        subg.add_edges_from(subg_tmp.edges(data=True))
+
+        # create new inport
+        for src, iport in new_iport.items():
+            subg.add_node(iport, input="True")
+            subg.add_edge(iport, src)
+
+        # create new oport
+        for sink, oport in new_oport.items():
+            subg.add_node(oport, output="True")
+            subg.add_edge(sink, oport)
+
+        # # remove unused const, iport, oport
+        # remove_nodes = []
+        # for v in subg.nodes():
+        #     if subg.degree(v) == 0:
+        #         remove_nodes.append(v)
+        # subg.remove_nodes_from(remove_nodes)
+
+        # create new application instance
+        ret_app = Application()
+        ret_app.__DAG = subg
+        ret_app.__Freq = self.__Freq
+        ret_app.__app_name = self.__app_name
+
+        return ret_app
+
+
+    def getInputCount(self):
+        return len(nx.get_node_attributes(self.__DAG, "input").keys())
+
+    def getOutputCount(self):
+        return len(nx.get_node_attributes(self.__DAG, "output").keys())
