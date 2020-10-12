@@ -4,6 +4,8 @@ import os
 import signal
 import math
 
+main_pid = os.getpid()
+
 class MapWidthEval(EvalBase):
     def __init__(self):
         pass
@@ -42,8 +44,8 @@ class MapWidthEval(EvalBase):
                       len(set(nx.get_node_attributes(app.getOutputSubGraph(), "output").keys())),\
                       math.ceil(len(app.getCompSubGraph().nodes()) / height))
 
-        if min_map == map_width:
-            os.kill(os.getpgid(os.getpid()), signal.SIGUSR1)
+        if min_map == map_width and individual.isValid():
+            os.kill(main_pid, signal.SIGUSR1)
         return map_width
 
     @staticmethod
