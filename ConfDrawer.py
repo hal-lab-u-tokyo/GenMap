@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as pat
+import networkx as nx
 
 # drawing setting
 pe_margin = 0.15
@@ -78,6 +79,7 @@ class ConfDrawer():
                 self.ax.add_patch(pe)
 
         # add ALUs & SEs
+        routing_alus = []
         for v in individual.routed_graph.nodes():
             for x in range(self.width):
                 for y in range(self.height):
@@ -86,6 +88,10 @@ class ConfDrawer():
                             alu = self.__make_ALU_patch((x, y))
                             self.ax.add_patch(alu)
                             self.node_to_patch[v] = alu
+                            if "route" in individual.routed_graph.nodes[v].keys():
+                                if individual.routed_graph.nodes[v]["route"]:
+                                    # routing alu
+                                    routing_alus.append((x, y))
                         else:
                             for SE_id, SEs in CGRA.get_PE_resources((x, y))["SE"].items():
                                 if v in SEs:
@@ -102,6 +108,13 @@ class ConfDrawer():
                 opcode = "RPE"
             self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, y + 1 - pe_margin * 2),\
                                 size=12)
+
+        # add routing node
+        for (x, y) in routing_alus:
+            opcode = CGRA.getRoutingOpcode(\
+                CGRA.getNodeName("ALU", pos=(x, y)))
+            self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, \
+                            y + 1 - pe_margin * 2), size=12)
 
         # draw routing
         for u, v in individual.routed_graph.edges():

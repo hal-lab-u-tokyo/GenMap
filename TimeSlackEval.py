@@ -49,6 +49,13 @@ class TimeSlackEval(EvalBase):
         delay_table.update({v: sim_params.delay_info["SE"]\
                             for v in individual.routed_graph.nodes() if CGRA.isSE(v)})
 
+        # for routing ALU
+        for alu, flag in nx.get_node_attributes(individual.routed_graph,\
+                                                 "route").items():
+            if flag:
+                delay_table[alu] = sim_params.delay_info[\
+                        CGRA.getRoutingOpcode(alu)]
+
         if not body_bias is None:
             domains = CGRA.getBBdomains()
             if fastest_mode:

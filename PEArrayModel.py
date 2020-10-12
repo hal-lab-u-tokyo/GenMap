@@ -139,6 +139,15 @@ class PEArrayModel():
         #    value: output name defined by config file
         self.__output_names = {}
 
+        # list of PEs, which are available for routing
+        #   values are coordinate of the ALUs
+        self.__routing_ALU = []
+
+        # opcode for routing
+        #   key node name of ALU
+        #   values: opcode
+        self.__routing_opcode = {}
+
         # get architecture name
         name_str = conf.get("name")
         if name_str == None:
@@ -266,6 +275,16 @@ class PEArrayModel():
                 else:
                     raise self.InvalidConfigError("missing configuration value for opcode: "\
                                                     + str(op.text))
+                # check routing ability
+                route_op = op.get("route")
+                if not route_op is None:
+                    route_op = str(route_op)
+                    if route_op not in ["true", "false"]:
+                        raise self.InvalidConfigError("unknown value for route attribute of opcode: " + route_op + \
+                            "Either \"true\" or \"false\" must be specified")
+                    elif route_op == "true":
+                        self.__routing_ALU.append((x, y))
+                        self.__routing_opcode[ALU_node_exp.format(pos=(x, y))] = op.text
 
             connections[ALU_node_exp.format(pos=(x, y))] = ALU.iter("input")
 
@@ -779,3 +798,28 @@ class PEArrayModel():
         return self.__output_names[se]
 
 
+    def isRoutingALU(self, pos):
+        """Checks whether the ALU can work for routing node
+
+            Args:
+                pos: coordinate of the ALU
+
+            Returns:
+                bool: if the ALU can work for routing node
+                      otherwise return False.
+
+        """
+        if pos in self.__routing_ALU:
+            return True
+
+    def getRoutingOpcode(self, node):
+        """Gets opcode for routing
+
+            Args:
+                node: node name for ALU
+
+            Returns:
+                str: opcode for the routing
+
+        """
+        return self.__routing_opcode[node]
