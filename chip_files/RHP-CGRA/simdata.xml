@@ -1,0 +1,52 @@
+<DATA>
+	<BiasRange>
+		<bias>0.0</bias>
+	</BiasRange>
+	<Delay unit="ns">
+		<ALU bias="0.0" op="NOP">0</ALU>
+		<ALU bias="0.0" op="ADD">0</ALU>
+		<ALU bias="0.0" op="SUB">0</ALU>
+		<ALU bias="0.0" op="MUL">0</ALU>
+		<ALU bias="0.0" op="DIV">0</ALU>
+		<ALU bias="0.0" op="AND">0</ALU>
+		<ALU bias="0.0" op="XOR">0</ALU>
+		<ALU bias="0.0" op="OR">0</ALU>
+		<ALU bias="0.0" op="NOT">0</ALU>
+		<ALU bias="0.0" op="FADD">0</ALU>
+		<ALU bias="0.0" op="FSUB">0</ALU>
+		<ALU bias="0.0" op="FMUL">0</ALU>
+		<ALU bias="0.0" op="FDIV">0</ALU>
+		<ALU bias="0.0" op="FEXP">0</ALU>
+		<ALU bias="0.0" op="FSIN">0</ALU>
+		<!-- delay of SE -->
+		<SE bias="0.0">0</SE>
+	</Delay>
+	<Power>
+		<Static>
+		    <!-- we don't have data for leakage -->
+			<PE unit="mW" bias="0.0">0.0000</PE>
+		</Static>
+		<Dynamic>
+			<Energy unit="pJ">0</Energy>
+			<Propagation>0</Propagation>
+			<Decay>0</Decay>
+			<SE_weight>0</SE_weight>
+			<Switching op="NOP">0</Switching>
+			<Switching op="ADD">0</Switching>
+			<Switching op="SUB">0</Switching>
+			<Switching op="MUL">0</Switching>
+			<Switching op="DIV">0</Switching>
+			<Switching op="AND">0</Switching>
+			<Switching op="XOR">0</Switching>
+			<Switching op="OR">0</Switching>
+			<Switching op="NOT">0</Switching>
+			<Switching op="FADD">0</Switching>
+			<Switching op="FSUB">0</Switching>
+			<Switching op="FMUL">0</Switching>
+			<Switching op="FDIV">0</Switching>
+			<Switching op="FEXP">0</Switching>
+			<Switching op="FSIN">0</Switching>
+		</Dynamic>
+	</Power>
+</DATA>
+

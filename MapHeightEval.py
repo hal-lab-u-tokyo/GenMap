@@ -1,6 +1,6 @@
 from EvalBase import EvalBase
 
-class MapWidthEval(EvalBase):
+class MapHeightEval(EvalBase):
     def __init__(self):
         pass
 
@@ -21,7 +21,7 @@ class MapWidthEval(EvalBase):
                 map_width: mapping width
 
         """
-        x_coords = []
+        y_coords = []
         SEs = [v for v in individual.routed_graph.nodes() if CGRA.isSE(v)]
         ALUs = [v for v in individual.routed_graph.nodes() if CGRA.isALU(v)]
         width, height = CGRA.getSize()
@@ -31,11 +31,10 @@ class MapWidthEval(EvalBase):
                     rsc = CGRA.get_PE_resources((x, y))
                     if node in  [v for se_set in rsc["SE"].values() for v in se_set ] or \
                         node == rsc["ALU"]:
-                        x_coords.append(x)
+                        y_coords.append(y)
                         break
-        map_width = max(x_coords) + 1
-        individual.saveEvaluatedData("map_width", map_width)
-        return map_width
+        map_height = max(y_coords) + 1
+        return map_height
 
     @staticmethod
     def isMinimize():
@@ -43,4 +42,4 @@ class MapWidthEval(EvalBase):
 
     @staticmethod
     def name():
-        return "Mapping_Width"
+        return "Mapping_Height"
