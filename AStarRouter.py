@@ -72,7 +72,6 @@ class AStarRouter(RouterBase):
                             if "operand" in comp_DFG.edges[src_node, dst_node] else None for dst_node in \
                             sorted(list(comp_DFG.successors(src_node)), \
                                 key=lambda x: AStarRouter.__manhattan_dist(mapping[x], mapping[src_node])) }
-
             # route each path
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
 
@@ -203,6 +202,10 @@ class AStarRouter(RouterBase):
             routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
             # print("out", path)
+
+            # update ALU out link cost and used flag
+            for suc in routed_graph.successors(src):
+                routed_graph.edges[src, suc]["weight"] = USED_LINK_WEIGHT
 
             out_port_nodes.remove(path[-1])
 

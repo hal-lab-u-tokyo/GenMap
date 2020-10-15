@@ -148,6 +148,9 @@ class PEArrayModel():
         #   values: opcode
         self.__routing_opcode = {}
 
+        # const attributes
+        self.__infini_const = False
+
         # get architecture name
         name_str = conf.get("name")
         if name_str == None:
@@ -181,7 +184,10 @@ class PEArrayModel():
         if const_str == None:
             raise self.InvalidConfigError("missing PE array attribute: const_reg")
         elif const_str.isdigit() == False:
-            raise ValueError("Invalid PE array attribute: const_reg")
+            if const_str == "X" or const_str == "x":
+                self.__infini_const = True
+            else:
+                raise ValueError("Invalid PE array attribute: const_reg")
         else:
             self.__const_reg_range = list(range(int(const_str)))
         for c_reg in self.__const_reg_range:
@@ -494,6 +500,7 @@ class PEArrayModel():
                 "index": src_index, "id": src_id, "src_name": src_name,\
                 "conf_value": conf_val}
 
+
     # getter method
     def getArchName(self):
         '''Returns architecture name of this model
@@ -708,6 +715,12 @@ class PEArrayModel():
         """Returns pipeline register number of the architecture
         """
         return len(self.__preg_positions)
+
+    def isNeedConstRoute(self):
+        """Returns whether const routing is needed
+        """
+
+        return not self.__infini_const
 
     @staticmethod
     def isSE(node_name):
