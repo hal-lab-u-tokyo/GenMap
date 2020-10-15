@@ -34,6 +34,8 @@ class RouterBase(metaclass=ABCMeta):
             Notes:
                 This method will add following attributes to routed_graph's edges
                     1. operand: to fix order of operands for an ALU
+                Also, this method will add following attributes to routed_graph's nodes
+                    1. route: to specifiy routing ALU
         """
         pass
 
@@ -58,6 +60,8 @@ class RouterBase(metaclass=ABCMeta):
                     1. operand: to fix order of operands for an ALU
                 Also, this method will add following attributes to routed_graph's nodes
                     1. value: constant value which is assigned to an const reg
+                    2. route: to specifiy routing ALU
+
         """
         pass
 
@@ -82,6 +86,7 @@ class RouterBase(metaclass=ABCMeta):
                     1. operand: to fix order of operands for an ALU
                 Also, this method will add following attributes to routed_graph's nodes
                     1. map: input data which is mapped to an input port
+                    2. route: to specifiy routing ALU
         """
         pass
 
@@ -108,5 +113,6 @@ class RouterBase(metaclass=ABCMeta):
             Notes:
                 This method will add following attributes to routed_graph's nodes
                     1. map: output data which is mapped to a output port
+                    2. route: to specifiy routing ALU
         """
         pass

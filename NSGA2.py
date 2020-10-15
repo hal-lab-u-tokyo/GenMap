@@ -65,6 +65,11 @@ class NSGA2():
         if not issubclass(self.__router, RouterBase):
             raise TypeError(self.__router.__name__ + " is not RouterBase class")
 
+        # init routing options
+        self.__const_route_en = False
+        self.__input_route_en = False
+        self.__output_route_en = False
+
         # get objectives
         eval_names = [ele.text for ele in config.iter("eval")]
 
@@ -146,6 +151,22 @@ class NSGA2():
 
         # obtain CGRA size
         width, height = CGRA.getSize()
+
+        # check routing options
+        if CGRA.isNeedConstRoute():
+            self.__const_route_en = True
+        else:
+            self.__const_route_en = False
+        if len(CGRA.getInputPorts()) > 0:
+            self.__input_route_en = True
+        else:
+            if len(app.getInputSubGraph()) > 0:
+                print("Warnning: application DFG contains input data flow but {0} does not have input ports".format(CGRA.getArchName()))
+        if len(CGRA.getOutputPorts()) > 0:
+            self.__output_route_en = True
+        else:
+            if len(app.getOutputSubGraph()) > 0:
+                print("Warnning: application DFG contains output data flow but {0} does not have output ports".format(CGRA.getArchName()))
 
         # obrain computation DFG
         comp_dfg = app.getCompSubGraph()
@@ -252,23 +273,26 @@ class NSGA2():
             return
 
         # const routing
-        cost += router.const_routing(CGRA, app.getConstSubGraph(), individual.mapping, g)
-        if cost > penalty:
-            individual.routing_cost = cost + penalty * 30
-            return
+        if self.__const_route_en:
+            cost += router.const_routing(CGRA, app.getConstSubGraph(), individual.mapping, g)
+            if cost > penalty:
+                individual.routing_cost = cost + penalty * 30
+                return
 
         # input routing
-        cost += router.input_routing(CGRA, app.getInputSubGraph(), individual.mapping, g)
-        if cost > penalty:
-            individual.routing_cost = cost + penalty * 20
-            return
+        if self.__input_route_en:
+            cost += router.input_routing(CGRA, app.getInputSubGraph(), individual.mapping, g)
+            if cost > penalty:
+                individual.routing_cost = cost + penalty * 20
+                return
 
         # output routing
-        if CGRA.getPregNumber() > 0:
-            cost += router.output_routing(CGRA, app.getOutputSubGraph(), \
-                                            individual.mapping, g, individual.preg)
-        else:
-            cost += router.output_routing(CGRA, app.getOutputSubGraph(), individual.mapping, g)
+        if self.__output_route_en:
+            if CGRA.getPregNumber() > 0:
+                cost += router.output_routing(CGRA, app.getOutputSubGraph(), \
+                                                individual.mapping, g, individual.preg)
+            else:
+                cost += router.output_routing(CGRA, app.getOutputSubGraph(), individual.mapping, g)
 
         if cost > penalty:
             individual.routing_cost = cost + penalty * 10

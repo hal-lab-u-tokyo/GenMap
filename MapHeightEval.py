@@ -1,12 +1,6 @@
 from EvalBase import EvalBase
-import networkx as nx
-import os
-import signal
-import math
 
-main_pid = os.getpid()
-
-class MapWidthEval(EvalBase):
+class MapHeightEval(EvalBase):
     def __init__(self):
         pass
 
@@ -27,7 +21,7 @@ class MapWidthEval(EvalBase):
                 map_width: mapping width
 
         """
-        x_coords = []
+        y_coords = []
         SEs = [v for v in individual.routed_graph.nodes() if CGRA.isSE(v)]
         ALUs = [v for v in individual.routed_graph.nodes() if CGRA.isALU(v)]
         width, height = CGRA.getSize()
@@ -37,18 +31,10 @@ class MapWidthEval(EvalBase):
                     rsc = CGRA.get_PE_resources((x, y))
                     if node in  [v for se_set in rsc["SE"].values() for v in se_set ] or \
                         node == rsc["ALU"]:
-                        x_coords.append(x)
+                        y_coords.append(y)
                         break
-        map_width = max(x_coords) + 1
-        individual.saveEvaluatedData("map_width", map_width)
-
-        min_map = max(len(set(nx.get_node_attributes(app.getInputSubGraph(), "input").keys())),\
-                      len(set(nx.get_node_attributes(app.getOutputSubGraph(), "output").keys())),\
-                      math.ceil(len(app.getCompSubGraph().nodes()) / height))
-
-        if min_map == map_width and individual.isValid():
-            os.kill(main_pid, signal.SIGUSR1)
-        return map_width
+        map_height = max(y_coords) + 1
+        return map_height
 
     @staticmethod
     def isMinimize():
@@ -56,4 +42,4 @@ class MapWidthEval(EvalBase):
 
     @staticmethod
     def name():
-        return "Mapping_Width"
+        return "Mapping_Height"

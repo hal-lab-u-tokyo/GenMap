@@ -33,7 +33,22 @@ class AStarRouter(RouterBase):
         CGRA.setInitEdgeAttr("weight", ALU_OUT_WEIGTH, "ALU")
 
     @staticmethod
+    def __set_unused_ALU(CGRA, mapping, routed_graph):
+        w, h = CGRA.getSize()
+        used_coords = mapping.values()
+        for x in range(w):
+            for y in range(h):
+                if (x, y) not in used_coords and \
+                    CGRA.isRoutingALU((x, y)):
+                    # remove high cost of ALU out
+                    alu = CGRA.getNodeName("ALU", pos = (x, y))
+                    for suc_element in routed_graph.successors(alu):
+                        routed_graph.edges[alu, suc_element]["weight"] = 1
+
+    @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
+        AStarRouter.__set_unused_ALU(CGRA, mapping, routed_graph)
+
         # get out degree for each node
         out_deg = {v: comp_DFG.out_degree(v) for v in comp_DFG.nodes() if comp_DFG.out_degree(v) > 0 }
         # sort in ascending order
@@ -57,10 +72,8 @@ class AStarRouter(RouterBase):
                             if "operand" in comp_DFG.edges[src_node, dst_node] else None for dst_node in \
                             sorted(list(comp_DFG.successors(src_node)), \
                                 key=lambda x: AStarRouter.__manhattan_dist(mapping[x], mapping[src_node])) }
-
             # route each path
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, src_alu, dest_alus)
-
 
         return route_cost
 
@@ -160,6 +173,8 @@ class AStarRouter(RouterBase):
                     # remove other input edges
                     remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
                     routed_graph.remove_edges_from(remove_edges)
+                    if CGRA.isALU(path[i+1]):
+                        routed_graph.nodes[path[i+1]]["route"] = True
                 routed_graph.nodes[path[-1]]["free"] = False
 
                 free_last_stage_SEs -= set(path)
@@ -182,9 +197,15 @@ class AStarRouter(RouterBase):
                 # remove other input edges
                 remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
                 routed_graph.remove_edges_from(remove_edges)
+                if CGRA.isALU(path[i+1]):
+                    routed_graph.nodes[path[i+1]]["route"] = True
             routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
             # print("out", path)
+
+            # update ALU out link cost and used flag
+            for suc in routed_graph.successors(src):
+                routed_graph.edges[src, suc]["weight"] = USED_LINK_WEIGHT
 
             out_port_nodes.remove(path[-1])
 
@@ -338,7 +359,9 @@ class AStarRouter(RouterBase):
                     # set used flag to the links
                     for i in range(len(path) - 1):
                         e = (path[i], path[i + 1])
-                        if CGRA.isSE(path[i + 1]):
+                        isSE = CGRA.isSE(e[1])
+                        isALU = CGRA.isALU(e[1])
+                        if isSE or (isALU and e[1] != path[-1]):
                             # if the link is provided by SE, set cost 0
                             # for path sharing
                             shared_edges.add(e)
@@ -346,10 +369,13 @@ class AStarRouter(RouterBase):
                             # remove other input edges
                             remove_edges = [(p, path[i + 1]) for p in graph.predecessors(path[i + 1]) if p != path[i]]
                             graph.remove_edges_from(remove_edges)
+                            if isALU:
+                                graph.nodes[e[1]]["route"] = True
                         else:
                             # other than SE's
                             graph.edges[e]["weight"] = USED_LINK_WEIGHT
                             graph.edges[e]["free"] = False
+
                     # add operand attr
                     if not operand is None:
                         graph.edges[(path[-2], path[-1])]["operand"] = operand

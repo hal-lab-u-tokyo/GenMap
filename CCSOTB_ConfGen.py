@@ -277,6 +277,19 @@ class CCSOTB_ConfGen(ConfGenBase):
                 if len(pre_nodes) > 1:
                     confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, pre_nodes[1])
 
+        # routing ALU
+        for x in range(width):
+            for y in range(height):
+                alu = CGRA.getNodeName("ALU", pos=(x,y))
+                if alu in routed_graph.nodes():
+                    if "route" in routed_graph.nodes[alu].keys():
+                        if routed_graph.nodes[alu]["route"]:
+                            opcode = CGRA.getRoutingOpcode(alu)
+                            confs[x][y]["OPCODE"] = CGRA.getOpConfValue((x, y), opcode)
+                            pre_node = list(routed_graph.predecessors(alu))[0]
+                            confs[x][y]["SEL_A"] = confs[x][y]["SEL_B"] = \
+                                CGRA.getNetConfValue(alu, pre_node)
+
         # SEs
         for x in range(width):
             for y in range(height):

@@ -85,24 +85,28 @@ class PowerEval(EvalBase):
 
 
     @staticmethod
-    def get_opcodes(CGRA, app, mapping):
+    def get_opcodes(CGRA, app, individual):
         """Gets opcodes for each used ALU.
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
                 app (Application): An application to be optimized
-                mapping (dict): mapping of the DFG
-                    keys (str): operation label of DFG
-                    values (tuple): PE coordinates
+                individual (Individual): an individual
             Returns:
                 Dict: opcodes of used ALUs
                     keys (str): ALU name of routed graph
                     values (str): opcode of the ALU
         """
+        mapping = individual.mapping
+        graph = individual.routed_graph
         op_attr = nx.get_node_attributes(app.getCompSubGraph(), "op")
         opcodes = {CGRA.getNodeName("ALU", pos): op_attr[op_label] \
                      if op_label in op_attr.keys() else "CAT" \
                          for op_label, pos in mapping.items()}
+        # for routing ALU
+        for alu, flag in nx.get_node_attributes(graph, "route").items():
+            if flag:
+                opcodes[alu] = CGRA.getRoutingOpcode(alu)
         return opcodes
 
     @staticmethod
@@ -144,7 +148,7 @@ class PowerEval(EvalBase):
 
             # 2. Latancy Satisfaction
             # make delay table
-            opcodes = PowerEval.get_opcodes(CGRA, app, individual.mapping)
+            opcodes = PowerEval.get_opcodes(CGRA, app, individual)
             delay_table = {node: sim_params.delay_info[opcode]
                             for node, opcode in opcodes.items()}
 
@@ -215,7 +219,7 @@ class PowerEval(EvalBase):
         graph.add_node("root")
         nx.set_node_attributes(graph, 0, "switching")
         nx.set_node_attributes(graph, 0, "len")
-        opcodes = PowerEval.get_opcodes(CGRA, app, individual.mapping)
+        opcodes = PowerEval.get_opcodes(CGRA, app, individual)
 
         if CGRA.getPregNumber() != 0:
             stage_domains = CGRA.getStageDomains(individual.preg)

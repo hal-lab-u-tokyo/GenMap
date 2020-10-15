@@ -24,6 +24,7 @@ class Individual():
             self.preg = []
         # get network model
         self.routed_graph = CGRA.getNetwork()
+
         # initialize each variable
         self.routing_cost = 0
         self.__valid = False
