@@ -1,26 +1,11 @@
-<PEArray name="RHP-CGRA-7x9" width="7" height="9" input_port="9" output_port="9" const_reg="0" >
+<PEArray name="RHP-CGRA-9x9" width="9" height="9" input_port="0" output_port="0" const_reg="X" >
 	<!-- ROW 00 -->
 	<PE coord="(0, 0)" >
 		<ALU>
-			<operation value="0" route="true" >NOP</operation>
-			<operation value="1" >ADD</operation>
-			<operation value="2" >SUB</operation>
-			<operation value="3" >MUL</operation>
-			<operation value="4" >DIV</operation>
-			<operation value="5" >AND</operation>
-			<operation value="6" >XOR</operation>
-			<operation value="7" >OR</operation>
-			<operation value="8" >NOT</operation>
-			<operation value="9" >FADD</operation>
-			<operation value="10" >FSUB</operation>
-			<operation value="11" >FMUL</operation>
-			<operation value="12" >FDIV</operation>
-			<operation value="13" >FEXP</operation>
-			<operation value="14" >FSIN</operation>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="0"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="1"/>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 1)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 1)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 0)"/>
 		</ALU>
 	</PE>
@@ -44,7 +29,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 0)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 1)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 1)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 1)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 0)"/>
 		</ALU>
 	</PE>
@@ -68,7 +53,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 0)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 1)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 1)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 1)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 0)"/>
 		</ALU>
 	</PE>
@@ -92,7 +77,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 0)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 1)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 1)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 1)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 0)"/>
 		</ALU>
 	</PE>
@@ -116,7 +101,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 0)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 1)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 1)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 1)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 0)"/>
 		</ALU>
 	</PE>
@@ -140,7 +125,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 0)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 1)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 1)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 1)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 0)"/>
 		</ALU>
 	</PE>
@@ -164,10 +149,11 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 0)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 1)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 1)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 0)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 01 -->
-	<PE coord="(0, 1)" >
+	<PE coord="(7, 0)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -184,11 +170,29 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="0"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="1"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="2"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 0)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 1)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 1)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 1)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 0)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 0)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 0)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 1)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 1)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 01 -->
+	<PE coord="(0, 1)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 2)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 2)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 1)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 0)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 0)"/>
@@ -215,7 +219,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 1)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 2)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 2)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 2)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 1)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(2, 0)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(1, 0)"/>
@@ -242,7 +246,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 1)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 2)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 2)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 2)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 1)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(3, 0)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(2, 0)"/>
@@ -269,7 +273,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 1)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 2)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 2)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 2)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 1)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(4, 0)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(3, 0)"/>
@@ -296,7 +300,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 1)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 2)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 2)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 2)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 1)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(5, 0)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(4, 0)"/>
@@ -323,7 +327,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 1)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 2)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 2)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 2)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 1)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(6, 0)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(5, 0)"/>
@@ -350,11 +354,13 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 1)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 2)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 2)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 1)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 0)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 0)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 02 -->
-	<PE coord="(0, 2)" >
+	<PE coord="(7, 1)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -371,11 +377,34 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="1"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="2"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="3"/>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 0)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 1)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 2)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 2)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 2)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 1)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 0)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 0)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 1)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 0)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 1)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 2)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 2)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 0)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 02 -->
+	<PE coord="(0, 2)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 3)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 3)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 2)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 1)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 1)"/>
@@ -402,7 +431,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 2)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 3)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 3)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 3)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 2)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(2, 1)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(1, 1)"/>
@@ -429,7 +458,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 2)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 3)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 3)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 3)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 2)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(3, 1)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(2, 1)"/>
@@ -456,7 +485,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 2)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 3)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 3)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 3)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 2)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(4, 1)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(3, 1)"/>
@@ -483,7 +512,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 2)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 3)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 3)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 3)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 2)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(5, 1)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(4, 1)"/>
@@ -510,7 +539,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 2)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 3)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 3)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 3)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 2)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(6, 1)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(5, 1)"/>
@@ -537,11 +566,13 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 2)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 3)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 3)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 2)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 1)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 1)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 03 -->
-	<PE coord="(0, 3)" >
+	<PE coord="(7, 2)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -558,11 +589,34 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="2"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="3"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="4"/>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 1)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 2)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 3)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 3)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 3)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 2)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 1)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 1)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 2)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 1)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 2)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 3)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 3)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 1)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 03 -->
+	<PE coord="(0, 3)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 4)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 4)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 3)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 2)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 2)"/>
@@ -589,7 +643,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 3)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 4)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 4)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 4)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 3)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(2, 2)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(1, 2)"/>
@@ -616,7 +670,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 3)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 4)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 4)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 4)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 3)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(3, 2)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(2, 2)"/>
@@ -643,7 +697,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 3)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 4)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 4)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 4)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 3)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(4, 2)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(3, 2)"/>
@@ -670,7 +724,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 3)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 4)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 4)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 4)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 3)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(5, 2)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(4, 2)"/>
@@ -697,7 +751,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 3)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 4)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 4)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 4)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 3)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(6, 2)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(5, 2)"/>
@@ -724,11 +778,13 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 3)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 4)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 4)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 3)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 2)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 2)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 04 -->
-	<PE coord="(0, 4)" >
+	<PE coord="(7, 3)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -745,11 +801,34 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="3"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="4"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="5"/>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 2)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 3)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 4)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 4)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 4)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 3)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 2)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 2)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 3)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 2)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 3)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 4)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 4)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 2)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 04 -->
+	<PE coord="(0, 4)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 5)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 5)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 4)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 3)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 3)"/>
@@ -776,7 +855,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 4)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 5)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 5)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 5)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 4)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(2, 3)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(1, 3)"/>
@@ -803,7 +882,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 4)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 5)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 5)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 5)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 4)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(3, 3)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(2, 3)"/>
@@ -830,7 +909,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 4)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 5)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 5)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 5)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 4)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(4, 3)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(3, 3)"/>
@@ -857,7 +936,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 4)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 5)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 5)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 5)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 4)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(5, 3)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(4, 3)"/>
@@ -884,7 +963,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 4)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 5)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 5)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 5)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 4)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(6, 3)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(5, 3)"/>
@@ -911,11 +990,13 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 4)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 5)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 5)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 4)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 3)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 3)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 05 -->
-	<PE coord="(0, 5)" >
+	<PE coord="(7, 4)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -932,11 +1013,34 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="4"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="5"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="6"/>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 3)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 4)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 5)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 5)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 5)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 4)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 3)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 3)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 4)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 3)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 4)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 5)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 5)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 3)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 05 -->
+	<PE coord="(0, 5)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 6)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 6)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 5)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 4)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 4)"/>
@@ -963,7 +1067,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 5)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 6)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 6)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 6)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 5)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(2, 4)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(1, 4)"/>
@@ -990,7 +1094,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 5)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 6)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 6)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 6)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 5)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(3, 4)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(2, 4)"/>
@@ -1017,7 +1121,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 5)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 6)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 6)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 6)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 5)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(4, 4)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(3, 4)"/>
@@ -1044,7 +1148,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 5)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 6)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 6)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 6)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 5)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(5, 4)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(4, 4)"/>
@@ -1071,7 +1175,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 5)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 6)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 6)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 6)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 5)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(6, 4)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(5, 4)"/>
@@ -1098,11 +1202,13 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 5)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 6)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 6)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 5)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 4)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 4)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 06 -->
-	<PE coord="(0, 6)" >
+	<PE coord="(7, 5)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -1119,11 +1225,34 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="5"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="6"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="7"/>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 4)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 5)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 6)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 6)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 6)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 5)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 4)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 4)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 5)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 4)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 5)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 6)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 6)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 4)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 06 -->
+	<PE coord="(0, 6)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 7)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 7)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 6)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 5)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 5)"/>
@@ -1150,7 +1279,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 6)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 7)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 7)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 7)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 6)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(2, 5)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(1, 5)"/>
@@ -1177,7 +1306,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 6)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 7)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 7)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 7)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 6)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(3, 5)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(2, 5)"/>
@@ -1204,7 +1333,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 6)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 7)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 7)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 7)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 6)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(4, 5)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(3, 5)"/>
@@ -1231,7 +1360,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 6)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 7)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 7)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 7)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 6)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(5, 5)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(4, 5)"/>
@@ -1258,7 +1387,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 6)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 7)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 7)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 7)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 6)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(6, 5)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(5, 5)"/>
@@ -1285,11 +1414,13 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 6)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 7)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 7)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 6)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 5)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 5)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 07 -->
-	<PE coord="(0, 7)" >
+	<PE coord="(7, 6)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -1306,11 +1437,34 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="6"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="7"/>
-			<input name="IN_SOUTHWEST" value="2" type="IN_PORT" index="8"/>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 5)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 6)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 7)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 7)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 7)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 6)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 5)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 5)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 6)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 5)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 6)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 7)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 7)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 5)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 07 -->
+	<PE coord="(0, 7)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(0, 8)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(1, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(1, 8)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 7)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 6)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 6)"/>
@@ -1337,7 +1491,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(0, 7)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(0, 8)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(1, 8)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(2, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(2, 8)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(2, 7)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(2, 6)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(1, 6)"/>
@@ -1364,7 +1518,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(1, 7)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(1, 8)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(2, 8)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(3, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(3, 8)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(3, 7)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(3, 6)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(2, 6)"/>
@@ -1391,7 +1545,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(2, 7)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(2, 8)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(3, 8)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(4, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(4, 8)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(4, 7)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(4, 6)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(3, 6)"/>
@@ -1418,7 +1572,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(3, 7)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(3, 8)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(4, 8)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(5, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(5, 8)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(5, 7)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(5, 6)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(4, 6)"/>
@@ -1445,7 +1599,7 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(4, 7)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(4, 8)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(5, 8)"/>
-			<input name="IN_SOUTHWEST" value="4" type="ALU" coord="(6, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(6, 8)"/>
 			<input name="IN_EAST" value="5" type="ALU" coord="(6, 7)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(6, 6)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(5, 6)"/>
@@ -1472,11 +1626,13 @@
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 7)"/>
 			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(5, 8)"/>
 			<input name="IN_SOUTH" value="3" type="ALU" coord="(6, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(7, 8)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 7)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 6)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 6)"/>
 		</ALU>
 	</PE>
-	<!-- ROW 08 -->
-	<PE coord="(0, 8)" >
+	<PE coord="(7, 7)" >
 		<ALU>
 			<operation value="0" route="true" >NOP</operation>
 			<operation value="1" >ADD</operation>
@@ -1493,8 +1649,32 @@
 			<operation value="12" >FDIV</operation>
 			<operation value="13" >FEXP</operation>
 			<operation value="14" >FSIN</operation>
-			<input name="IN_NORTHWEST" value="0" type="IN_PORT" index="7"/>
-			<input name="IN_WEST" value="1"  type="IN_PORT" index="8"/>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 6)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 7)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(6, 8)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(7, 8)"/>
+			<input name="IN_SOUTHEAST" value="4" type="ALU" coord="(8, 8)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 7)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 6)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 6)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 7)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 6)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 7)"/>
+			<input name="IN_SOUTHWEST" value="2" type="ALU" coord="(7, 8)"/>
+			<input name="IN_SOUTH" value="3" type="ALU" coord="(8, 8)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 6)"/>
+		</ALU>
+	</PE>
+	<!-- ROW 08 -->
+	<PE coord="(0, 8)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
 			<input name="IN_EAST" value="5" type="ALU" coord="(1, 8)"/>
 			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(1, 7)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(0, 7)"/>
@@ -1639,51 +1819,42 @@
 			<operation value="14" >FSIN</operation>
 			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(5, 7)"/>
 			<input name="IN_WEST" value="1" type="ALU" coord="(5, 8)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(7, 8)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(7, 7)"/>
 			<input name="IN_NORTH" value="7" type="ALU" coord="(6, 7)"/>
 		</ALU>
 	</PE>
-	<OUT_PORT index="0">
-		<input name="IN_WEST" type="ALU" coord="(6, 0)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 1)"/>
-	</OUT_PORT>
-	<OUT_PORT index="1">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 0)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 1)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 2)"/>
-	</OUT_PORT>
-	<OUT_PORT index="2">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 1)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 2)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 3)"/>
-	</OUT_PORT>
-	<OUT_PORT index="3">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 2)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 3)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 4)"/>
-	</OUT_PORT>
-	<OUT_PORT index="4">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 3)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 4)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 5)"/>
-	</OUT_PORT>
-	<OUT_PORT index="5">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 4)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 5)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 6)"/>
-	</OUT_PORT>
-	<OUT_PORT index="6">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 5)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 6)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 7)"/>
-	</OUT_PORT>
-	<OUT_PORT index="7">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 6)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 7)"/>
-		<input name="IN_SOUTHWEST" type="ALU" coord="(6, 8)"/>
-	</OUT_PORT>
-	<OUT_PORT index="8">
-		<input name="IN_NORTHWEST" type="ALU" coord="(6, 7)"/>
-		<input name="IN_WEST" type="ALU" coord="(6, 8)"/>
-	</OUT_PORT>
-
+	<PE coord="(7, 8)" >
+		<ALU>
+			<operation value="0" route="true" >NOP</operation>
+			<operation value="1" >ADD</operation>
+			<operation value="2" >SUB</operation>
+			<operation value="3" >MUL</operation>
+			<operation value="4" >DIV</operation>
+			<operation value="5" >AND</operation>
+			<operation value="6" >XOR</operation>
+			<operation value="7" >OR</operation>
+			<operation value="8" >NOT</operation>
+			<operation value="9" >FADD</operation>
+			<operation value="10" >FSUB</operation>
+			<operation value="11" >FMUL</operation>
+			<operation value="12" >FDIV</operation>
+			<operation value="13" >FEXP</operation>
+			<operation value="14" >FSIN</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(6, 7)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(6, 8)"/>
+			<input name="IN_EAST" value="5" type="ALU" coord="(8, 8)"/>
+			<input name="IN_NORTHWEST" value="6" type="ALU" coord="(8, 7)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(7, 7)"/>
+		</ALU>
+	</PE>
+	<PE coord="(8, 8)" >
+		<ALU>
+			<operation value="0" >LD</operation>
+			<operation value="1" >ST</operation>
+			<input name="IN_NORTHWEST" value="0" type="ALU" coord="(7, 7)"/>
+			<input name="IN_WEST" value="1" type="ALU" coord="(7, 8)"/>
+			<input name="IN_NORTH" value="7" type="ALU" coord="(8, 7)"/>
+		</ALU>
+	</PE>
 </PEArray>
