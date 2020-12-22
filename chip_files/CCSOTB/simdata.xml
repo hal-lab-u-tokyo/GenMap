@@ -150,10 +150,10 @@
 			<PE unit="mW" bias="0.4">0.030725521</PE>
 		</Static>
 		<Dynamic>
-			<Energy unit="pJ">0.0253</Energy>
-			<Propagation>0.91926</Propagation>
-			<Decay>1.00767</Decay>
-			<SE_weight>1</SE_weight>
+			<Energy unit="pJ">0.026299553575893867</Energy>
+			<Propagation>0.9507092450023429</Propagation>
+			<Decay>1.0104022283308298</Decay>
+			<SE_weight>0.9371881551527852</SE_weight>
 			<Switching op="ADD">15.8003</Switching>
 			<Switching op="SUB"> 24.47</Switching>
 			<Switching op="MULT">24.037</Switching>
