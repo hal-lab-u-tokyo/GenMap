@@ -11,7 +11,7 @@ class MapWidthEval(EvalBase):
         pass
 
     @staticmethod
-    def eval(CGRA, app, sim_params, individual):
+    def eval(CGRA, app, sim_params, individual, **info):
         """Return mapping width.
 
             Args:
@@ -42,12 +42,15 @@ class MapWidthEval(EvalBase):
         map_width = max(x_coords) + 1
         individual.saveEvaluatedData("map_width", map_width)
 
-        min_map = max(len(set(nx.get_node_attributes(app.getInputSubGraph(), "input").keys())),\
-                      len(set(nx.get_node_attributes(app.getOutputSubGraph(), "output").keys())),\
-                      math.ceil(len(app.getCompSubGraph().nodes()) / height))
+        if "quit_minwidth" in info.keys():
+            if info["quit_minwidth"] is True:
+                min_map = max(len(set(nx.get_node_attributes(app.getInputSubGraph(), "input").keys())),\
+                        len(set(nx.get_node_attributes(app.getOutputSubGraph(), "output").keys())),\
+                        math.ceil(len(app.getCompSubGraph().nodes()) / height))
 
-        if min_map == map_width and individual.isValid():
-            os.kill(main_pid, signal.SIGUSR1)
+            if min_map == map_width and individual.isValid():
+                os.kill(main_pid, signal.SIGUSR1)
+
         return map_width
 
     @staticmethod

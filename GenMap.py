@@ -169,7 +169,10 @@ if __name__ == '__main__':
                 termios.tcsetattr(fd, termios.TCSANOW, new)
             hof, fitness_log = optimizer.runOptimization()
             elapsed_time = time.time() - start_time
-            print("elapsed time:", elapsed_time, "[sec]")
+            time_msg = "elapsed time: {0} [sec]".format(elapsed_time)
+            print(time_msg)
+            if not logfile is None:
+                logfile.write(time_msg + "\n")
         except KeyboardInterrupt:
             # exit safety
             if tty_off:

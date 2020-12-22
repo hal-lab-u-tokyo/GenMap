@@ -167,6 +167,9 @@ class NSGA2():
         else:
             if len(app.getOutputSubGraph()) > 0:
                 print("Warnning: application DFG contains output data flow but {0} does not have output ports".format(CGRA.getArchName()))
+        rt_options = (self.__const_route_en, \
+                        self.__input_route_en, \
+                        self.__output_route_en)
 
         # obrain computation DFG
         comp_dfg = app.getCompSubGraph()
@@ -206,7 +209,7 @@ class NSGA2():
             self.__toolbox.register("individual", creator.Individual, CGRA, init_maps)
         self.__toolbox.register("population", tools.initRepeat, list, self.__toolbox.individual)
         self.__toolbox.register("random_individual", creator.Individual, CGRA)
-        self.__toolbox.register("evaluate", self.eval_objectives, self.__eval_list, self.__eval_args, CGRA, app, sim_params, self.__router)
+        self.__toolbox.register("evaluate", self.eval_objectives, self.__eval_list, self.__eval_args, CGRA, app, sim_params, self.__router, rt_options)
         self.__toolbox.register("mate", Individual.cxSet)
         self.__toolbox.register("mutate", Individual.mutSet, 0.5)
         self.__toolbox.register("select", tools.selNSGA2)
@@ -242,16 +245,16 @@ class NSGA2():
         random_mappings = self.__placer.make_random_mappings(*self.__random_pop_args)
         return [self.__toolbox.random_individual(random_mappings, self.__preg_num) for i in range(n)]
 
-    def eval_objectives(self, eval_list, eval_args, CGRA, app, sim_params, router, individual):
+    def eval_objectives(self, eval_list, eval_args, CGRA, app, sim_params, router, rt_ops, individual):
         """ Executes evaluation for each objective
         """
         # routing the mapping
-        self.__doRouting(CGRA, app, router, individual)
+        self.__doRouting(CGRA, app, router, rt_ops, individual)
         # evaluate each objectives
         return [eval_cls.eval(CGRA, app, sim_params, individual, **args) \
                 for eval_cls, args in zip(eval_list, eval_args)], individual
 
-    def __doRouting(self, CGRA, app, router, individual):
+    def __doRouting(self, CGRA, app, router, rt_ops, individual):
         """
             Execute routing
         """
@@ -266,6 +269,9 @@ class NSGA2():
         g = individual.routed_graph
         cost = 0
 
+        # get routing options
+        const_rt_en, input_rt_en, output_rt_en = rt_ops
+
         # comp routing
         cost += router.comp_routing(CGRA, app.getCompSubGraph(), individual.mapping, g)
         if cost > penalty:
@@ -273,21 +279,21 @@ class NSGA2():
             return
 
         # const routing
-        if self.__const_route_en:
+        if const_rt_en:
             cost += router.const_routing(CGRA, app.getConstSubGraph(), individual.mapping, g)
             if cost > penalty:
                 individual.routing_cost = cost + penalty * 30
                 return
 
         # input routing
-        if self.__input_route_en:
+        if input_rt_en:
             cost += router.input_routing(CGRA, app.getInputSubGraph(), individual.mapping, g)
             if cost > penalty:
                 individual.routing_cost = cost + penalty * 20
                 return
 
         # output routing
-        if self.__output_route_en:
+        if output_rt_en:
             if CGRA.getPregNumber() > 0:
                 cost += router.output_routing(CGRA, app.getOutputSubGraph(), \
                                                 individual.mapping, g, individual.preg)
@@ -383,7 +389,7 @@ class NSGA2():
                                             obj = self.status_disp[i].desc, min = stats["min"][i],\
                                             max=stats["max"][i]))
 
-            if self.__quit:
+            if self.__quit and gen_count >= 30:
                 break;
 
         self.__pool.close()

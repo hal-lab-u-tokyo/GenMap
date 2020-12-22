@@ -2,6 +2,7 @@ from RouterBase import RouterBase
 import networkx as nx
 import pulp
 import itertools
+import random
 
 USED_LINK_WEIGHT = 10000
 ALU_OUT_WEIGTH = 1000
@@ -45,6 +46,7 @@ class AStarRouter(RouterBase):
                     for suc_element in routed_graph.successors(alu):
                         routed_graph.edges[alu, suc_element]["weight"] = 1
 
+    
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
         AStarRouter.__set_unused_ALU(CGRA, mapping, routed_graph)
@@ -308,10 +310,15 @@ class AStarRouter(RouterBase):
         """
         min_length = PENALTY_CONST
         nearest_node = None
+        path_dict = {}
+
         # find a nearest node greedy
         for dst in dsts:
             try:
-                path_len = nx.astar_path_length(graph, src, dst, weight="weight")
+                path = nx.astar_path(graph, src, dst, weight="weight")
+                path_len = sum([graph.edges[(path[i], path[i+1])]["weight"]\
+                             for i in range(len(path) - 1)])
+                path_dict[dst] = path
                 if path_len < min_length:
                     min_length = path_len
                     nearest_node = dst
@@ -321,7 +328,7 @@ class AStarRouter(RouterBase):
         if nearest_node is None:
             return None, PENALTY_CONST
         else:
-            return nx.astar_path(graph, src, nearest_node, weight="weight"), min_length
+            return path_dict[nearest_node], min_length
 
     @staticmethod
     def __single_src_multi_dest_route(CGRA, graph, src, dsts):
@@ -349,12 +356,15 @@ class AStarRouter(RouterBase):
         for dst, operand in dsts.items():
             try:
                 # get path length by using astar
-                path_len = nx.astar_path_length(graph, src, dst, weight = "weight")
+                path = nx.astar_path(graph, src, dst, weight = "weight")
+                path_len = sum([graph.edges[(path[i], path[i+1])]["weight"]\
+                             for i in range(len(path) - 1)])
+
                 if path_len > ALU_OUT_WEIGTH:
                     raise nx.exception.NetworkXNoPath
                 else:
                     route_cost += path_len
-                    path = nx.astar_path(graph, src, dst, weight = "weight")
+                    # path = nx.astar_path(graph, src, dst, weight = "weight")
                     # print(path_len, path)
                     # set used flag to the links
                     for i in range(len(path) - 1):
