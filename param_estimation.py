@@ -55,7 +55,7 @@ class MyShell(Cmd):
         args = line.split(" ")
         args = [argv for argv in args if argv != ""]
 
-        if len(args) != 1:
+        if len(args) == 1:
             if args[0] in ["pJ", "nJ", "uJ", "mJ"]:
                 self.__energy_unit = args[0]
             else:
@@ -225,6 +225,7 @@ def cost_func(params, cases, CGRA, sim_params):
     sim_params.switching_energy = params[0]
     sim_params.switching_propagation = params[1]
     sim_params.switching_decay = params[2]
+    sim_params.se_weight = params[3]
 
     errs = [0.0 for i in range(len(cases))]
 
@@ -318,7 +319,7 @@ if __name__ == "__main__":
     sim_params = header_list[0]["sim_params"]
 
     # set initial parameters
-    params = [1., 1., 0.9]
+    params = [0.1, 1., 1., 0.8,]
 
     # set cases
     cases = []
@@ -358,12 +359,14 @@ if __name__ == "__main__":
     print("switching energy", params[0])
     print("switching propagation", params[1])
     print("switching decay", params[2])
+    print("se weight", params[3])
 
 
     # updated by estmiated params
     sim_params.switching_energy = params[0]
     sim_params.switching_propagation = params[1]
     sim_params.switching_decay = params[2]
+    sim_params.se_weight = params[3]
 
     # second stage
     if shell.getOpSwOptRate() != 0.0:

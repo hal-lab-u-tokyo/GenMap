@@ -144,12 +144,21 @@ class PEArrayModel():
         self.__routing_ALU = []
 
         # opcode for routing
-        #   key node name of ALU
+        #   key: node name of ALU
         #   values: opcode
         self.__routing_opcode = {}
 
         # const attributes
         self.__infini_const = False
+
+        # heterogeneity of ISA
+        self.__heteroISA = False
+
+        # ALU list for each op
+        #   keys:   opcode name
+        #   values: list of ALU coord
+        self.__supported_ALU = {}
+
 
         # get architecture name
         name_str = conf.get("name")
@@ -169,6 +178,8 @@ class PEArrayModel():
             raise ValueError("Invalid PE array attribute: width")
         else:
             self.__width = int(width_str)
+            if not self.__width > 0:
+                raise ValueError("PE width must be greater than 0")
 
         # init PE array height
         height_str = conf.get("height")
@@ -178,6 +189,8 @@ class PEArrayModel():
             raise ValueError("Invalid PE array attribute: height")
         else:
             self.__height = int(height_str)
+            if not self.__height > 0:
+                raise ValueError("PE height must be greater than 0")
 
         # init PE array const
         const_str = conf.get("const_reg")
@@ -340,6 +353,21 @@ class PEArrayModel():
         nx.set_node_attributes(self.__network, True, "free")
         # set edge attributes
         self.setInitEdgeAttr("free", True)
+
+        # analyze ISA
+        base = set(self.__operation_list[0][0])
+        for x in range(self.__width):
+            for y in range(self.__height):
+                if base != set(self.__operation_list[x][y]):
+                    self.__heteroISA = True
+                    break
+        all_ops = set([op for cols in self.__operation_list\
+                        for pe in cols for op in pe])
+        for op in all_ops:
+            self.__supported_ALU[op] = \
+                [(x, y) for x in range(self.__width) \
+                    for y in range(self.__height) \
+                        if op in self.__operation_list[x][y]]
 
     def __reg_config_net_table(self, dst, src, value):
         """Regists configuration data table for PE array network.
@@ -721,6 +749,27 @@ class PEArrayModel():
         """
 
         return not self.__infini_const
+
+
+    def isHeteroISA(self):
+        """Returns heterogeneity of ISA
+        """
+
+        return self.__heteroISA
+
+    def getSupportedOps(self):
+        """Returns supported operations
+        """
+
+        return list(self.__supported_ALU.keys())
+
+    def getSupportedALUs(self, opcode):
+        """Returns ALU list supporting the specified opcode
+        """
+        try:
+            return self.__supported_ALU[opcode]
+        except KeyError:
+            return []
 
     @staticmethod
     def isSE(node_name):

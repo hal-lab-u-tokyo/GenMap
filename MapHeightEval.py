@@ -6,7 +6,7 @@ class MapHeightEval(EvalBase):
 
     @staticmethod
     def eval(CGRA, app, sim_params, individual):
-        """Return mapping width.
+        """Return mapping height.
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
@@ -15,10 +15,7 @@ class MapHeightEval(EvalBase):
                 individual (Individual): An individual to be evaluated
 
             Returns:
-                int: mapping width
-
-            Saved evaluation results:
-                map_width: mapping width
+                int: mapping height
 
         """
         y_coords = []

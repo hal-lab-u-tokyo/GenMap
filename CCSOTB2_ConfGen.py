@@ -421,6 +421,7 @@ class CCSOTB2_ConfGen(ConfGenBase):
         width, height = CGRA.getSize()
         out_num = len(st_conf["mem_align"])
         in_num = len(ld_conf["mem_align"])
+        dup_count = 0
         for dup_count in range(1, width // map_width):
             for x in range(map_width):
                 dest_x = map_width * dup_count + x

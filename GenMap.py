@@ -43,6 +43,26 @@ def parser():
     args = argparser.parse_args()
     return args
 
+def checkFeasibility(CGRA, app):
+    comp_dfg = app.getCompSubGraph()
+    need_ops = {op: 0 for op in CGRA.getSupportedOps()}
+    for v in comp_dfg.nodes():
+        op = comp_dfg.nodes[v]["op"]
+        if op in need_ops:
+            need_ops[op] += 1
+        else:
+            print("operation: {0} does not supported in {1}".format(\
+                    op, CGRA.getArchName()))
+            return False
+
+    for k, v in need_ops.items():
+        if len(CGRA.getSupportedALUs(k)) < v:
+            print("No enough PE for {0} in {1}".format(k, \
+                    CGRA.getArchName()))
+            return False
+
+    return True
+
 if __name__ == '__main__':
     args = parser()
 
@@ -93,6 +113,7 @@ if __name__ == '__main__':
             sim_params = SimParameters(model, tree_sim.getroot())
         except SimParameters.InvalidParameters as e:
             print("Parameter import failed: ", e.args)
+            exit()
     else:
         print("No such file: " + args.simdata, file=sys.stderr)
         exit()
@@ -126,6 +147,10 @@ if __name__ == '__main__':
         inp=input('overwrite ' + output_file_name + ' y/n? >> ')=='y'
         if inp == False:
             exit()
+
+    # check feasibility of this application for the archtecture
+    if not checkFeasibility(model, app):
+        exit()
 
     # load optimization setting
     if os.path.exists(args.opt_conf):

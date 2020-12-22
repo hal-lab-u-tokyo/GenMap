@@ -247,6 +247,7 @@ class PowerEval(EvalBase):
             else:
                 traversed_list.append(v)
 
+
             if CGRA.isALU(v):
                 graph.node[v]["switching"] = sim_params.switching_info[opcodes[v]]
                 # propagation part
@@ -259,10 +260,11 @@ class PowerEval(EvalBase):
             elif CGRA.isSE(v):
                 prev_sws = [graph.node[prev]["switching"] for prev in graph.predecessors(v)]
                 prev_sws.append(MIN_SW)
-                graph.node[v]["switching"] = max(prev_sws)
+                graph.node[v]["switching"] = max(prev_sws) * sim_params.se_weight
+
 
         S_total = sum(nx.get_node_attributes(graph, "switching").values())
-
+              
         if duplicate_enable:
             width, __ = CGRA.getSize()
             S_total *= width // individual.getEvaluatedData("map_width")
