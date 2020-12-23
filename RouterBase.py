@@ -116,3 +116,27 @@ class RouterBase(metaclass=ABCMeta):
                     2. route: to specifiy routing ALU
         """
         pass
+
+    @staticmethod
+    @abstractmethod
+    def inout_routing(CGRA, in_DFG, out_DFG, mapping, routed_graph, **info):
+        """Routes a computation DFG on the PE array.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                in_DFG (networkx DiGraph): An input data graph to be routed
+                out_DFG (networkx DiGraph): An output data graph to be routed
+                mapping (dict): mapping of the DFG
+                    keys (str): node names of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): PE array graph
+
+            Returns:
+                int: routing cost
+
+            Notes:
+                This method will add following attributes to routed_graph's nodes
+                    1. map: output data which is mapped to a inout port
+                    2. route: to specifiy routing ALU
+        """
+        pass

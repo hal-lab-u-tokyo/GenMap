@@ -69,6 +69,7 @@ class NSGA2():
         self.__const_route_en = False
         self.__input_route_en = False
         self.__output_route_en = False
+        self.__inout_route_en = False
 
         # get objectives
         eval_names = [ele.text for ele in config.iter("eval")]
@@ -157,19 +158,24 @@ class NSGA2():
             self.__const_route_en = True
         else:
             self.__const_route_en = False
-        if len(CGRA.getInputPorts()) > 0:
-            self.__input_route_en = True
+
+        if CGRA.isIOShared():
+            self.__inout_route_en = True
         else:
-            if len(app.getInputSubGraph()) > 0:
-                print("Warnning: application DFG contains input data flow but {0} does not have input ports".format(CGRA.getArchName()))
-        if len(CGRA.getOutputPorts()) > 0:
-            self.__output_route_en = True
-        else:
-            if len(app.getOutputSubGraph()) > 0:
-                print("Warnning: application DFG contains output data flow but {0} does not have output ports".format(CGRA.getArchName()))
+            if len(CGRA.getInputPorts()) > 0:
+                self.__input_route_en = True
+            else:
+                if len(app.getInputSubGraph()) > 0:
+                    print("Warnning: application DFG contains input data flow but {0} does not have input ports".format(CGRA.getArchName()))
+            if len(CGRA.getOutputPorts()) > 0:
+                self.__output_route_en = True
+            else:
+                if len(app.getOutputSubGraph()) > 0:
+                    print("Warnning: application DFG contains output data flow but {0} does not have output ports".format(CGRA.getArchName()))
         rt_options = (self.__const_route_en, \
                         self.__input_route_en, \
-                        self.__output_route_en)
+                        self.__output_route_en, \
+                        self.__inout_route_en)
 
         # obrain computation DFG
         comp_dfg = app.getCompSubGraph()
@@ -270,7 +276,7 @@ class NSGA2():
         cost = 0
 
         # get routing options
-        const_rt_en, input_rt_en, output_rt_en = rt_ops
+        const_rt_en, input_rt_en, output_rt_en, inout_rt_en = rt_ops
 
         # comp routing
         cost += router.comp_routing(CGRA, app.getCompSubGraph(), individual.mapping, g)
@@ -285,20 +291,26 @@ class NSGA2():
                 individual.routing_cost = cost + penalty * 30
                 return
 
-        # input routing
-        if input_rt_en:
-            cost += router.input_routing(CGRA, app.getInputSubGraph(), individual.mapping, g)
-            if cost > penalty:
-                individual.routing_cost = cost + penalty * 20
-                return
+        if inout_rt_en:
+            cost += router.inout_routing(CGRA, app.getInputSubGraph(), \
+                app.getOutputSubGraph(), individual.mapping, g)
 
-        # output routing
-        if output_rt_en:
-            if CGRA.getPregNumber() > 0:
-                cost += router.output_routing(CGRA, app.getOutputSubGraph(), \
-                                                individual.mapping, g, individual.preg)
-            else:
-                cost += router.output_routing(CGRA, app.getOutputSubGraph(), individual.mapping, g)
+        else:
+            # input routing
+            if input_rt_en:
+                cost += router.input_routing(CGRA, app.getInputSubGraph(), individual.mapping, g)
+                if cost > penalty:
+                    individual.routing_cost = cost + penalty * 20
+                    return
+
+            # output routing
+            if output_rt_en:
+                if CGRA.getPregNumber() > 0:
+                    cost += router.output_routing(CGRA, app.getOutputSubGraph(), \
+                                                    individual.mapping, g, individual.preg)
+                else:
+                    cost += router.output_routing(CGRA, app.getOutputSubGraph(), individual.mapping, g)
+
 
         if cost > penalty:
             individual.routing_cost = cost + penalty * 10

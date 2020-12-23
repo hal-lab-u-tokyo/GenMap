@@ -215,6 +215,64 @@ class AStarRouter(RouterBase):
 
         return route_cost
 
+    @staticmethod
+    def inout_routing(CGRA, in_DFG, out_DFG, mapping, routed_graph, **info):
+        import sys
+        io_port = CGRA.getInoutPorts()
+        io_map = AStarRouter.__io_mapping(CGRA, io_port, in_DFG, out_DFG, mapping, routed_graph)
+        if io_map is None:
+            return PENALTY_CONST * (len(list(in_DFG.edges())) + len(list(out_DFG.edges())))
+        else:
+            input_map, output_map = io_map
+            # save io mapping
+            nx.set_node_attributes(routed_graph, input_map, "map")
+            nx.set_node_attributes(routed_graph, output_map, "map")
+
+        # input routing
+        route_cost = 0
+        edges = {inode: [] for inode in input_map.values()}
+        for (u, v) in in_DFG.edges():
+            edges[u].append((u, v))
+
+        for i_port, inode in input_map.items():
+            dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
+                        in_DFG.edges[(i, dst_node)]["operand"] \
+                        if "operand" in in_DFG.edges[(i, dst_node)] else None \
+                        for i, dst_node in edges[inode]}
+            route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, i_port, dst_alus)
+
+        # output routing
+        for o_port, onode in output_map.items():
+            # get source alu
+            src_node = list(out_DFG.predecessors(onode))[0]
+            alu = CGRA.getNodeName("ALU", pos=mapping[src_node])
+            # update link cost around the alu
+            for suc_element in routed_graph.successors(alu):
+                routed_graph.edges[alu, suc_element]["weight"] = 1
+            # get shortest path
+            path = nx.astar_path(routed_graph, alu, o_port)
+            cost = sum([routed_graph.edges[(path[i], path[i+1])]["weight"]\
+                             for i in range(len(path) - 1)])
+            if cost > ALU_OUT_WEIGTH:
+                route_cost += PENALTY_CONST
+            else:
+                # update cost and used flags
+                for i in range(len(path) - 1):
+                    routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
+                    routed_graph.edges[path[i], path[i + 1]]["free"] = False
+                    routed_graph.nodes[path[i]]["free"] = False
+                    # remove other input edges
+                    remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
+                    routed_graph.remove_edges_from(remove_edges)
+                    # if CGRA.isALU(path[i+1]):
+                    #     routed_graph.nodes[path[i+1]]["route"] = True
+                routed_graph.nodes[path[-1]]["free"] = False
+
+                # update ALU out link cost and used flag
+                for suc in routed_graph.successors(alu):
+                    routed_graph.edges[alu, suc]["weight"] = USED_LINK_WEIGHT
+
+        return route_cost
 
     @staticmethod
     def __resource_mapping(CGRA, resources, DFG, mapping, routed_graph):
@@ -289,6 +347,119 @@ class AStarRouter(RouterBase):
             else:
                 res_mapping = {r: [e for e in routed_edges if isMap[e][r].value() == 1.0] for r in resources}
                 return res_mapping
+        else:
+            return None
+
+
+    @staticmethod
+    def __io_mapping(CGRA, ioports, in_DFG, out_DFG, mapping, routed_graph):
+        """Decides io-mapping under the constraint about sharing input port and output port
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                ioport (list-like): list of ioport nodes name (tuple)
+                in_DFG (networkx DiGraph): An input graph to be routed
+                out_DFG (networkx DiGraph): An output graph to be routed
+                mapping (dict): mapping of the DFG
+                    keys (str): operation node names of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): PE array graph
+
+            Returns:
+                tuple of dict: (input_mapping, output_mapping)
+                    For both dict:
+                        keys (str): input/output port name of routed_graph
+                        values (list): input/output node name of app graph
+                        In case of failure, return None
+        """
+
+        iport_list = [x[0] for x in ioports]
+        oport_list = [x[1] for x in ioports]
+
+        # get in/out edges
+        routed_in_edges = in_DFG.edges()
+        routed_out_edges = out_DFG.edges()
+
+        # get input/output values
+        inodes = set([i for i, v in routed_in_edges])
+        onodes = set([o for v, o in routed_out_edges])
+
+        # check validation
+        if (len(inodes) + len(onodes)) > len(ioports):
+            # Exceed available io port
+            return None
+
+        # calculate distance
+        dist_from_res = {}
+        for i, v in routed_in_edges:
+            dist_from_res[(i, v)] = {}
+            for ip in iport_list:
+                alu = CGRA.getNodeName("ALU", pos=mapping[v])
+                try:
+                    dist = nx.astar_path_length(routed_graph, ip, alu)
+                except nx.exception.NetworkXNoPath:
+                    dist = PENALTY_CONST
+                dist_from_res[(i, v)][ip] = dist + 1
+        for v, o in routed_out_edges:
+            dist_from_res[(v, o)] = {}
+            for op in oport_list:
+                alu = CGRA.getNodeName("ALU", pos=mapping[v])
+                try:
+                    path = nx.astar_path(routed_graph, alu, op)
+                    dist = sum([routed_graph.edges[(path[i], path[i+1])]["weight"]\
+                             for i in range(len(path) - 1)])
+                    if routed_graph.edges[(path[0], path[1])]["weight"] == ALU_OUT_WEIGTH:
+                        if routed_graph.edges[(path[0], path[1])]["free"]:
+                            dist -= ALU_OUT_WEIGTH + 1
+                except nx.exception.NetworkXNoPath:
+                    dist = PENALTY_CONST
+                dist_from_res[(v, o)][op] = dist
+
+        # make pulp problem
+        prob = pulp.LpProblem("Make IO Mapping", pulp.LpMinimize)
+
+        # make pulp variables
+        # first index: input/output node, second input/output port
+        isInportMap = pulp.LpVariable.dicts("IPMAP", (inodes, iport_list), 0, 1, cat="Binary")
+        isOutportMap = pulp.LpVariable.dicts("OPMAP", (onodes, oport_list), 0, 1, cat="Binary")
+
+        # define problem
+        prob += pulp.lpSum([isInportMap[e[0]][ip] * dist_from_res[e][ip] for e in routed_in_edges for ip in iport_list]) + \
+             pulp.lpSum([isOutportMap[e[1]][op] * dist_from_res[e][op] for e in routed_out_edges for op in oport_list])
+
+        # constraints
+        #   to ensure each edge is mapped to a port
+        for inode in inodes:
+            prob += pulp.lpSum([isInportMap[inode][ip] for ip in iport_list]) == 1
+        for onode in onodes:
+            prob += pulp.lpSum([isOutportMap[onode][op] for op in oport_list]) == 1
+        # to prevent overuse of inout port
+        for i in range(len(ioports)):
+            prob += pulp.lpSum([isInportMap[inode][iport_list[i]] for inode in inodes]) + \
+                        pulp.lpSum([isOutportMap[onode][oport_list[i]] for onode in onodes]) <= 1
+
+        # solve this ILP
+        stat = prob.solve(solver)
+        result = prob.objective.value()
+
+        # check result
+        if pulp.LpStatus[stat] == "Optimal" and not result is None:
+            if result > PENALTY_CONST:
+                return None
+            else:
+                input_mapping = {}
+                for inode in inodes:
+                    for ip in iport_list:
+                        if isInportMap[inode][ip].value() == 1.0:
+                            input_mapping[ip] = inode
+                            break
+                output_mapping = {}
+                for onode in onodes:
+                    for op in oport_list:
+                        if isOutportMap[onode][op].value() == 1.0:
+                            output_mapping[op] = onode
+                            break
+                return (input_mapping, output_mapping)
         else:
             return None
 
