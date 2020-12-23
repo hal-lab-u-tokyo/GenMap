@@ -2,13 +2,10 @@
 	<Router>AStarRouter</Router>
 	<eval>WireLengthEval</eval>
 	<eval>MapWidthEval</eval>
-	<eval>MapHeightEval</eval>
-	<!--
 	<eval>OpMapWidthEval</eval>
 	<eval args='{"duplicate_enable": True}' >PowerEval</eval>
 	<eval>TimeSlackEval</eval>
--->
-	<parameter name="Maximum generation" >100</parameter>
+	<parameter name="Maximum generation" >20</parameter>
 	<parameter name="Maximum stall" >100</parameter>
 	<parameter name="Initial population size" >300</parameter>
 	<parameter name="Offspring size" >100</parameter>

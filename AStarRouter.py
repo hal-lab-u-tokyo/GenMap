@@ -46,7 +46,7 @@ class AStarRouter(RouterBase):
                     for suc_element in routed_graph.successors(alu):
                         routed_graph.edges[alu, suc_element]["weight"] = 1
 
-    
+
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
         AStarRouter.__set_unused_ALU(CGRA, mapping, routed_graph)
@@ -250,27 +250,31 @@ class AStarRouter(RouterBase):
             for suc_element in routed_graph.successors(alu):
                 routed_graph.edges[alu, suc_element]["weight"] = 1
             # get shortest path
-            path = nx.astar_path(routed_graph, alu, o_port)
-            cost = sum([routed_graph.edges[(path[i], path[i+1])]["weight"]\
+            try:
+                path = nx.astar_path(routed_graph, alu, o_port)
+                cost = sum([routed_graph.edges[(path[i], path[i+1])]["weight"]\
                              for i in range(len(path) - 1)])
-            if cost > ALU_OUT_WEIGTH:
-                route_cost += PENALTY_CONST
-            else:
-                # update cost and used flags
-                for i in range(len(path) - 1):
-                    routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
-                    routed_graph.edges[path[i], path[i + 1]]["free"] = False
-                    routed_graph.nodes[path[i]]["free"] = False
-                    # remove other input edges
-                    remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
-                    routed_graph.remove_edges_from(remove_edges)
-                    # if CGRA.isALU(path[i+1]):
-                    #     routed_graph.nodes[path[i+1]]["route"] = True
-                routed_graph.nodes[path[-1]]["free"] = False
 
-                # update ALU out link cost and used flag
-                for suc in routed_graph.successors(alu):
-                    routed_graph.edges[alu, suc]["weight"] = USED_LINK_WEIGHT
+                if cost > ALU_OUT_WEIGTH:
+                    route_cost += PENALTY_CONST
+                else:
+                    # update cost and used flags
+                    for i in range(len(path) - 1):
+                        routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
+                        routed_graph.edges[path[i], path[i + 1]]["free"] = False
+                        routed_graph.nodes[path[i]]["free"] = False
+                        # remove other input edges
+                        remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
+                        routed_graph.remove_edges_from(remove_edges)
+                        if CGRA.isALU(path[i+1]):
+                            routed_graph.nodes[path[i+1]]["route"] = True
+                    routed_graph.nodes[path[-1]]["free"] = False
+
+                    # update ALU out link cost and used flag
+                    for suc in routed_graph.successors(alu):
+                        routed_graph.edges[alu, suc]["weight"] = USED_LINK_WEIGHT
+            except nx.exception.NetworkXNoPath:
+                route_cost += PENALTY_CONST
 
         return route_cost
 
