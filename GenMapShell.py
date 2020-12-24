@@ -9,7 +9,7 @@ import re
 
 from ConfDrawer import ConfDrawer
 
-
+from tkinter import TclError
 
 class GenMapShell(Cmd):
     prompt = "GenMap shell> "
@@ -223,9 +223,12 @@ class GenMapShell(Cmd):
             model = self.header["arch"]
             ind = self.data["hof"][self.selected_id]
             app = self.header["app"]
-            drawer = ConfDrawer(model, ind)
-            drawer.draw_PEArray(model, ind, app)
-            drawer.show()
+            try:
+                drawer = ConfDrawer(model, ind)
+                drawer.draw_PEArray(model, ind, app)
+                drawer.show()
+            except TclError as e:
+                print(e)
 
     def help_view(self):
         print("usage: view\nIt visualizes the selected solution")
