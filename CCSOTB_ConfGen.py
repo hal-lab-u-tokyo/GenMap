@@ -3,6 +3,7 @@ from ConfDrawer import ConfDrawer
 
 import os
 import math
+from tkinter import TclError
 
 # ADDRESS
 ALU_CONF_ADDR = "01_{ROW:06b}_{COL:012b}_00" # lower 6bit of row bitmap
@@ -66,9 +67,12 @@ class CCSOTB_ConfGen(ConfGenBase):
             if files_exist:
                 print("some file exist")
             else:
-                drawer = ConfDrawer(CGRA, individual)
-                drawer.draw_PEArray(CGRA, individual, app)
-                drawer.save(fig_filename)
+                try:
+                    drawer = ConfDrawer(CGRA, individual)
+                    drawer.draw_PEArray(CGRA, individual, app)
+                    drawer.save(fig_filename)
+                except TclError as e:
+                        print("Fail to save mapping figure because", e)
 
                 # make configurations
                 PE_confs = self.make_PE_conf(CGRA, app, individual)
@@ -305,7 +309,7 @@ class CCSOTB_ConfGen(ConfGenBase):
 
         return confs
 
-    def compress_confdata():
+    def compress_confdata(self):
         pass
 
     def make_LD_Dmanu(self, CGRA, routed_graph):

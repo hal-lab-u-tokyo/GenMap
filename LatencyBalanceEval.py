@@ -1,5 +1,6 @@
 from EvalBase import EvalBase
 from DataPathAnalysis import DataPathAnalysis
+import statistics
 
 import networkx as nx
 
@@ -23,20 +24,90 @@ class LatencyBalanceEval(EvalBase):
                 sim_params (SimParameters): parameters for some simulations
                 individual (Individual): An individual to be evaluated
                 Options:
-                    duplicate_enable (bool): True if you need the mapped data-flow
-                                                to be duplicated horizontally.
-
+                    mode (str): to select evaluation mode
+                    "max_lat_diff" (default): max latency difference for all nodes
+                    "cv_lat_diff": coefficient of variation of latency
+                                    difference for all nodes
+                    "max_path_diff": difference btw the longest data path length
+                                        & shortest one
+                    "cv_path": coefficient of variation of all path length
             Returns:
-                float: coefficient of variation of all path latency
+                float: evaluated value for the specified mode
 
         """
 
         if individual.isValid() == False:
             return PENALTY_COST
 
-        lat_list = [len(dp) for dp in DataPathAnalysis.get_data_path(CGRA, individual)]
+        eval_modes = {"max_lat_diff": LatencyBalanceEval.calc_max_lat_diff,
+                      "cv_lat_diff": LatencyBalanceEval.calc_cv_lat_diff,
+                      "max_path_diff": LatencyBalanceEval.calc_max_path_diff,
+                      "cv_path_len": LatencyBalanceEval.calc_cv_path_len}
 
-        return max(lat_list) - min(lat_list)
+        mode = "max_lat_diff" # defualt
+        if "mode" in info.keys():
+            if not info["mode"] in eval_modes.keys():
+                mode = info["mode"]
+
+        return eval_modes[mode](CGRA, individual)
+
+    @staticmethod
+    def calc_max_path_diff(CGRA, individual):
+        len_list = [len(dp) for dp in DataPathAnalysis.get_data_path(CGRA, individual)]
+        return max(len_list) - min(len_list)
+
+    @staticmethod
+    def calc_cv_path_len(CGRA, individual):
+        len_list = [len(dp) for dp in DataPathAnalysis.get_data_path(CGRA, individual)]
+        sd = statistics.stdev(len_list)
+        avg = sum(len_list) / len(len_list)
+        return sd / avg
+
+    @staticmethod
+    def calc_max_lat_diff(CGRA, individual):
+        lat_diff = LatencyBalanceEval.analyze_latency_diff(CGRA, individual)
+        return max(lat_diff.values())
+
+    @staticmethod
+    def calc_cv_lat_diff(CGRA, individual):
+        lat_diff = LatencyBalanceEval.analyze_latency_diff(CGRA, individual)
+        sd = statistics.stdev(lat_diff.values())
+        avg = sum(lat_diff.values()) / len(lat_diff)
+        return sd / avg
+
+    @staticmethod
+    def analyze_latency_diff(CGRA, individual):
+        graph = individual.routed_graph.copy()
+        op_nodes = [CGRA.getNodeName("ALU", pos=pos) \
+                    for pos in individual.mapping.values()]
+        graph.add_node("root")
+        nx.set_node_attributes(graph, 0, "min_len")
+        nx.set_node_attributes(graph, 0, "max_len")
+
+        used_iport = set(individual.routed_graph.nodes()) & \
+                      set(CGRA.getInputPorts())
+
+        for i_port in used_iport:
+            graph.add_edge("root", i_port)
+
+        # analyze shortest path length
+        for u, v in nx.bfs_edges(graph, "root"):
+            if v in op_nodes:
+                graph.node[v]["min_len"] = graph.node[u]["min_len"] + 1
+
+        # for analyze longest path length
+        for u, v in nx.edge_bfs(graph, "root"):
+            if v in op_nodes:
+                if graph.node[u]["max_len"] + 1 > graph.node[v]["max_len"]:
+                    graph.node[v]["max_len"] = graph.node[u]["max_len"] + 1
+
+        latency_diff = {v: graph.node[v]["max_len"] - graph.node[v]["min_len"] \
+                        for v in op_nodes}
+
+        individual.saveEvaluatedData("latency_diff", latency_diff)
+        del graph
+        return latency_diff
+
 
     @staticmethod
     def isMinimize():

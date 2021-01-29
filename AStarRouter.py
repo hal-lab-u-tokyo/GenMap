@@ -217,7 +217,6 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def inout_routing(CGRA, in_DFG, out_DFG, mapping, routed_graph, **info):
-        import sys
         io_port = CGRA.getInoutPorts()
         io_map = AStarRouter.__io_mapping(CGRA, io_port, in_DFG, out_DFG, mapping, routed_graph)
         if io_map is None:

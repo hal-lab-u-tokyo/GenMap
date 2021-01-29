@@ -1,4 +1,5 @@
 import os
+from tkinter import TclError
 
 from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
@@ -143,9 +144,12 @@ class CCSOTB2_ConfGen(ConfGenBase):
                                     info_filename)
 
                 if fig_save_enable:
-                    drawer = ConfDrawer(CGRA, individual)
-                    drawer.draw_PEArray(CGRA, individual, app)
-                    drawer.save(fig_filename)
+                    try:
+                        drawer = ConfDrawer(CGRA, individual)
+                        drawer.draw_PEArray(CGRA, individual, app)
+                        drawer.save(fig_filename)
+                    except TclError as e:
+                        print("Fail to save mapping figure because", e)
         else:
             print("No such direcotry: ", args["output_dir"])
 
@@ -536,7 +540,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
         """analyzes LD table from mapping results
             Args:
                 CGRA (PEArrayModel)             : the target architecture
-                app (Application)               : the target application
                 routed_graph (networkx DiGraph) : routed graph on PE array resources
 
             Returns:
@@ -569,7 +572,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
         """analyzes ST table from mapping results
             Args:
                 CGRA (PEArrayModel)             : the target architecture
-                app (Application)               : the target application
                 routed_graph (networkx DiGraph) : routed graph on PE array resources
 
             Returns:
@@ -608,7 +610,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
         """analyzes value of constant register from mapping results
             Args:
                 CGRA (PEArrayModel)             : the target architecture
-                app (Application)               : the target application
                 routed_graph (networkx DiGraph) : routed graph on PE array resources
 
             Returns:
