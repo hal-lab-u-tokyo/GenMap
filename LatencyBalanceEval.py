@@ -1,11 +1,14 @@
 from EvalBase import EvalBase
 from DataPathAnalysis import DataPathAnalysis
+
 import statistics
+import signal
+import os
 
 import networkx as nx
 
 PENALTY_COST = 1000
-
+main_pid = os.getpid()
 
 class LatencyBalanceEval(EvalBase):
     class DependencyError (Exception):
@@ -25,12 +28,14 @@ class LatencyBalanceEval(EvalBase):
                 individual (Individual): An individual to be evaluated
                 Options:
                     mode (str): to select evaluation mode
-                    "max_lat_diff" (default): max latency difference for all nodes
-                    "cv_lat_diff": coefficient of variation of latency
+                    "max_lat_diff" (default): max latency difference
+                                              for all nodes
+                    "sum_lat_diff": sum of latency
                                     difference for all nodes
                     "max_path_diff": difference btw the longest data path length
-                                        & shortest one
-                    "cv_path": coefficient of variation of all path length
+                                     & shortest one
+                    "sum_path_diff": sum of path length differences from
+                                      the shortest path
             Returns:
                 float: evaluated value for the specified mode
 
@@ -40,14 +45,18 @@ class LatencyBalanceEval(EvalBase):
             return PENALTY_COST
 
         eval_modes = {"max_lat_diff": LatencyBalanceEval.calc_max_lat_diff,
-                      "cv_lat_diff": LatencyBalanceEval.calc_cv_lat_diff,
+                      "sum_lat_diff": LatencyBalanceEval.calc_sum_lat_diff,
                       "max_path_diff": LatencyBalanceEval.calc_max_path_diff,
-                      "cv_path_len": LatencyBalanceEval.calc_cv_path_len}
+                      "sum_path_diff": LatencyBalanceEval.calc_sum_path_diff}
 
         mode = "max_lat_diff" # defualt
         if "mode" in info.keys():
-            if not info["mode"] in eval_modes.keys():
+            if info["mode"] in eval_modes.keys():
                 mode = info["mode"]
+            else:
+                print("Error: unknown mode is specified for latency balance evaluation:",
+                        info["mode"])
+                os.kill(main_pid, signal.SIGUSR1)
 
         return eval_modes[mode](CGRA, individual)
 
@@ -57,11 +66,9 @@ class LatencyBalanceEval(EvalBase):
         return max(len_list) - min(len_list)
 
     @staticmethod
-    def calc_cv_path_len(CGRA, individual):
+    def calc_sum_path_diff(CGRA, individual):
         len_list = [len(dp) for dp in DataPathAnalysis.get_data_path(CGRA, individual)]
-        sd = statistics.stdev(len_list)
-        avg = sum(len_list) / len(len_list)
-        return sd / avg
+        return sum([l - min(len_list) for l in len_list])
 
     @staticmethod
     def calc_max_lat_diff(CGRA, individual):
@@ -69,11 +76,9 @@ class LatencyBalanceEval(EvalBase):
         return max(lat_diff.values())
 
     @staticmethod
-    def calc_cv_lat_diff(CGRA, individual):
+    def calc_sum_lat_diff(CGRA, individual):
         lat_diff = LatencyBalanceEval.analyze_latency_diff(CGRA, individual)
-        sd = statistics.stdev(lat_diff.values())
-        avg = sum(lat_diff.values()) / len(lat_diff)
-        return sd / avg
+        return sum(lat_diff)
 
     @staticmethod
     def analyze_latency_diff(CGRA, individual):
