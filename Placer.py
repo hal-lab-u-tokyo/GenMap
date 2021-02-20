@@ -108,6 +108,11 @@ class Placer():
 
         # make sink nodes upper side
         pos = {v: (x, 1 - y) for v, (x, y) in pos.items()}
+
+        # randomly rotate by 90 deg.
+        if random.randint(0, 1) == 0:
+            pos = {v: (y, 1 - x) for v, (x, y) in pos.items()}
+
         # randomly flip x position
         if random.randint(0, 1) == 0:
             pos = {v: (1 - x, y) for v, (x, y) in pos.items()}

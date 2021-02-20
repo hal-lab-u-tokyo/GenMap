@@ -1,4 +1,5 @@
 import os
+from tkinter import TclError
 
 from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
@@ -52,7 +53,7 @@ HEAD_FLIT = "001_{addr:022b}_{mt:03b}_{vch:03b}_{src:02b}_{dst:02b}\n"
 TAIL_FLIT = "010_{data:s}\n"
 MSG_TYPES = {"SW": 1}
 
-class CCSOTB2_ConfGen(ConfGenBase):
+class VPCMA2_ConfGen(ConfGenBase):
 
     def __init__(self):
         # override style option setting
@@ -164,9 +165,12 @@ class CCSOTB2_ConfGen(ConfGenBase):
                                     info_filename)
 
                 if fig_save_enable:
-                    drawer = ConfDrawer(CGRA, individual)
-                    drawer.draw_PEArray(CGRA, individual, app)
-                    drawer.save(fig_filename)
+                    try:
+                        drawer = ConfDrawer(CGRA, individual)
+                        drawer.draw_PEArray(CGRA, individual, app)
+                        drawer.save(fig_filename)
+                    except TclError as e:
+                        print("Fail to save mapping figure because", e)
         else:
             print("No such direcotry: ", args["output_dir"])
 
@@ -572,7 +576,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
         """analyzes LD table from mapping results
             Args:
                 CGRA (PEArrayModel)             : the target architecture
-                app (Application)               : the target application
                 routed_graph (networkx DiGraph) : routed graph on PE array resources
 
             Returns:
@@ -605,7 +608,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
         """analyzes ST table from mapping results
             Args:
                 CGRA (PEArrayModel)             : the target architecture
-                app (Application)               : the target application
                 routed_graph (networkx DiGraph) : routed graph on PE array resources
 
             Returns:
@@ -644,7 +646,6 @@ class CCSOTB2_ConfGen(ConfGenBase):
         """analyzes value of constant register from mapping results
             Args:
                 CGRA (PEArrayModel)             : the target architecture
-                app (Application)               : the target application
                 routed_graph (networkx DiGraph) : routed graph on PE array resources
 
             Returns:
@@ -725,5 +726,5 @@ class CCSOTB2_ConfGen(ConfGenBase):
         f.close()
 
 if __name__ == '__main__':
-    generator = CCSOTB2_ConfGen()
+    generator = VPCMA2_ConfGen()
     generator.main()

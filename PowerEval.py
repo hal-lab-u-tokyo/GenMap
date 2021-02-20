@@ -31,7 +31,7 @@ class PowerEval(EvalBase):
 
     @staticmethod
     def eval(CGRA, app, sim_params, individual, **info):
-        """Return mapping width.
+        """Return estimated power
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA

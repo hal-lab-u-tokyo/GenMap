@@ -9,7 +9,7 @@ import re
 
 from ConfDrawer import ConfDrawer
 
-
+from tkinter import TclError
 
 class GenMapShell(Cmd):
     prompt = "GenMap shell> "
@@ -26,6 +26,11 @@ class GenMapShell(Cmd):
         readline.set_completer_delims(new_delims)
         self.selected_id = -1
         self.conf_gen = conf_gen
+        self.eval_names = []
+        for name in header["eval_names"]:
+            if name in self.eval_names:
+                name += "_" + str(header["eval_names"].count(name) - 1)
+            self.eval_names.append(name)
 
         # check hypervolume is available
         self.__hv_enable = True
@@ -44,7 +49,7 @@ class GenMapShell(Cmd):
 
     def do_show(self, _):
         head = ["ID"]
-        head.extend(self.header["eval_names"])
+        head.extend(self.eval_names)
         table = prettytable.PrettyTable(head)
         for ind in self.filtered_sols:
             row = [list(self.data["hof"]).index(ind)]
@@ -59,7 +64,7 @@ class GenMapShell(Cmd):
         parsed_args = self.parse_sort(line.split(" "))
 
         if not parsed_args is None:
-            obj_idx = self.header["eval_names"].index(parsed_args.object)
+            obj_idx = self.eval_names.index(parsed_args.object)
 
             if parsed_args.order == "asc" or \
                 parsed_args.order == "ASC":
@@ -78,7 +83,7 @@ class GenMapShell(Cmd):
         pos = args.index(text)
 
         if pos == 1:
-            comp_args = [obj for obj in self.header["eval_names"] if obj.startswith(text)]
+            comp_args = [obj for obj in self.eval_names if obj.startswith(text)]
         elif pos == 2:
             comp_args = [order for order in ["asc", "desc", "ASC", "DESC"] \
                             if order.startswith(text)]
@@ -95,7 +100,7 @@ class GenMapShell(Cmd):
         usage = "sort {0} {1}\nIt sorts filtered solutions".format(\
                     self.__bold_font("objective"), self.__bold_font("order"))
         parser = ArgumentParser(prog = "sort", usage=usage)
-        parser.add_argument("object", type=str, choices=self.header["eval_names"])
+        parser.add_argument("object", type=str, choices=self.eval_names)
         parser.add_argument("order", type=str, choices=["asc", "desc", "ASC", "DESC"])
 
         try:
@@ -110,7 +115,7 @@ class GenMapShell(Cmd):
         parsed_args = self.parse_filter(line.split(" "))
 
         if not parsed_args is None:
-            obj_idx = self.header["eval_names"].index(parsed_args.object)
+            obj_idx = self.eval_names.index(parsed_args.object)
 
             if parsed_args.comp_operator == "==":
                 self.filtered_sols = [ind for ind in self.filtered_sols\
@@ -146,7 +151,7 @@ class GenMapShell(Cmd):
         pos = args.index(text)
 
         if pos == 1:
-            comp_args = [obj for obj in self.header["eval_names"] if obj.startswith(text)]
+            comp_args = [obj for obj in self.eval_names if obj.startswith(text)]
         elif pos == 2:
             comp_args = [op for op in ["==", "!=", "<", ">", "<=", ">="] \
                             if op.startswith(text)]
@@ -164,7 +169,7 @@ class GenMapShell(Cmd):
                 self.__bold_font("comp_operator"),\
                 self.__bold_font("value"))
         parser = ArgumentParser(prog = "filter", usage=usage)
-        parser.add_argument("object", type=str, choices=self.header["eval_names"])
+        parser.add_argument("object", type=str, choices=self.eval_names)
         parser.add_argument("comp_operator", type=str, \
                             choices=["==", "!=", "<", ">", "<=", ">="])
         parser.add_argument("value", type=float)
@@ -223,9 +228,12 @@ class GenMapShell(Cmd):
             model = self.header["arch"]
             ind = self.data["hof"][self.selected_id]
             app = self.header["app"]
-            drawer = ConfDrawer(model, ind)
-            drawer.draw_PEArray(model, ind, app)
-            drawer.show()
+            try:
+                drawer = ConfDrawer(model, ind)
+                drawer.draw_PEArray(model, ind, app)
+                drawer.show()
+            except TclError as e:
+                print(e)
 
     def help_view(self):
         print("usage: view\nIt visualizes the selected solution")

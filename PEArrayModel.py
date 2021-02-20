@@ -7,6 +7,7 @@ CONST_node_exp = "CONST_{index}"
 IN_PORT_node_exp = "IN_PORT_{index}"
 OUT_PORT_node_exp = "OUT_PORT_{index}"
 
+
 class PEArrayModel():
 
     class InvalidConfigError(Exception):
@@ -24,6 +25,8 @@ class PEArrayModel():
                 const_reg: the number of constant registers
                 input_port: the number of input port
                 output_port: the number of output port
+                inout_port: the number of inout port
+            Please note you can use either a pair of input_port and output port or inout_port.
             And also, it must contain a child elements whose tag name is "PE", "PREG", or "OUT_PORT".
 
             "PE" Element will be composed of
@@ -96,6 +99,7 @@ class PEArrayModel():
         self.__const_reg_range = []
         self.__in_port_range = []
         self.__out_port_range = []
+        self.__inout_used = True
 
         # operation list supported by the PEs
         #    1st index: pos_x
@@ -206,25 +210,45 @@ class PEArrayModel():
         for c_reg in self.__const_reg_range:
             self.__network.add_node(CONST_node_exp.format(index=c_reg))
 
-        # init PE array inport
-        inport_str = conf.get("input_port")
-        if inport_str == None:
-            raise self.InvalidConfigError("missing PE array attribute: input_port")
-        elif inport_str.isdigit() == False:
-            raise ValueError("Invalid PE array attribute: input_port")
+        # init PE array inout port
+        inoutport_str = conf.get("inout_port")
+        if inoutport_str == None:
+            self.__inout_used = False
+        elif inoutport_str.isdigit() == False:
+            raise ValueError("Invalid PE array attribute: inout_port")
         else:
-            self.__in_port_range = list(range(int(inport_str)))
-        for iport in self.__in_port_range:
-            self.__network.add_node(IN_PORT_node_exp.format(index=iport))
+            inout_size = int(inoutport_str)
+            if inout_size <= 0:
+                print("Warnning: the size of inout port is less than or equal to zero")
+                self.__inout_used = False
+            else:
+                # virtually create both inpout port and output port
+                self.__in_port_range = list(range(inout_size))
+                self.__out_port_range = list(range(inout_size))
+                for i in self.__in_port_range:
+                    self.__network.add_node(IN_PORT_node_exp.format(index=i))
 
-        # init PE array outport
-        outport_str = conf.get("output_port")
-        if outport_str == None:
-            raise self.InvalidConfigError("missing PE array attribute: output_port")
-        elif outport_str.isdigit() == False:
-            raise ValueError("Invalid PE array attribute: output_port")
-        else:
-            self.__out_port_range = list(range(int(outport_str)))
+
+        if not self.__inout_used:
+            # init PE array inport
+            inport_str = conf.get("input_port")
+            if inport_str == None:
+                raise self.InvalidConfigError("missing PE array attribute: input_port")
+            elif inport_str.isdigit() == False:
+                raise ValueError("Invalid PE array attribute: input_port")
+            else:
+                self.__in_port_range = list(range(int(inport_str)))
+            for iport in self.__in_port_range:
+                self.__network.add_node(IN_PORT_node_exp.format(index=iport))
+
+            # init PE array outport
+            outport_str = conf.get("output_port")
+            if outport_str == None:
+                raise self.InvalidConfigError("missing PE array attribute: output_port")
+            elif outport_str.isdigit() == False:
+                raise ValueError("Invalid PE array attribute: output_port")
+            else:
+                self.__out_port_range = list(range(int(outport_str)))
 
         # init operation list
         self.__operation_list = [[[] for y in range(self.__height)] for x in range(self.__width)]
@@ -254,7 +278,8 @@ class PEArrayModel():
 
         # check config number
         if len(PEs) != self.__width * self.__height:
-            raise self.InvalidConfigError("Short of PE configs")
+            raise self.InvalidConfigError("The number of PE configs is {0}" +  \
+                "but the specified array size is {1}x{2}".format(len(PEs), self.__width, self.__height))
 
         # load PE configs & add to network
         connections = {}
@@ -654,6 +679,15 @@ class PEArrayModel():
         """
         return [IN_PORT_node_exp.format(index=i) for i in self.__in_port_range]
 
+    def getInoutPorts(self):
+        """Returns pairs of input port and output port
+        """
+        if self.__inout_used:
+            return [(IN_PORT_node_exp.format(index=i), OUT_PORT_node_exp.format(index=i)) \
+                     for i in self.__in_port_range]
+        else:
+            return []
+
     def getOutputPorts(self):
         """Returns output port names of the network.
         """
@@ -750,6 +784,11 @@ class PEArrayModel():
 
         return not self.__infini_const
 
+    def isIOShared(self):
+        """Returns whether inout port is used instead of input/output port
+        """
+
+        return self.__inout_used
 
     def isHeteroISA(self):
         """Returns heterogeneity of ISA
