@@ -1,5 +1,7 @@
 from PEArrayModel import PEArrayModel
 
+import re
+
 DELAY_UNITS = {"ps": 10**(-12), "ns": 10**(-9), "us": 10**(-6), "ms": 10**(-3)}
 POWER_UNITS = {"pW": 10**(-12), "nW": 10**(-9), "uW": 10**(-6), "mW": 10**(-3)}
 ENERGY_UNITS = {"pJ": 10**(-12), "nJ": 10**(-9), "uJ": 10**(-6), "mJ": 10**(-3)}
@@ -68,6 +70,10 @@ class SimParameters():
         self.__load_bias_range(bias_range)
         self.__load_delay_info(delay_data)
         self.__load_power_info(power_data)
+
+        # user fields
+        self.__userdata = {}
+        self.__load_user_data(data)
 
     def __load_bias_range(self, bias_range_xml):
         """Loads body bias range.
@@ -258,6 +264,63 @@ class SimParameters():
             # store
             self.switching_info[op_str] = sw_val
 
+    def __load_user_data(self, data):
+        """Loads user data
+            data (XML Element): simluation parameters
+            Raise:
+                If there exist invalid parameters, or lack of information,
+                it will raise InvalidParameters.
+        """
+        for user_fields in data.findall("User"):
+            if user_fields.get("name") is None:
+                raise self.InvalidParameters("User element must have name attribute")
+            name = user_fields.get("name")
+            # init user data
+            userdata = {}
+            # iterates for each tag
+            for ele in user_fields.getchildren():
+                # check tag name
+                if ele.tag != "param":
+                    raise SimParameters.InvalidParameters( \
+                         "User filed is allowed to contain only \"param\" tag: "\
+                            + ele.tag)
+                # check if name attr is included
+                paramname = ele.get("name")
+                if paramname is None:
+                    raise SimParameters.InvalidParameters( \
+                            "param tag in user filed has no name attribute")
+                # get data type and convet to the type
+                datatype = self.__getType(ele)
+                try:
+                    val = eval("{0}({1})".format(datatype["dType"], ele.text))
+                except:
+                    raise SimParameters.InvalidParameters(\
+                        "Fail to import a user data {0} as {1}".format(\
+                        ele.text, datatype["dType"]))
+
+                if datatype["isCollection"]:
+                    # in the case of collection type
+                    if datatype["cType"] == "list":
+                        if paramname not in userdata.keys():
+                            userdata[paramname] = [val]
+                        else:
+                            userdata[paramname].append(val)
+                    else:
+                        key = ele.get("key")
+                        if key is None:
+                            raise SimParameters.InvalidParameters(\
+                                "user data for dict type must have key attribute")
+                        if paramname not in userdata.keys():
+                            userdata[paramname] = {key: val}
+                        else:
+                            userdata[paramname][key] = val
+                else:
+                    userdata[paramname] = val
+
+            # store the loaded data
+            self.__userdata[name] = userdata
+
+
     def calc_power(self, delay, energy):
         """Caluculate power consumption from delay and energy.
 
@@ -321,7 +384,7 @@ class SimParameters():
         else:
             raise ValueError("Unknown unit type: " + unit_type)
 
-
+    
     def __getUnit(self, element, unit_type):
         """Gets unit attribute from an element
 
@@ -405,6 +468,51 @@ class SimParameters():
                 raise SimParameters.InvalidParameters("Invalid value {0} for {1[0]}".format(element.text, msg))
 
             return float_val
+
+    def __getType(self, element):
+        """Gets type of user data
+
+            Args:
+                element(XML element): an XML element containing unit attribute
+
+            Return: dict
+                keys & values:
+                    isCollection: if the specified type is list or dict; return True
+                    cType: list, dict, or None
+                    dType: data type
+
+        """
+        typestr = element.get("type")
+        cType = None
+        if typestr is None:
+            dType = "float"
+        else:
+            if re.match(r"dict\[.*\]$", typestr):
+                cType = "dict"
+                dType = re.sub(r"\]$", "", re.sub(r"^dict\[", "", typestr))
+            elif re.match(r"list\[.*\]$", typestr):
+                cType = "list"
+                dType = re.sub(r"\]$", "", re.sub(r"^list\[", "", typestr))
+            else:
+                dType = typestr
+
+        return {"isCollection": cType is not None, "cType": cType,
+                    "dType": dType}
+
+    def getUserdata(self, name):
+        """Gets user custom data
+
+            Args:
+                name (str): name of the user data
+            Retrun:
+                dict: the specified user data
+
+            Raise:
+                If the specified name of data does not exist,
+                raises KeyError
+        """
+
+        return self.__userdata[name]
 
     def getTimeUnit(self):
         return self.units["delay"]
