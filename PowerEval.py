@@ -8,6 +8,7 @@ import cvxpy as cp
 
 import copy
 import math
+import time
 
 PENALTY_COST = 1000
 MIN_SW = 1.5 # lower limit of SE's switching count 
@@ -33,7 +34,7 @@ class ModelBase():
         if "bbv_step" in sim_params.getUserdata("delay_power_model").keys():
             self.need_quantize = True
             self.quant_step = sim_params.getUserdata("delay_power_model")["bbv_step"]
-            self.bias = 10 ** math.ceil(math.log10(self.quant_step))
+            self.bias = 10 ** math.ceil(-math.log10(self.quant_step))
         else:
             self.need_quantize = False
 
@@ -48,6 +49,7 @@ class DelayModel(ModelBase):
         super().__init__(sim_params)
         self.weight = sim_params.getUserdata("delay_power_model")["weight"]
         self.alpha = sim_params.getUserdata("delay_power_model")["alpha"]
+
 
     def delayScale(self, vdd, bbv):
         return vdd * ((vdd - self.vthreshold(bbv)) ** (- self.alpha))
@@ -233,9 +235,6 @@ class PowerEval(EvalBase):
                 for node in dp:
                     D[i][domain_table[node]] += delay_table[node] \
                         if CGRA.isALU(node) else delaymodel.weight["SE"]
-                #     print("{0} {1:.3f}".format(domain_table[node], (delay_table[node] \
-                #         if CGRA.isALU(node) else delaymodel.weight["SE"]) * delaymodel.delayScale(0.9, 0.0)))
-                # print()
 
             # constructs convex optimization problem
             Dreqvec = cp.Parameter(path_count, value = np.full(path_count, max_lat))
@@ -278,6 +277,7 @@ class PowerEval(EvalBase):
             if prob.status not in ["infeasible", "unbounded"]:
                 # get optimal value
                 leak_power = prob.value
+                individual.saveEvaluatedData("before_round_leakage", leak_power)
                 # statistics
                 stats = prob.solver_stats
                 # print("solve time", stats.solve_time)
@@ -285,10 +285,13 @@ class PowerEval(EvalBase):
 
                 # get optimal bbv assignment
                 opt_bbv = [v for v in bbv.value] if Ndom > 1 else [bbv.value]
-
                 # voltage rouding
                 if delaymodel.need_quantize:
                     opt_bbv = PowerEval.round_bbv(D, opt_bbv, max_lat)
+
+                leak_power = 0.0
+                for bbv, p in zip(opt_bbv, Pleak):
+                    leak_power += leakmodel.leackage(bbv, p)
 
                 individual.saveEvaluatedData("body_bias", \
                     {domain: opt_bbv[domkey2ID[domain]] \
@@ -316,19 +319,17 @@ class PowerEval(EvalBase):
         floored = {}
         Ndom = len(bbv_vec)
 
-        # first rounding
+        # firstly, all of voltages are floored
         for i in range(Ndom):
             v = bbv_vec[i]
             diff = (v * bias - delaymodel.bbv_min * bias)
-            step = round(diff / delaymodel.quant_step * bias)
+            step = math.floor(diff / (delaymodel.quant_step * bias))
             rounded = step * delaymodel.quant_step + \
                                     delaymodel.bbv_min
-            if rounded < v:
-                # floored
-                floored[i] = v - rounded
+            floored[i] = v - rounded
             round_bbv_vec.append(rounded)
 
-        floored_sorted = sorted(floored.items(), key=lambda x: -x[1])
+        floored_sorted = sorted(floored.items(), key=lambda x: x[1])
         while True:
             effvec = delaymodel.delayScale(0.9, \
                         np.array(round_bbv_vec).reshape((Ndom, 1)))
