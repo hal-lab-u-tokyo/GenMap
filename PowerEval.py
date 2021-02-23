@@ -329,7 +329,7 @@ class PowerEval(EvalBase):
             floored[i] = v - rounded
             round_bbv_vec.append(rounded)
 
-        floored_sorted = sorted(floored.items(), key=lambda x: x[1])
+        floored_sorted = sorted(floored.items(), key=lambda x: -x[1])
         while True:
             effvec = delaymodel.delayScale(0.9, \
                         np.array(round_bbv_vec).reshape((Ndom, 1)))
@@ -411,7 +411,10 @@ class PowerEval(EvalBase):
                                     for bbv in sim_params.bias_range]) <= max_lat
 
             # solve this ILP
+            # start = time.time()
             stat = problem.solve(solver)
+            # end = time.time()
+            # print(end - start, "sec")
             result = problem.objective.value()
             leak_power = pulp.value(problem.objective)
 
