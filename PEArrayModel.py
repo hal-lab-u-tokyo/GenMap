@@ -7,6 +7,7 @@ CONST_node_exp = "CONST_{index}"
 IN_PORT_node_exp = "IN_PORT_{index}"
 OUT_PORT_node_exp = "OUT_PORT_{index}"
 
+DEFAULT_EDGE_WEIGHT = {"ALU": 1, "SE": 1, "IN_PORT": 0, "OUT_PORT": 0, "Const": 0}
 
 class PEArrayModel():
 
@@ -100,6 +101,7 @@ class PEArrayModel():
         self.__in_port_range = []
         self.__out_port_range = []
         self.__inout_used = True
+        self.__link_weight = {}
 
         # operation list supported by the PEs
         #    1st index: pos_x
@@ -298,7 +300,7 @@ class PEArrayModel():
 
             # ALU
             if len(list(pe.iter("ALU"))) != 1:
-                raise self.InvalidConfigError("missing PE({0}) coordinate".format((x, y)))
+                raise self.InvalidConfigError("missing an ALU for PE({0}) or it has more than one PEs".format((x, y)))
             ALU = list(pe.iter("ALU"))[0]
             self.__network.add_node(ALU_node_exp.format(pos=(x, y)))
             if not pe.get("bbdomain") is None:
@@ -427,8 +429,7 @@ class PEArrayModel():
                 if not attr["coord"] is None:
                     alu = ALU_node_exp.format(pos=attr["coord"])
                     if alu in self.__network.nodes():
-                        self.__network.add_edge(alu, dst)
-                        self.__reg_config_net_table(dst, alu, attr["conf_value"])
+                        src_node = alu
                     else:
                         raise self.InvalidConfigError(alu + " is not exist")
                 else:
@@ -441,8 +442,7 @@ class PEArrayModel():
                 else:
                     se = SE_node_exp.format(pos=attr["coord"], id=attr["id"], name=attr["src_name"])
                     if se in self.__network.nodes():
-                        self.__network.add_edge(se, dst)
-                        self.__reg_config_net_table(dst, se, attr["conf_value"])
+                        src_node = se
                     else:
                         raise self.InvalidConfigError(se + " is not exist")
 
@@ -452,9 +452,7 @@ class PEArrayModel():
                     raise self.InvalidConfigError("missing index of const register connected to " + dst)
                 else:
                     if attr["index"] in self.__const_reg_range:
-                        const_node = CONST_node_exp.format(index=attr["index"])
-                        self.__network.add_edge(const_node, dst)
-                        self.__reg_config_net_table(dst, const_node, attr["conf_value"])
+                        src_node = CONST_node_exp.format(index=attr["index"])
                     else:
                         raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
 
@@ -464,13 +462,17 @@ class PEArrayModel():
                     raise self.InvalidConfigError("missing index of input port connected to " + dst)
                 else:
                     if attr["index"] in self.__in_port_range:
-                        input_node = IN_PORT_node_exp.format(index=attr["index"])
-                        self.__network.add_edge(input_node, dst)
-                        self.__reg_config_net_table(dst, input_node, attr["conf_value"])
+                        src_node = IN_PORT_node_exp.format(index=attr["index"])
                     else:
                         raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
             else:
                 raise self.InvalidConfigError("known connection type {0}".format(attr["type"]))
+
+            # add edge and config table entry
+            self.__network.add_edge(src_node, dst, weight = attr["weight"])
+            self.__reg_config_net_table(dst, src_node, attr["conf_value"])
+            # save the init weight value to restore
+            self.__link_weight[(src_node, dst)] = attr["weight"]
 
     def __coord_str2tuple(self, s):
         """convert a string of 2D coordinate to a tuple
@@ -534,6 +536,16 @@ class PEArrayModel():
         # get src_name of input_connection (if any)
         src_name = input_connection.get("src_name")
 
+        # get link weight
+        weight_str = input_connection.get("weight")
+        if not weight_str is None:
+            try:
+                weight = float(weight_str)
+            except ValueError:
+                raise ValueError("Invalid link weight value of " + weight_str)
+        else:
+            weight = DEFAULT_EDGE_WEIGHT[con_type]
+
         # get configuration value
         #   config value is essential except for OUT_PORTs
         conf_val_str = input_connection.get("value")
@@ -551,7 +563,7 @@ class PEArrayModel():
 
         return {"label": label, "type": con_type, "coord": src_coord, \
                 "index": src_index, "id": src_id, "src_name": src_name,\
-                "conf_value": conf_val}
+                "conf_value": conf_val, "weight": weight}
 
 
     # getter method
@@ -668,6 +680,9 @@ class PEArrayModel():
         """
 
         return (self.__width, self.__height)
+
+    def getLinkWeight(self, edge):
+        return self.__link_weight[edge]
 
     def getConstRegs(self):
         """Returns const register names of the network.
