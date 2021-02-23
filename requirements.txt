@@ -7,3 +7,4 @@ pydot==1.4.1
 pygmo==2.9
 tqdm==4.31.1
 llvmlite==0.30.0
+cvxpy==1.1.10
