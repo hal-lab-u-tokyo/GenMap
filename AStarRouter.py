@@ -27,10 +27,10 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def set_default_weights(CGRA):
-        CGRA.setInitEdgeAttr("weight", 1, "SE")
-        CGRA.setInitEdgeAttr("weight", 0, "Const")
-        CGRA.setInitEdgeAttr("weight", 0, "IN_PORT")
-        CGRA.setInitEdgeAttr("weight", 0, "OUT_PORT")
+        # CGRA.setInitEdgeAttr("weight", 1, "SE")
+        # CGRA.setInitEdgeAttr("weight", 0, "Const")
+        # CGRA.setInitEdgeAttr("weight", 0, "IN_PORT")
+        # CGRA.setInitEdgeAttr("weight", 0, "OUT_PORT")
         CGRA.setInitEdgeAttr("weight", ALU_OUT_WEIGTH, "ALU")
 
     @staticmethod
@@ -44,7 +44,8 @@ class AStarRouter(RouterBase):
                     # remove high cost of ALU out
                     alu = CGRA.getNodeName("ALU", pos = (x, y))
                     for suc_element in routed_graph.successors(alu):
-                        routed_graph.edges[alu, suc_element]["weight"] = 1
+                        routed_graph.edges[alu, suc_element]["weight"] = \
+                            CGRA.getLinkWeight((alu, suc_element))
 
 
     @staticmethod
@@ -64,7 +65,8 @@ class AStarRouter(RouterBase):
 
             # remove high cost of alu out
             for suc_element in routed_graph.successors(src_alu):
-                routed_graph.edges[src_alu, suc_element]["weight"] = 1
+                routed_graph.edges[src_alu, suc_element]["weight"] = \
+                    CGRA.getLinkWeight((src_alu, suc_element))
 
             # get destination alus in ascending order of manhattan distance from the src node
             #       key  : dst alu node name
@@ -157,7 +159,8 @@ class AStarRouter(RouterBase):
             alu = CGRA.getNodeName("ALU", pos=mapping[v])
             # remove high cost of alu out
             for suc_element in routed_graph.successors(alu):
-                routed_graph.edges[alu, suc_element]["weight"] = 1
+                routed_graph.edges[alu, suc_element]["weight"] = \
+                    CGRA.getLinkWeight((alu, suc_element))
 
             src = alu
             if src in path_extend_nodes:
@@ -247,7 +250,8 @@ class AStarRouter(RouterBase):
             alu = CGRA.getNodeName("ALU", pos=mapping[src_node])
             # update link cost around the alu
             for suc_element in routed_graph.successors(alu):
-                routed_graph.edges[alu, suc_element]["weight"] = 1
+                routed_graph.edges[alu, suc_element]["weight"] = \
+                    CGRA.getLinkWeight((alu, suc_element))
             # get shortest path
             try:
                 path = nx.astar_path(routed_graph, alu, o_port)
