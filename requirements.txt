@@ -1,5 +1,6 @@
 deap==1.0.1
 matplotlib==3.0.0
+numpy==1.18.1
 networkx==2.3
 prettytable==0.7.2
 PuLP==2.4

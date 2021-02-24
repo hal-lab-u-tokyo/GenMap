@@ -65,9 +65,11 @@ GenMap requires the following python libraries. Recommended version for each lib
     1. pydot (1.4.1)
     1. pygmo (2.9)
     1. prettytable (0.7.2)
+    1. cvxpy (1.1.10)
     * Optional
     1. llvmlite (0.30.0) (necesssary to export configuration as LLVM-IR)
     1. pyeda (0.28.0) (necessary for configuration compression using espresso)
+    1. mosek (9.2.38) (necessary to use mosek's solvers)
 
 ```
 (GenMap_env) # pip3 install (package_name)[==version]
