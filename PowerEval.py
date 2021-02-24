@@ -1,5 +1,6 @@
 from EvalBase import EvalBase
 from DataPathAnalysis import DataPathAnalysis
+from SolverSetup import SolverSetup
 
 import networkx as nx
 import pulp
@@ -13,13 +14,20 @@ import time
 PENALTY_COST = 1000
 MIN_SW = 1.5 # lower limit of SE's switching count 
 
-# setting up for pulp
-solver = pulp.GUROBI(msg = 0)
-if solver.available():
-    # print message
-    pulp.LpProblem().solve(solver)
-else:
-    solver = pulp.PULP_CBC_CMD(threads = 1)
+
+# setting up for pulp solver
+try:
+    ilp_solver = SolverSetup("ILP").getSolver()
+except SolverSetup.SolverSetupError as e:
+    print("Fail to setup ILP solver:", e)
+    sys.exit()
+
+# setting up for cvxpy solver
+try:
+    cp_solver = SolverSetup("CP").getSolver()
+except SolverSetup.SolverSetupError as e:
+    print("Fail to setup CP solver:", e)
+    sys.exit()
 
 isCpOpt = True
 leakmodel = None
@@ -271,10 +279,19 @@ class PowerEval(EvalBase):
                                         exp=cp.exp)
             # create minimization problem
             prob = cp.Problem(cp.Minimize(cp.sum(power)), constraints)
+            solve_fail = False
+
             # solve
-            prob.solve()
+            try:
+                prob.solve(**cp_solver)
+            except cp.SolverError as e:
+                solve_fail = True
+
+            # check status
+            solve_fail |= prob.status in ["infeasible", "unbounded"]
+
             # get status
-            if prob.status not in ["infeasible", "unbounded"]:
+            if not solve_fail:
                 # get optimal value
                 leak_power = prob.value
                 individual.saveEvaluatedData("before_round_leakage", leak_power)
@@ -412,7 +429,7 @@ class PowerEval(EvalBase):
 
             # solve this ILP
             # start = time.time()
-            stat = problem.solve(solver)
+            stat = problem.solve(ilp_solver)
             # end = time.time()
             # print(end - start, "sec")
             result = problem.objective.value()
@@ -424,7 +441,7 @@ class PowerEval(EvalBase):
                 # success
                 for domain in bb_domains.keys():
                     for bbv in sim_params.bias_range:
-                        if isBBV[domain][bbv].value() == 1:
+                        if int(isBBV[domain][bbv].value()) == 1:
                             bbv_assign[domain] = bbv
                 individual.saveEvaluatedData("body_bias", bbv_assign)
             else:

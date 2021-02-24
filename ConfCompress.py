@@ -2,8 +2,18 @@ import pulp
 import re
 import math
 import copy
+import sys
 
 from PEArrayModel import PEArrayModel
+from SolverSetup import SolverSetup
+
+# setting up for pulp solver
+try:
+    solver = SolverSetup("ILP").getSolver()
+except SolverSetup.SolverSetupError as e:
+    print("Fail to setup ILP solver:", e)
+    sys.exit()
+
 
 class ConfCompressor(object):
     """docstring for Compressor"""
@@ -114,7 +124,7 @@ class ConfCompressor(object):
                         match_list.append((conf, x, y, ef_bits))
 
 
-        problem = pulp.LpProblem('Problem Name', pulp.LpMaximize) 
+        problem = pulp.LpProblem('Find_best_bit-maps', pulp.LpMaximize) 
         rows = pulp.LpVariable.dicts('rows', range(height), 0, 1, cat = 'Binary')
         cols = pulp.LpVariable.dicts('cols', range(width), 0, 1, cat = 'Binary')
         conf_sel = pulp.LpVariable.dicts('conf_sel', conf_list, 0, 1, cat = 'Binary')
@@ -137,18 +147,21 @@ class ConfCompressor(object):
 
         problem += pulp.lpSum([bit_width[conf]  * conf_sel[conf] for conf in conf_list]) <= MAX_WIDTH
 
-        stat = problem.solve()
+        stat = problem.solve(solver)
         result = problem.objective.value()
+        print(result)
 
         if pulp.LpStatus[stat] == "Optimal" and result != None:
             if result >= max_pattern["score"]:
                 max_pattern["score"] = result
-                max_pattern["rows"] = [0 if rows[y].value() == None else int(rows[y].value()) for y in range(height)]
-                max_pattern["cols"] = [0 if cols[x].value() == None else int(cols[x].value()) for x in range(width)]
+                max_pattern["rows"] = [0 if rows[y].value() == None \
+                    else round(rows[y].value()) for y in range(height)]
+                max_pattern["cols"] = [0 if cols[x].value() == None \
+                    else round(cols[x].value()) for x in range(width)]
                 max_pattern["conf"] = list()
                 for conf in conf_list:
                     if conf_sel[conf].value() != None and \
-                                          int(conf_sel[conf].value()) == 1:
+                                round(conf_sel[conf].value()) == 1:
                         max_pattern["conf"].append(conf)
 
 
@@ -205,7 +218,7 @@ class ConfCompressor(object):
                             match_list.append((x, y, ef_bits))
 
                 # define ILP problem
-                problem = pulp.LpProblem('Find best bit-maps', pulp.LpMaximize)
+                problem = pulp.LpProblem('Find_best_bit-maps', pulp.LpMaximize)
                 rows = pulp.LpVariable.dicts('rows', range(height), 0, 1, cat = 'Binary')
                 cols = pulp.LpVariable.dicts('cols', range(width), 0, 1, cat = 'Binary')
                 flag = pulp.LpVariable.dicts('flag', (range(width), range(height)), 0, 1, cat = 'Binary')
@@ -225,14 +238,14 @@ class ConfCompressor(object):
                         problem += 2 * flag[x][y] <= cols[x] + rows[y]
 
                 # solve the problem
-                stat = problem.solve()
+                stat = problem.solve(solver)
                 result = problem.objective.value()
 
                 if pulp.LpStatus[stat] == "Optimal" and result != None:
                     if result >= max_pattern["score"]:
                         max_pattern["score"] = result
-                        max_pattern["rows"] = [0 if rows[y].value() == None else int(rows[y].value()) for y in range(height)]
-                        max_pattern["cols"] = [0 if cols[x].value() == None else int(cols[x].value()) for x in range(width)]
+                        max_pattern["rows"] = [0 if rows[y].value() == None else round(rows[y].value()) for y in range(height)]
+                        max_pattern["cols"] = [0 if cols[x].value() == None else round(cols[x].value()) for x in range(width)]
                         max_pattern["conf"] = conf
 
             # update

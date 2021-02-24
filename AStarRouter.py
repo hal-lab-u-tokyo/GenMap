@@ -1,20 +1,23 @@
 from RouterBase import RouterBase
+from SolverSetup import SolverSetup
+
 import networkx as nx
 import pulp
 import itertools
 import random
+import sys
 
 USED_LINK_WEIGHT = 10000
 ALU_OUT_WEIGTH = 1000
 PENALTY_CONST = 1000
 
-# setting up for pulp
-solver = pulp.GUROBI(msg = 0)
-if solver.available():
-    # print message
-    pulp.LpProblem().solve(solver)
-else:
-    solver = pulp.PULP_CBC_CMD(threads = 1)
+# setting up for pulp solver
+try:
+    solver = SolverSetup("ILP").getSolver()
+except SolverSetup.SolverSetupError as e:
+    print("Fail to setup ILP solver:", e)
+    sys.exit()
+
 
 class AStarRouter(RouterBase):
 
@@ -322,7 +325,7 @@ class AStarRouter(RouterBase):
                 dist_from_res[(r, v)][res_node] = dist + 1
 
         # make pulp problem
-        prob = pulp.LpProblem("Make Resouece Mapping", pulp.LpMinimize)
+        prob = pulp.LpProblem("Make_Resouece_Mapping", pulp.LpMinimize)
 
         # make pulp variables
         # first index: edge, second index const reg node
@@ -352,7 +355,7 @@ class AStarRouter(RouterBase):
             if result > PENALTY_CONST:
                 return None
             else:
-                res_mapping = {r: [e for e in routed_edges if isMap[e][r].value() == 1.0] for r in resources}
+                res_mapping = {r: [e for e in routed_edges if int(isMap[e][r].value()) == 1] for r in resources}
                 return res_mapping
         else:
             return None

@@ -10,10 +10,10 @@ GenMap requires some additional packages. So, you have to have root privileges t
 
 ### Required Packages
 1. git
-1. python36  
-1. python36-devel 
-1. python36-libs  
-1. python36-tkinter 
+1. python36
+1. python36-devel
+1. python36-libs
+1. python36-tkinter
 1. graphviz
 
 ## Install Steps
@@ -21,12 +21,12 @@ We recommend to install GenMap on a virtual python environment to avoid python l
 
 1. Install above packages (as necessary)
 
-For CentOS7, 
+For CentOS7,
 ```
  $ yum install git python36 python36-devel python36-libs python36-tkinter graphviz
 ```
 
-For CentOS8, 
+For CentOS8,
 ```
  $ dnf install git python36 python36-devel python3-libs python3-tkinter graphviz
 ```
@@ -58,7 +58,7 @@ If you want to exit this environment, just execute ``deactivate`` command.
 5. Install Python Libraries
 GenMap requires the following python libraries. Recommended version for each library is in the bracket.
     1. deap (1.0.1)
-    1. pulp (1.6.8)
+    1. pulp (2.4)
     1. networkx (2.2)
     1. tqdm (4.31.1)
     1. matplotlib (3.0.0)
@@ -68,11 +68,11 @@ GenMap requires the following python libraries. Recommended version for each lib
     * Optional
     1. llvmlite (0.30.0) (necesssary to export configuration as LLVM-IR)
     1. pyeda (0.28.0) (necessary for configuration compression using espresso)
-    
+
 ```
 (GenMap_env) # pip3 install (package_name)[==version]
 ```
- or 
+ or
  ```
  (GenMap_env) # pip3 install -r requirements.txt(in this repo)
  ```
@@ -82,6 +82,7 @@ GenMap supports following CMA architectures by default:
     1. CMA-SOTB2
     1. CC-SOTB
     1. CC-SOTB2 (VPCMA)
+    1. VPCMA2
 
 Architecture information and parameters for some simulation are in the [chip_files](./chip_files)
 
@@ -178,6 +179,35 @@ In the GenMap Shell, the following commands are available.
 1. view: view mapping of the selected solution
 1. save: save configurations of the selected solution
 1. quit: quit the shell
+
+# How to change ILP solvers
+Some optimization in GenMap is handled as Integer Linear Program (ILP),
+and you can change ILP solvers as you like.
+
+The current version supports the following solvers.
+1. CBC (default)
+1. Gurobi (installation and license are needed)
+1. Mosek (installation and license are needed)
+
+To specify the solver to be used,
+you can set the environment variable as below.
+### For CBC
+```
+$ export GMP_ILP_SOLVER=cbc
+```
+
+### For Gurobi
+```
+$ export GMP_ILP_SOLVER=gurobi
+```
+Also, some environment vairiables like GRB_LICENSE_FILE are needed for gurobi itself.
+
+Please see [the official web site](https://www.gurobi.com/documentation/9.1/quickstart_mac/setting_environment_variab.html)
+
+### For Mosek
+```
+$ export GMP_ILP_SOLVER=mosek
+```
 
 # Write an Application 
 For GenMap, an application data-flow is described in *DOT* format.
