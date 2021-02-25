@@ -89,12 +89,7 @@ class SolverSetup():
             raise SolverSetup.SolverSetupError("mosek is not installed. " + \
                 "Please install mosek's python API like 'pip install mosek'")
         # check multithread option
-        # there is no way to specify the thread num
-        if self.__threads == 1:
-            options = {MOSEK.iparam.intpnt_multi_thread: \
-                    MOSEK.onoffkey.off}
-        else:
-            options = {}
+        options = {MOSEK.iparam.num_threads: self.__threads}
 
         self.__solver = pulp.MOSEK(msg=False, options = options)
         if not self.__solver.available():
@@ -127,9 +122,8 @@ class SolverSetup():
             raise SolverSetup.SolverSetupError\
                 ("mosek is not installed. " + "Please install mosek's python API like 'pip install mosek'")
         solver = {"solver": "MOSEK", "verbose": False}
-        if self.__threads == 1:
-            solver["mosek_params"] = {MOSEK.iparam.intpnt_multi_thread: \
-                    MOSEK.onoffkey.off}
+
+        solver["mosek_params"] = {MOSEK.iparam.num_threads: self.__threads}
 
         # check license
         self.__solver = pulp.MOSEK(msg=False)
