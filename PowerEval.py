@@ -183,7 +183,8 @@ class PowerEval(EvalBase):
         return opcodes
 
     @staticmethod
-    def eval_leak_cp(CGRA, app, sim_params, individual, leak_optimize):
+    def eval_leak_cp(CGRA, app, sim_params, individual, leak_optimize,
+                        _round_method = None):
         """Evaluates leackage power consumption.
             If necessary, it will optimize body bias voltage assignments
                 by using convex optimization programming.
@@ -194,10 +195,16 @@ class PowerEval(EvalBase):
                 sim_params (SimParameters): parameters for simulations
                 individual (Individual): An individual to be evaluated
                 leak_optimize (bool): True if you need body bias optimization.
-
+                _round_method (Function): specifies the method for
+                        rounding the body bias voltages
             Returns:
                 float: leakage power of whole PE array.
         """
+        if _round_method is None:
+            round_method = PowerEval.round_bbv_greedy
+        else:
+            round_method = _round_method
+
         if leak_optimize:
             # obtain domains
             bb_domains = CGRA.getBBdomains()
@@ -327,7 +334,22 @@ class PowerEval(EvalBase):
         return leak_power
 
     @staticmethod
-    def round_bbv(delay_table, bbv_vec, max_lat):
+    def round_bbv_greedy(delay_table, ptable, bbv_vec, max_lat):
+        """Rounds the body bias voltages to minimize the leakage
+            while satisfying the timing constraints
+
+            This rounding strategy is greedy.
+
+            Args:
+                delay_table (matrix): each row corresponds to each data path
+                            and each column corresponds to each domain
+                ptable (list): zero bias leakage for each domain
+                bbv_vec (list): optimal body bias voltage to be rounded
+                max_lat (float): maximum path delay for timing constraint
+
+            Returns:
+                list: rounded body bias voltage for each domain
+        """
         bias = delaymodel.bias
         round_bbv_vec = []
         # floored voltages
@@ -335,6 +357,7 @@ class PowerEval(EvalBase):
         # value: diff b/w rounded and original
         floored = {}
         Ndom = len(bbv_vec)
+        print(delaymodel.quant_step)
 
         # firstly, all of voltages are floored
         for i in range(Ndom):
@@ -362,6 +385,200 @@ class PowerEval(EvalBase):
                 round_bbv_vec[i] = round_bbv_vec[i] + \
                                         delaymodel.quant_step
 
+    @staticmethod
+    def round_bbv_bb(delay_table, ptable, bbv_vec, max_lat):
+        """Rounds the body bias voltages to minimize the leakage
+            while satisfying the timing constraints
+
+            This rounding result is exact based on
+                Branch-and-Bound algorithm
+
+            Args:
+                delay_table (matrix): each row corresponds to each data path
+                            and each column corresponds to each domain
+                ptable (list): zero bias leakage for each domain
+                bbv_vec (list): optimal body bias voltage to be rounded
+                max_lat (float): maximum path delay for timing constraint
+
+            Returns:
+                list: rounded body bias voltage for each domain
+        """
+        bias = delaymodel.bias
+        floored_bbv_vec = []
+        floored = {}
+        Ndom = len(bbv_vec)
+        v_step = delaymodel.quant_step
+        # firstly, all of voltages are floored
+        for i in range(Ndom):
+            v = bbv_vec[i]
+            diff = (v * bias - delaymodel.bbv_min * bias)
+            step = math.floor(diff / (delaymodel.quant_step * bias))
+            rounded = step * delaymodel.quant_step + \
+                                    delaymodel.bbv_min
+            floored_bbv_vec.append(rounded)
+            floored[i] = v - rounded
+
+        floored_sorted = [k for k, _ in \
+                sorted(floored.items(), key=lambda x: -x[1])]
+
+        # floored power
+        floored_pleak_table = [leakmodel.leackage(v, p) for v, p in \
+                                zip(floored_bbv_vec, ptable)]
+        # ceiled power
+        ceiled_pleak_table = [leakmodel.leackage(v + v_step, p) for v,p in \
+                                zip(floored_bbv_vec, ptable)]
+
+        # delay effect
+        floored_effvec = delaymodel.delayScale(0.9, \
+                        np.array(floored_bbv_vec).reshape((Ndom, 1)))
+        ceiled_effvec = delaymodel.delayScale(0.9, \
+          np.array([v + v_step for v in floored_bbv_vec]).reshape((Ndom, 1)))
+
+
+        # fixed dict:
+        # key: dom ID
+        # value: True if floored else False
+        FLOORED = True
+        CEILED = False
+        seq_cnt = 0
+        while not q.empty():
+            # print(seq_cnt, q.qsize())
+            prob = q.get()
+            # print("after get", seq_cnt, q.qsize())
+            seq_cnt += 1
+            target = prob["remains"][0]
+            remains = prob["remains"][1:]
+            # flooring
+            fixed = dict(prob["fixed"])
+            fixed[target] = FLOORED
+            # in the case of remains are ceiled
+            floored_flag = [fixed[i] if i in fixed else CEILED \
+                            for i in range(Ndom)]
+            effvec = np.array([floored_effvec[i] if floored_flag[i] \
+                        else ceiled_effvec[i] \
+                        for i in range(Ndom)]).reshape((Ndom, 1))
+            lat = max(np.matmul(delay_table, effvec))
+            if lat < max_lat:
+                pleak = sum([floored_pleak_table[i] if floored_flag[i] \
+                            else ceiled_pleak_table[i] \
+                                for i in range(Ndom)])
+                subprob = {"fixed": fixed, "remains": remains}
+                if len(remains) > 0:
+                    q.put(subprob)
+                    if pleak < leak_ub:
+                        leak_ub = pleak
+                else:
+                    if pleak <= leak_ub:
+                        leak_ub = pleak
+                        final = subprob
+                    continue
+
+
+            # ceiling
+            fixed = dict(prob["fixed"])
+            fixed[target] = CEILED
+            # in the case of remains are floored
+            # assuming the best case about leakage
+            floored_flag = [fixed[i] if i in fixed else FLOORED \
+                        for i in range(Ndom)]
+            pleak = sum([floored_pleak_table[i] if floored_flag[i] \
+                            else ceiled_pleak_table[i] \
+                                for i in range(Ndom)])
+            if pleak <= leak_ub:
+                subprob = {"fixed": fixed, "remains": remains}
+                if len(remains) > 0:
+                    q.put(subprob)
+                else:
+                    final = subprob
+
+        return [floored_bbv_vec[i] if final["fixed"][i] else \
+                floored_bbv_vec[i] + v_step for i in range(Ndom)]
+
+    @staticmethod
+    def round_bbv_ilp(delay_table, ptable, bbv_vec, max_lat):
+        """Rounds the body bias voltages to minimize the leakage
+            while satisfying the timing constraints
+
+            This rounding result is exact based on ILP
+
+            Args:
+                delay_table (matrix): each row corresponds to each data path
+                            and each column corresponds to each domain
+                ptable (list): zero bias leakage for each domain
+                bbv_vec (list): optimal body bias voltage to be rounded
+                max_lat (float): maximum path delay for timing constraint
+
+            Returns:
+                list: rounded body bias voltage for each domain
+        """
+        bias = delaymodel.bias
+        floored_bbv_vec = []
+        Ndom = len(bbv_vec)
+        v_step = delaymodel.quant_step
+        # firstly, all of voltages are floored
+        for i in range(Ndom):
+            v = bbv_vec[i]
+            diff = (v * bias - delaymodel.bbv_min * bias)
+            step = math.floor(diff / (delaymodel.quant_step * bias))
+            rounded = step * delaymodel.quant_step + \
+                                    delaymodel.bbv_min
+            floored_bbv_vec.append(rounded)
+
+        # for i in range(Ndom):
+        #     print(i, "{0:2.2f}~{1:2.2f}".format(floored_bbv_vec[i],\
+        #                 floored_bbv_vec[i] + v_step))
+
+        # floored power
+        floored_pleak_table = [leakmodel.leackage(v, p) for v, p in \
+                                zip(floored_bbv_vec, ptable)]
+        # ceiled power
+        ceiled_pleak_table = [leakmodel.leackage(v + v_step, p) for v,p in \
+                                zip(floored_bbv_vec, ptable)]
+
+        # delay effect
+        floored_effvec = delaymodel.delayScale(0.9, \
+                        np.array(floored_bbv_vec).reshape((Ndom, 1)))
+        ceiled_effvec = delaymodel.delayScale(0.9, \
+          np.array([v + v_step for v in floored_bbv_vec]).reshape((Ndom, 1)))
+
+        problem = pulp.LpProblem()
+
+        isFloored = pulp.LpVariable.dicts("isFloored", range(Ndom), \
+                                            0, 1, cat = "Binary")
+        isCeiled = pulp.LpVariable.dicts("isCeiled", range(Ndom), \
+                                            0, 1, cat = "Binary")
+
+        # problem definition
+        problem += pulp.lpSum([isFloored[i] * floored_pleak_table[i] + \
+                    isCeiled[i] * ceiled_pleak_table[i] \
+                        for i in range(Ndom)])
+
+        # Constraints
+        # 1. exclusivity for ceiling or flooring
+        for i in range(Ndom):
+            problem += (isFloored[i] + isCeiled[i]) == 1
+
+        # 2. no timing violation
+        for dp in delay_table:
+            problem += pulp.lpSum([dp[i] * ( floored_effvec[i] * isFloored[i]\
+                                            + ceiled_effvec[i] * isCeiled[i]) \
+                                        for i in range(Ndom)]) <= max_lat
+
+        # solve ILP
+        stat = problem.solve(ilp_solver)
+        result = problem.objective.value()
+        leak = pulp.value(problem.objective)
+        if pulp.LpStatus[stat] == "Optimal" and result != None:
+            rounded_bbv = []
+            for i in range(Ndom):
+                if round(isFloored[i].value()) == 1:
+                    rounded_bbv.append(floored_bbv_vec[i])
+                else:
+                    rounded_bbv.append(floored_bbv_vec[i] + v_step)
+
+        return rounded_bbv
+
+
 
     @staticmethod
     def eval_leak_ilp(CGRA, app, sim_params, individual, leak_optimize):
@@ -375,7 +592,6 @@ class PowerEval(EvalBase):
                 sim_params (SimParameters): parameters for simulations
                 individual (Individual): An individual to be evaluated
                 leak_optimize (bool): True if you need body bias optimization.
-
             Returns:
                 float: leakage power of whole PE array.
         """
@@ -441,7 +657,7 @@ class PowerEval(EvalBase):
                 # success
                 for domain in bb_domains.keys():
                     for bbv in sim_params.bias_range:
-                        if int(isBBV[domain][bbv].value()) == 1:
+                        if round(isBBV[domain][bbv].value()) == 1:
                             bbv_assign[domain] = bbv
                 individual.saveEvaluatedData("body_bias", bbv_assign)
             else:

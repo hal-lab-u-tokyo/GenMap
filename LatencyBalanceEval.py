@@ -84,7 +84,7 @@ class LatencyBalanceEval(EvalBase):
     def analyze_latency_diff(CGRA, individual):
         graph = individual.routed_graph.copy()
         op_nodes = [CGRA.getNodeName("ALU", pos=pos) \
-                    for pos in individual.mapping.values()]
+                for pos in individual.mapping.values()]
         graph.add_node("root")
         nx.set_node_attributes(graph, 0, "min_len")
         nx.set_node_attributes(graph, 0, "max_len")
@@ -97,17 +97,19 @@ class LatencyBalanceEval(EvalBase):
 
         # analyze shortest path length
         for u, v in nx.bfs_edges(graph, "root"):
-            if v in op_nodes:
+            if CGRA.isALU(v) or CGRA.isSE(v):
                 graph.node[v]["min_len"] = graph.node[u]["min_len"] + 1
 
         # for analyze longest path length
-        for u, v in nx.edge_bfs(graph, "root"):
-            if v in op_nodes:
-                if graph.node[u]["max_len"] + 1 > graph.node[v]["max_len"]:
-                    graph.node[v]["max_len"] = graph.node[u]["max_len"] + 1
+        for u in nx.topological_sort(graph):
+            for v in graph.successors(u):
+                if CGRA.isALU(v) or CGRA.isSE(v):
+                    if graph.node[v]["max_len"] < graph.node[u]["max_len"] + 1:
+                        graph.node[v]["max_len"] = graph.node[u]["max_len"] + 1
 
         latency_diff = {v: graph.node[v]["max_len"] - graph.node[v]["min_len"] \
                         for v in op_nodes}
+
 
         individual.saveEvaluatedData("latency_diff", latency_diff)
         del graph

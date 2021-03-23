@@ -355,7 +355,7 @@ class AStarRouter(RouterBase):
             if result > PENALTY_CONST:
                 return None
             else:
-                res_mapping = {r: [e for e in routed_edges if int(isMap[e][r].value()) == 1] for r in resources}
+                res_mapping = {r: [e for e in routed_edges if round(isMap[e][r].value()) == 1] for r in resources}
                 return res_mapping
         else:
             return None

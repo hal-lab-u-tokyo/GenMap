@@ -76,7 +76,6 @@ class SolverSetup():
 
         self.__solver = pulp.GUROBI_CMD(msg = False, \
                                         threads = self.__threads)
-
         if not self.__solver.available():
             raise SolverSetup.SolverSetupError\
                 ("Gurobi is not available. Please check PATH setting and" +
@@ -89,7 +88,10 @@ class SolverSetup():
             raise SolverSetup.SolverSetupError("mosek is not installed. " + \
                 "Please install mosek's python API like 'pip install mosek'")
         # check multithread option
-        options = {MOSEK.iparam.num_threads: self.__threads}
+        options = {MOSEK.iparam.num_threads: self.__threads,
+                     MOSEK.iparam.intpnt_multi_thread: \
+                                    MOSEK.onoffkey.off,\
+                    MOSEK.dparam.mio_max_time: 3600.0}
 
         self.__solver = pulp.MOSEK(msg=False, options = options)
         if not self.__solver.available():
@@ -123,7 +125,9 @@ class SolverSetup():
                 ("mosek is not installed. " + "Please install mosek's python API like 'pip install mosek'")
         solver = {"solver": "MOSEK", "verbose": False}
 
-        solver["mosek_params"] = {MOSEK.iparam.num_threads: self.__threads}
+        solver["mosek_params"] = {MOSEK.iparam.num_threads: self.__threads,
+                                  MOSEK.iparam.intpnt_multi_thread: \
+                                    MOSEK.onoffkey.off}
 
         # check license
         self.__solver = pulp.MOSEK(msg=False)
