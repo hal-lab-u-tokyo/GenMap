@@ -426,7 +426,7 @@ class AStarRouter(RouterBase):
                 dist_from_res[(v, o)][op] = dist
 
         # make pulp problem
-        prob = pulp.LpProblem("Make IO Mapping", pulp.LpMinimize)
+        prob = pulp.LpProblem("Make_IO_Mapping", pulp.LpMinimize)
 
         # make pulp variables
         # first index: input/output node, second input/output port

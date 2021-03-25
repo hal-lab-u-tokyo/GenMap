@@ -6,10 +6,13 @@ from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
 
 from MapHeightEval import MapHeightEval
+from MapWidthEval import MapWidthEval
 from LatencyBalanceEval import LatencyBalanceEval
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import numpy as np
+import seaborn as sns
 from tkinter import TclError
 
 COMP_FMT = "confTILE({x}, {y}, {IMM[0]}, {OPCODE}, {IMM_EN}, " + \
@@ -61,7 +64,10 @@ class RHPCGRA_ConfGen(ConfGenBase):
                 fig_filename = args["output_dir"] + "/" + args["prefix"] + "_map.png"
                 conf_filename = args["output_dir"] + "/" + args["prefix"] + "_conf.txt"
                 info_filename = args["output_dir"] + "/" + args["prefix"] + "_info.txt"
-                lat_anal_filename = args["output_dir"] + "/" + args["prefix"] + "_latency.png"
+                lat_anal_hist_filename = args["output_dir"] + "/" + \
+                                        args["prefix"] + "_latency_hist.png"
+                lat_anal_heat_filename = args["output_dir"] + "/" + \
+                                        args["prefix"] + "_latency_heat.png"
 
             # check if files exist
             files_exist = False
@@ -69,7 +75,8 @@ class RHPCGRA_ConfGen(ConfGenBase):
                 files_exist |= (os.path.exists(fig_filename) & fig_save_enable)
                 files_exist |= (os.path.exists(conf_filename) & conf_save_enable)
                 files_exist |= (os.path.exists(info_filename) & info_save_enable)
-                files_exist |= (os.path.exists(lat_anal_filename) & lat_anal_save_enable)
+                files_exist |= (os.path.exists(lat_anal_hist_filename) & lat_anal_save_enable)
+                files_exist |= (os.path.exists(lat_anal_heat_filename) & lat_anal_save_enable)
 
             # mapping figure
             if files_exist:
@@ -84,10 +91,11 @@ class RHPCGRA_ConfGen(ConfGenBase):
                     return
 
                 dup_count = 1
-                if style_opt["duplicate"]:
-                    map_height = MapHeightEval.eval(CGRA, app, sim_params,\
+                map_height = MapHeightEval.eval(CGRA, app, sim_params,\
                                                     individual)
-
+                map_width = MapWidthEval.eval(CGRA, app, sim_params,\
+                                                    individual)
+                if style_opt["duplicate"]:
                     dup_count = self.duplicate(CGRA, PE_confs, AG_confs,\
                                                     map_height)
 
@@ -116,21 +124,28 @@ class RHPCGRA_ConfGen(ConfGenBase):
                         print("Fail to save mapping figure because", e)
 
                 if lat_anal_save_enable:
+                    size = (map_width, map_height)
                     try:
-                        self.save_latency_analysis(CGRA, individual, \
-                                                lat_anal_filename)
+                        self.save_latency_analysis(CGRA, individual, size,\
+                                                      lat_anal_hist_filename,\
+                                                      lat_anal_heat_filename)
                     except TclError as e:
                         print("Fail to save latency analysis graph because", e)
 
         else:
             print("No such direcotry: ", args["output_dir"])
 
-    def save_latency_analysis(self, CGRA, ind, filename):
+    def save_latency_analysis(self, CGRA, ind, size, hist_file_name,\
+                                heat_file_name):
         """save latency analysis result
             Args:
                 CGRA (PEArrayModel)         : the target architecture
                 individual (Individual)     : selected inidividual to be generated
-                filename (str)              : the name of file to be saved
+                size (tuple)                : width x height to create heatmap
+                hist_file_name (str)        : file name for
+                                                latency diffrence histgram
+                heat_file_name (str)        : file name for
+                                                latency diffrence heatmap
 
             Returns: None
 
@@ -153,7 +168,29 @@ class RHPCGRA_ConfGen(ConfGenBase):
         ax.set_ylabel("# of nodes")
         ax.set_xlabel("Difference of latency")
         fig.tight_layout()
-        plt.savefig(filename)
+        plt.savefig(hist_file_name)
+
+        # create heatmap
+        fig = plt.figure()
+        width, height = size
+        xtick = list(range(width))
+        ytick = list(range(height))[::-1]
+        mask = [ [ True for x in range(width) ] for y in range(height)]
+        lat = [ [ 0 for x in range(width) ] for y in range(height)]
+        for x in range(width):
+            for y in range(height):
+                alu = CGRA.getNodeName("ALU", pos = (x, ytick[y]))
+                if alu in latency_diff.keys():
+                    lat[y][x] = latency_diff[alu]
+                    mask[y][x] = False
+
+        lat = np.array(lat)
+        mask = np.array(mask)
+        sns.heatmap(lat, cbar = False, cmap = "binary", linewidths=1)
+        sns.heatmap(lat, cmap="Reds", mask = mask, linewidths=1,\
+                     linecolor="black", xticklabels=xtick, \
+                     yticklabels=ytick, annot=True)
+        plt.savefig(heat_file_name)
 
 
     def save_conf(self, CGRA, PE_confs, AG_confs, filename):

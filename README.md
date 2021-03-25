@@ -66,6 +66,7 @@ GenMap requires the following python libraries. Recommended version for each lib
     1. pygmo (2.9)
     1. prettytable (0.7.2)
     1. cvxpy (1.1.10)
+    1. seaborn (0.11.1)
     * Optional
     1. llvmlite (0.30.0) (necesssary to export configuration as LLVM-IR)
     1. pyeda (0.28.0) (necessary for configuration compression using espresso)
