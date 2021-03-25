@@ -18,8 +18,6 @@
 		<ALU bias="0.0" op="FDIV">0</ALU>
 		<ALU bias="0.0" op="FEXP">0</ALU>
 		<ALU bias="0.0" op="FSIN">0</ALU>
-		<ALU bias="0.0" op="LD">0</ALU>
-		<ALU bias="0.0" op="ST">0</ALU>		
 		<!-- delay of SE -->
 		<SE bias="0.0">0</SE>
 	</Delay>
@@ -48,8 +46,6 @@
 			<Switching op="FDIV">0</Switching>
 			<Switching op="FEXP">0</Switching>
 			<Switching op="FSIN">0</Switching>
-			<Switching op="LD">0</Switching>
-			<Switching op="ST">0</Switching>
 		</Dynamic>
 	</Power>
 </DATA>
