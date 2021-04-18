@@ -1849,14 +1849,33 @@
 		</ALU>
 	</PE>
 
-	<OUT_PORT index="0">
+	<IN_PORT index="0" pos="left"/>
+	<IN_PORT index="1" pos="left"/>
+	<IN_PORT index="2" pos="left"/>
+	<IN_PORT index="3" pos="left"/>
+	<IN_PORT index="4" pos="left"/>
+	<IN_PORT index="5" pos="left"/>
+	<IN_PORT index="6" pos="left"/>
+	<IN_PORT index="7" pos="left"/>
+	<IN_PORT index="8" pos="left"/>
+	<IN_PORT index="9" pos="right"/>
+	<IN_PORT index="10" pos="right"/>
+	<IN_PORT index="11" pos="right"/>
+	<IN_PORT index="12" pos="right"/>
+	<IN_PORT index="13" pos="right"/>
+	<IN_PORT index="14" pos="right"/>
+	<IN_PORT index="15" pos="right"/>
+	<IN_PORT index="16" pos="right"/>
+	<IN_PORT index="17" pos="right"/>
+
+	<OUT_PORT index="0" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 1)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 0)" weight="1.0" />
 
 	</OUT_PORT>
 
 
-	<OUT_PORT index="1">
+	<OUT_PORT index="1" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 2)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 1)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 0)" weight="1.4142135623730951" />
@@ -1864,7 +1883,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="2">
+	<OUT_PORT index="2" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 3)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 2)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 1)" weight="1.4142135623730951" />
@@ -1872,7 +1891,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="3">
+	<OUT_PORT index="3" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 4)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 3)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 2)" weight="1.4142135623730951" />
@@ -1880,7 +1899,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="4">
+	<OUT_PORT index="4" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 5)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 4)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 3)" weight="1.4142135623730951" />
@@ -1888,7 +1907,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="5">
+	<OUT_PORT index="5" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 6)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 5)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 4)" weight="1.4142135623730951" />
@@ -1896,7 +1915,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="6">
+	<OUT_PORT index="6" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 7)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 6)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 5)" weight="1.4142135623730951" />
@@ -1904,7 +1923,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="7">
+	<OUT_PORT index="7" pos="left">
 			<input name="IN_NW" value="0" type="ALU" coord="(0, 8)" weight="1.4142135623730951" />
 			<input name="IN_W" value="1" type="ALU" coord="(0, 7)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 6)" weight="1.4142135623730951" />
@@ -1912,21 +1931,21 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="8">
+	<OUT_PORT index="8" pos="left">
 			<input name="IN_W" value="1" type="ALU" coord="(0, 8)" weight="1.0" />
 			<input name="IN_SW" value="2" type="ALU" coord="(0, 7)" weight="1.4142135623730951" />
 
 	</OUT_PORT>
 
 
-	<OUT_PORT index="9">
+	<OUT_PORT index="9" pos="right">
 			<input name="IN_E" value="5" type="ALU" coord="(6, 0)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 1)" weight="1.4142135623730951" />
 
 	</OUT_PORT>
 
 
-	<OUT_PORT index="10">
+	<OUT_PORT index="10" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 0)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 1)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 2)" weight="1.4142135623730951" />
@@ -1934,7 +1953,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="11">
+	<OUT_PORT index="11" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 1)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 2)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 3)" weight="1.4142135623730951" />
@@ -1942,7 +1961,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="12">
+	<OUT_PORT index="12" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 2)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 3)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 4)" weight="1.4142135623730951" />
@@ -1950,7 +1969,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="13">
+	<OUT_PORT index="13" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 3)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 4)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 5)" weight="1.4142135623730951" />
@@ -1958,7 +1977,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="14">
+	<OUT_PORT index="14" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 4)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 5)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 6)" weight="1.4142135623730951" />
@@ -1966,7 +1985,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="15">
+	<OUT_PORT index="15" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 5)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 6)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 7)" weight="1.4142135623730951" />
@@ -1974,7 +1993,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="16">
+	<OUT_PORT index="16" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 6)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 7)" weight="1.0" />
 			<input name="IN_NE" value="6" type="ALU" coord="(6, 8)" weight="1.4142135623730951" />
@@ -1982,7 +2001,7 @@
 	</OUT_PORT>
 
 
-	<OUT_PORT index="17">
+	<OUT_PORT index="17" pos="right">
 			<input name="IN_SE" value="4" type="ALU" coord="(6, 7)" weight="1.4142135623730951" />
 			<input name="IN_E" value="5" type="ALU" coord="(6, 8)" weight="1.0" />
 

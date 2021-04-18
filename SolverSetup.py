@@ -125,9 +125,11 @@ class SolverSetup():
                 ("mosek is not installed. " + "Please install mosek's python API like 'pip install mosek'")
         solver = {"solver": "MOSEK", "verbose": False}
 
+        mt_flag = MOSEK.onoffkey.on if self.__threads > 1 else \
+                    MOSEK.onoffkey.off
+
         solver["mosek_params"] = {MOSEK.iparam.num_threads: self.__threads,
-                                  MOSEK.iparam.intpnt_multi_thread: \
-                                    MOSEK.onoffkey.off}
+                                  MOSEK.iparam.intpnt_multi_thread: mt_flag }
 
         # check license
         self.__solver = pulp.MOSEK(msg=False)

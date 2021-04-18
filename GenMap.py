@@ -46,6 +46,12 @@ def parser():
 def checkFeasibility(CGRA, app):
     comp_dfg = app.getCompSubGraph()
     need_ops = {op: 0 for op in CGRA.getSupportedOps()}
+    w, h = CGRA.getSize()
+    if len(comp_dfg.nodes()) > w * h:
+        print("The size of PE array is {0}x{1} " + \
+                    "but DFG contains {2} nodes".format(\
+                    w, h, len(comp_dfg.nodes)))
+
     for v in comp_dfg.nodes():
         op = comp_dfg.nodes[v]["op"]
         if op in need_ops:

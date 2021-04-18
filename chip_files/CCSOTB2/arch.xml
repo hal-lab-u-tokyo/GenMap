@@ -5302,64 +5302,78 @@
 		</SE>
 	</PE>
 
-	<OUT_PORT index="0">
+	<IN_PORT index="0" pos="bottom"/>
+	<IN_PORT index="1" pos="bottom"/>
+	<IN_PORT index="2" pos="bottom"/>
+	<IN_PORT index="3" pos="bottom"/>
+	<IN_PORT index="4" pos="bottom"/>
+	<IN_PORT index="5" pos="bottom"/>
+	<IN_PORT index="6" pos="bottom"/>
+	<IN_PORT index="7" pos="bottom"/>
+	<IN_PORT index="8" pos="bottom"/>
+	<IN_PORT index="9" pos="bottom"/>
+	<IN_PORT index="10" pos="bottom"/>
+	<IN_PORT index="11" pos="bottom"/>
+
+	<OUT_PORT index="0" pos="bottom">
 		<input name="OUT_0" type="SE" id="0" src_name="OUT_SOUTH" coord="(0, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="1">
+	<OUT_PORT index="1" pos="bottom">
 		<input name="OUT_1" type="SE" id="0" src_name="OUT_SOUTH" coord="(1, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="2">
+	<OUT_PORT index="2" pos="bottom">
 		<input name="OUT_2" type="SE" id="0" src_name="OUT_SOUTH" coord="(2, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="3">
+	<OUT_PORT index="3" pos="bottom">
 		<input name="OUT_3" type="SE" id="0" src_name="OUT_SOUTH" coord="(3, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="4">
+	<OUT_PORT index="4" pos="bottom">
 		<input name="OUT_4" type="SE" id="0" src_name="OUT_SOUTH" coord="(4, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="5">
+	<OUT_PORT index="5" pos="bottom">
 		<input name="OUT_5" type="SE" id="0" src_name="OUT_SOUTH" coord="(5, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="6">
+	<OUT_PORT index="6" pos="bottom">
 		<input name="OUT_6" type="SE" id="0" src_name="OUT_SOUTH" coord="(6, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="7">
+	<OUT_PORT index="7" pos="bottom">
 		<input name="OUT_7" type="SE" id="0" src_name="OUT_SOUTH" coord="(7, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="8">
+	<OUT_PORT index="8" pos="bottom">
 		<input name="OUT_8" type="SE" id="0" src_name="OUT_SOUTH" coord="(8, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="9">
+	<OUT_PORT index="9" pos="bottom">
 		<input name="OUT_9" type="SE" id="0" src_name="OUT_SOUTH" coord="(9, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="10">
+	<OUT_PORT index="10" pos="bottom">
 		<input name="OUT_10" type="SE" id="0" src_name="OUT_SOUTH" coord="(10, 0)"/>
 	</OUT_PORT>
 
 
-	<OUT_PORT index="11">
+	<OUT_PORT index="11" pos="bottom">
 		<input name="OUT_11" type="SE" id="0" src_name="OUT_SOUTH" coord="(11, 0)"/>
 	</OUT_PORT>
+
 
 </PEArray>
 

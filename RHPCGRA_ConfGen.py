@@ -189,7 +189,7 @@ class RHPCGRA_ConfGen(ConfGenBase):
         sns.heatmap(lat, cbar = False, cmap = "binary", linewidths=1)
         sns.heatmap(lat, cmap="Reds", mask = mask, linewidths=1,\
                      linecolor="black", xticklabels=xtick, \
-                     yticklabels=ytick, annot=True)
+                     yticklabels=ytick, annot=True, vmin=0)
         plt.savefig(heat_file_name)
 
 

@@ -164,7 +164,6 @@ class Individual():
         duplicated_nodes = {k: duplicated_nodes[k] for k in keys}
 
         new_mapping = copy.deepcopy(self.mapping)
-
         for op, coord in duplicated_nodes.items():
             if list(new_mapping.values()).count(coord) == 1:
                 continue

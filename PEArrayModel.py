@@ -28,7 +28,7 @@ class PEArrayModel():
                 output_port: the number of output port
                 inout_port: the number of inout port
             Please note you can use either a pair of input_port and output port or inout_port.
-            And also, it must contain a child elements whose tag name is "PE", "PREG", or "OUT_PORT".
+            And also, it must contain a child elements whose tag name is "PE", "PREG", "IN_PORT" or "OUT_PORT".
 
             "PE" Element will be composed of
                 an "ALU" Element
@@ -86,6 +86,12 @@ class PEArrayModel():
             If vpos = y, it means the pipeline register is placed between (y - 1)th PE rows and yth PE rows.
 
             "OUT_PORT" Element will be composed of "input" elements
+
+            "IN_PORT" and "OUT_PORT" can have an optional attiribute named "pos".
+            It is used to specify where each port is placed in the PE array.
+            This attribute is valid for the following values:
+                "bottom", "top", "left", "right"
+
 
         Raise:
             If there exist invalid configurations, it will raise
@@ -165,6 +171,9 @@ class PEArrayModel():
         #   values: list of ALU coord
         self.__supported_ALU = {}
 
+        # IO placement
+        self.__input_pos = {"left": [], "right": [], "top": [], "bottom": []}
+        self.__output_pos = {"left": [], "right": [], "top": [], "bottom": []}
 
         # get architecture name
         name_str = conf.get("name")
@@ -360,7 +369,7 @@ class PEArrayModel():
                     if output.get("return_only") == "True":
                         self.__return_only_se.append(se_node_name)
 
-        # add output connections
+        # get output connections
         for ele in conf:
             if ele.tag == "OUT_PORT":
                 if ele.get("index") is None:
@@ -370,11 +379,59 @@ class PEArrayModel():
                         oport_index = int(ele.get("index"))
                     except ValueError:
                         raise ValueError("Invalid OUT_PORT index: " + ele.get("index"))
+                    if not oport_index in self.__out_port_range:
+                        raise self.InvalidConfigError("OUT_PORT index {0} is out of range".format(oport_index))
                 connections[OUT_PORT_node_exp.format(index=oport_index)] = ele.iter("input")
+                # check position setting
+                if not ele.get("pos") is None:
+                    pos = ele.get("pos")
+                    if not pos in self.__output_pos.keys():
+                        raise self.InvalidConfigError("Unknown OUT_PORT {0} position: {1}".format(oport_index, pos))
+                    else:
+                        self.__output_pos[pos].append(oport_index)
 
         # make connections
         for dst, srcs in connections.items():
             self.__make_connection(dst, srcs)
+
+
+        # get input position setting
+        for ele in conf:
+            if ele.tag == "IN_PORT":
+                if ele.get("index") is None:
+                    raise self.InvalidConfigError("missing IN_PORT index")
+                else:
+                    try:
+                        iport_index = int(ele.get("index"))
+                    except ValueError:
+                        raise ValueError("Invalid IN_PORT index: " + ele.get("index"))
+                    if not iport_index in self.__in_port_range:
+                        raise self.InvalidConfigError("IN_PORT index {0} is out of range".format(iport_index))
+                if not ele.get("pos") is None:
+                    pos = ele.get("pos")
+                    if not pos in self.__input_pos.keys():
+                        raise self.InvalidConfigError("Unknown IN_PORT {0} position: {1}".format(iport_index, pos))
+                    else:
+                        self.__input_pos[pos].append(iport_index)
+
+        # sort of io position list in asc order
+        for v in self.__input_pos.values():
+            v.sort()
+        for v in self.__output_pos.values():
+            v.sort()
+
+        # check io position setting
+        lack = set(self.__in_port_range) - \
+            set([inner for outer in self.__input_pos.values() \
+                 for inner in outer])
+        if len(self.__in_port_range) > len(lack) > 0:
+            print("Warning: positions for some IN_PORTs ({0}) are not specified".format(lack))
+        lack = set(self.__out_port_range) - \
+            set([inner for outer in self.__output_pos.values() \
+                for inner in outer])
+        if len(self.__out_port_range) > len(lack) > 0:
+            print("Warning: positions for some OUT_PORTs ({0}) are not specified".format(lack))
+
 
         # set node attributes
         nx.set_node_attributes(self.__network, True, "free")
@@ -454,7 +511,7 @@ class PEArrayModel():
                     if attr["index"] in self.__const_reg_range:
                         src_node = CONST_node_exp.format(index=attr["index"])
                     else:
-                        raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
+                        raise self.InvalidConfigError(str(attr["index"]) + " is out of range for const registers")
 
 
             elif attr["type"] == "IN_PORT": # add edge from Input Port
@@ -464,7 +521,7 @@ class PEArrayModel():
                     if attr["index"] in self.__in_port_range:
                         src_node = IN_PORT_node_exp.format(index=attr["index"])
                     else:
-                        raise self.InvalidConfigError(attr["index"] + " is out of range for const registers")
+                        raise self.InvalidConfigError(str(attr["index"]) + " is out of range for input port")
             else:
                 raise self.InvalidConfigError("known connection type {0}".format(attr["type"]))
 
@@ -694,6 +751,11 @@ class PEArrayModel():
         """
         return [IN_PORT_node_exp.format(index=i) for i in self.__in_port_range]
 
+    def getOutputPorts(self):
+        """Returns output port names of the network.
+        """
+        return [OUT_PORT_node_exp.format(index=i) for i in self.__in_port_range]
+
     def getInoutPorts(self):
         """Returns pairs of input port and output port
         """
@@ -703,10 +765,33 @@ class PEArrayModel():
         else:
             return []
 
-    def getOutputPorts(self):
-        """Returns output port names of the network.
+    def getInputPortsByPos(self, pos):
+        """Returns input port names at the specified pos of the network.
+
+            Args:
+                pos (str): position of input ports as following:
+                    "left", "right", "top", "bottom"
         """
-        return [OUT_PORT_node_exp.format(index=i) for i in self.__in_port_range]
+        if pos in self.__input_pos:
+            return [IN_PORT_node_exp.format(index=i) \
+                    for i in self.__input_pos[pos]]
+        else:
+            return []
+
+    def getOutputPortsByPos(self, pos):
+        """Returns output port names at the specified pos of the network.
+
+            Args:
+                pos (str): position of output ports as following:
+                    "left", "right", "top", "bottom"
+        """
+        if pos in self.__output_pos:
+            return [OUT_PORT_node_exp.format(index=i) \
+                    for i in self.__output_pos[pos]]
+        else:
+            return []
+
+
 
     def get_PE_resources(self, coord):
         return {"ALU": self.getNodeName("ALU", coord),\
@@ -868,6 +953,20 @@ class PEArrayModel():
         """
         return node_name.find("OUT_PORT") == 0
 
+    @staticmethod
+    def isIN_PORT(node_name):
+        """Check whether the node is OUT_PORT or not.
+
+            Args:
+                node_name (str): a name of node
+
+            Returns:
+                bool: if the node is OUT_PORT, return True.
+                      otherwise return False.
+
+        """
+        return node_name.find("IN_PORT") == 0
+
     def getOperationList(self, coord):
         """Returns operation list supported by an ALU.
 
@@ -939,3 +1038,4 @@ class PEArrayModel():
 
         """
         return self.__routing_opcode[node]
+

@@ -1,11 +1,17 @@
 from EvalBase import EvalBase
+import networkx as nx
+import os
+import signal
+import math
+
+main_pid = os.getpid()
 
 class MapHeightEval(EvalBase):
     def __init__(self):
         pass
 
     @staticmethod
-    def eval(CGRA, app, sim_params, individual):
+    def eval(CGRA, app, sim_params, individual, **info):
         """Return mapping height.
 
             Args:
@@ -31,6 +37,24 @@ class MapHeightEval(EvalBase):
                         y_coords.append(y)
                         break
         map_height = max(y_coords) + 1
+
+        # if "quit_minheight" in info.keys():
+        #     if info["quit_minheight"] is True:
+        #         input_count = len(set(nx.get_node_attributes(\
+        #                     app.getInputSubGraph(), "input").keys()))
+        #         output_count = len(set(nx.get_node_attributes(\
+        #                     app.getOutputSubGraph(), "output").keys()))
+        #         minh_op = math.ceil(len(app.getCompSubGraph().nodes()) \
+        #                                 / width)
+        #         if CGRA.isIOShared():
+        #             min_maph = max(((input_count + output_count + 1) // 2),\
+        #                             minh_op)
+        #         else:
+        #             min_maph = max(input_count, output_count, minh_op)
+
+        #     if min_maph == map_height and individual.isValid():
+        #         os.kill(main_pid, signal.SIGUSR1)
+
         return map_height
 
     @staticmethod
