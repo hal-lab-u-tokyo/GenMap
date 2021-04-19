@@ -109,14 +109,14 @@ class SolverSetup():
             raise SolverSetup.SolverSetupError\
                 ("ECOS is not installed.")
 
-        print("WARN: ECOS might be fail to solver a problem for a certain condition")
+        print("WARN: ECOS might be fail to solve a convex problem for a certain condition")
         self.__solver = {"solver": "ECOS", "verbose": False}
 
     def __scs_cp_setup(self):
         if not "SCS" in cp.installed_solvers():
             raise SolverSetup.SolverSetupError\
                 ("SCS is not installed.")
-        print("WARN: SCS might be fail to solver a problem for a certain condition")
+        print("WARN: SCS might be fail to solve a convex problem for a certain condition")
         self.__solver = {"solver": "SCS", "verbose": False}
 
     def __mosek_cp_setup(self):

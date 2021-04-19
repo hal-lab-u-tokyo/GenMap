@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as pat
 import networkx as nx
+import pulp
 
 from SolverSetup import SolverSetup
 
 import math
-import pulp
 
 # setting up for pulp solver
 try:
@@ -56,8 +56,12 @@ class ConfDrawer():
         self.used_input = {}
         self.used_output = {}
         # count for each position
-        self.io_count = {}
-        self.io_placed_count = {}
+        # dict of dict
+        # 1st key: IO pos, 2nd key: coord of adj PE
+        self.io_count = {pos: {} for pos in ["left", "right", "top", "bottom"]}
+        self.io_placed_count =  {pos: {} for pos in ["left", "right", "top", "bottom"]}
+        # drawing 
+        self.io_size = pe_size # it cloud be updated after anylyzeIO
 
         for x in range(self.width):
             for y in range(self.height):
@@ -167,14 +171,17 @@ class ConfDrawer():
         info_list.extend(self.used_output.values())
         for info in info_list:
             coord = info["adjPE"]
-            if not coord in self.io_count:
-                self.io_count[coord] = 1
+            pos = info["pos"]
+            if not coord in self.io_count[pos]:
+                self.io_count[pos][coord] = 1
+                self.io_placed_count[pos][coord] = 0
             else:
-                self.io_count[coord] += 1
+                self.io_count[pos][coord] += 1
 
-        self.io_placed_count = {coord: 0 for coord in self.io_count.keys()}
-
-        if CGRA.isIOShared() and max(self.io_count.values()) > 1:
+        max_io_count = max([count for count_list in self.io_count.values() \
+                                for count in count_list.values()])
+        self.length = pe_size / float(max_io_count)
+        if CGRA.isIOShared() and max_io_count > 1:
             print("Warning: the target CGRA shares IO ports for both input and output but some IO are drawn at the same position")
 
         used_pos = [info["pos"] for info in info_list]
@@ -447,32 +454,34 @@ class ConfDrawer():
                 self.used_output[node_name]
 
         adjPEPos = info["adjPE"]
-        length = pe_size / float(self.io_count[adjPEPos])
-        placed_count = self.io_placed_count[adjPEPos]
-        port_ofst = placed_count * length + (length / 2.0)
-        harf_PE = 1 / 2.0
-
+        pos = info["pos"]
+        length = self.length
+        margin_to_PE = length / 2.0
+        placed_count = self.io_placed_count[pos][adjPEPos]
+        io_count = self.io_count[pos][adjPEPos]
+        port_ofst = ((pe_size / float(io_count * 2))\
+                 * (placed_count * 2 + 1))
         color = iport_color if isInput else oport_color
 
         # calc offset and rotation angles
         if info["pos"] == "left":
-            pos_x = adjPEPos[0] - harf_PE
+            pos_x = adjPEPos[0] - margin_to_PE
             pos_y = adjPEPos[1] + pe_margin + port_ofst
             angle = math.radians(270) if isInput else math.radians(90)
         elif info["pos"] == "right":
-            pos_x = adjPEPos[0] + harf_PE + 1
+            pos_x = adjPEPos[0] + margin_to_PE + 1
             pos_y = adjPEPos[1] + pe_margin + port_ofst
             angle = math.radians(90) if isInput else math.radians(270)
         elif info["pos"] == "top":
             pos_x = adjPEPos[0] + pe_margin + port_ofst
-            pos_y = adjPEPos[1] + harf_PE + 1
+            pos_y = adjPEPos[1] + margin_to_PE + 1
             angle =  math.radians(180) if isInput else math.radians(0)
         elif info["pos"] == "bottom":
             pos_x = adjPEPos[0] + pe_margin + port_ofst
-            pos_y = adjPEPos[1] - harf_PE
+            pos_y = adjPEPos[1] - margin_to_PE
             angle = math.radians(0) if isInput else math.radians(180)
 
-        self.io_placed_count[adjPEPos] += 1
+        self.io_placed_count[pos][adjPEPos] += 1
 
         return pat.RegularPolygon(xy = (pos_x, pos_y), radius = length / 2,\
                                 numVertices= 3, fc = color, \

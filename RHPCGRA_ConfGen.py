@@ -9,6 +9,10 @@ from MapHeightEval import MapHeightEval
 from MapWidthEval import MapWidthEval
 from LatencyBalanceEval import LatencyBalanceEval
 
+import matplotlib
+import warnings
+warnings.filterwarnings('ignore', category=matplotlib.MatplotlibDeprecationWarning)
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
