@@ -131,7 +131,7 @@ class AStarRouter(RouterBase):
         return route_cost
 
     @staticmethod
-    def output_routing(CGRA, out_DFG, mapping, routed_graph, preg_conf = None, **info):
+    def output_routing(CGRA, out_DFG, mapping, routed_graph, preg_conf = None,  dontuse = [], **info):
 
         route_cost = 0
 
@@ -139,7 +139,8 @@ class AStarRouter(RouterBase):
         output_edges = out_DFG.edges()
 
         # get output node name
-        out_port_nodes = CGRA.getOutputPorts()
+        out_port_nodes = [oport for oport in CGRA.getOutputPorts()\
+                            if not oport in dontuse]
 
         # # get alu nodes connected to output port
         alu_list = []
@@ -162,8 +163,10 @@ class AStarRouter(RouterBase):
             alu = CGRA.getNodeName("ALU", pos=mapping[v])
             # remove high cost of alu out
             for suc_element in routed_graph.successors(alu):
-                routed_graph.edges[alu, suc_element]["weight"] = \
-                    CGRA.getLinkWeight((alu, suc_element))
+                e = alu, suc_element
+                if routed_graph.edges[e]["weight"] < USED_LINK_WEIGHT:
+                    routed_graph.edges[e]["weight"] = \
+                        CGRA.getLinkWeight((alu, suc_element))
 
             src = alu
             if src in path_extend_nodes:
@@ -209,7 +212,6 @@ class AStarRouter(RouterBase):
                     routed_graph.nodes[path[i+1]]["route"] = True
             routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
-            # print("out", path)
 
             # update ALU out link cost and used flag
             for suc in routed_graph.successors(src):
@@ -352,11 +354,8 @@ class AStarRouter(RouterBase):
 
         # check result
         if pulp.LpStatus[stat] == "Optimal" and not result is None:
-            if result > PENALTY_CONST:
-                return None
-            else:
-                res_mapping = {r: [e for e in routed_edges if round(isMap[e][r].value()) == 1] for r in resources}
-                return res_mapping
+            res_mapping = {r: [e for e in routed_edges if round(isMap[e][r].value()) == 1] for r in resources}
+            return res_mapping
         else:
             return None
 
@@ -454,22 +453,19 @@ class AStarRouter(RouterBase):
 
         # check result
         if pulp.LpStatus[stat] == "Optimal" and not result is None:
-            if result > PENALTY_CONST:
-                return None
-            else:
-                input_mapping = {}
-                for inode in inodes:
-                    for ip in iport_list:
-                        if isInportMap[inode][ip].value() == 1.0:
-                            input_mapping[ip] = inode
-                            break
-                output_mapping = {}
-                for onode in onodes:
-                    for op in oport_list:
-                        if isOutportMap[onode][op].value() == 1.0:
-                            output_mapping[op] = onode
-                            break
-                return (input_mapping, output_mapping)
+            input_mapping = {}
+            for inode in inodes:
+                for ip in iport_list:
+                    if isInportMap[inode][ip].value() == 1.0:
+                        input_mapping[ip] = inode
+                        break
+            output_mapping = {}
+            for onode in onodes:
+                for op in oport_list:
+                    if isOutportMap[onode][op].value() == 1.0:
+                        output_mapping[op] = onode
+                        break
+            return (input_mapping, output_mapping)
         else:
             return None
 

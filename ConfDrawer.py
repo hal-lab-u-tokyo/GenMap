@@ -84,19 +84,29 @@ class ConfDrawer():
             if CGRA.isOUT_PORT(v):
                 self.used_output[v] = {}
 
+        # get IO config
+        self.analyzeIO(CGRA)
+        horizontal_ofset = 1 if len(self.io_count["left"]) > 0 \
+            or len(self.io_count["right"]) > 0 else 0
+        vertical_ofset = 1 if len(self.io_count["top"]) > 0 \
+            or  len(self.io_count["bottom"]) > 0 else 0
 
-        actual_width = max(x for x in range(self.width) for y in range(self.height) if self.used_PE[x][y]) + 1
-        actual_height = max(y for x in range(self.width) for y in range(self.height) if self.used_PE[x][y]) + 1
+
+        used_PE_coords = [(x, y) for x in range(self.width) for y in range(self.height) if self.used_PE[x][y]]
+        used_ip_coords = [v["adjPE"] for v in self.used_input.values()]
+        used_op_coords = [v["adjPE"] for v in self.used_output.values()]
+
+        actual_width = max([x for (x, y) in \
+            sum([used_PE_coords, used_ip_coords, used_op_coords], [])]) + 1
+        actual_height = max([y for (x, y) in \
+            sum([used_PE_coords, used_ip_coords, used_op_coords], [])]) + 1
 
         # draw the used PEs
         self.width = actual_width
         self.height = actual_height
 
-        self.xubound = self.width
-        self.yubound = self.height
-
-        # get IO config
-        self.analyzeIO(CGRA)
+        self.xubound = self.width + horizontal_ofset
+        self.yubound = self.height + vertical_ofset
 
         self.fig = plt.figure(figsize=(self.xubound, self.yubound))
         self.ax = self.fig.add_subplot(1, 1, 1)
@@ -130,41 +140,46 @@ class ConfDrawer():
                     oports_dict[pos].append(op_name)
                     info["pos"] = pos
 
-        # estimate adjPE
+        # estimate adjPE for each pos
         g = CGRA.getNetwork()
+        pending_iport_analysis = False
         for pos in io_pos:
             # for input
-            connPos = {}
+            ipConnPos = {}
             if len(iports_dict[pos]) > 0:
-                try:
-                    for u in iports_dict[pos]:
-                        connPos[u] = self.getAdjPECandidates(pos, \
-                                            list(g.successors(u)))
-                    adjPEPos = self.findAdjPE(pos, connPos)
-                    for k, v in adjPEPos.items():
-                        self.used_input[k]["adjPE"] = v
-                except Exception as e:
-                    print(e)
-                    print("skip IO drawing")
-                    for u in iports_dict[pos]:
-                        del self.used_input[u]
+                for u in iports_dict[pos]:
+                    ipConnPos[u] = self.getAdjPECandidates(pos, \
+                                        list(g.successors(u)))
 
             # for output
-            connPos = {}
+            opConnPos = {}
             if len(oports_dict[pos]) > 0:
-                try:
-                    for u in oports_dict[pos]:
-                        connPos[u] = self.getAdjPECandidates(pos, \
-                                            list(g.predecessors(u)))
+                for u in oports_dict[pos]:
+                    opConnPos[u] = self.getAdjPECandidates(pos, \
+                                        list(g.predecessors(u)))
 
+
+            try:
+                if CGRA.isIOShared():
+                    connPos = ipConnPos.copy()
+                    connPos.update(opConnPos)
                     adjPEPos = self.findAdjPE(pos, connPos)
-                    for k, v in adjPEPos.items():
-                        self.used_output[k]["adjPE"] = v
-                except Exception as e:
-                    print(e)
-                    print("skip IO drawing")
-                    for u in oports_dict[pos]:
-                        del self.used_output[u]
+                else:
+                    adjPEPos = self.findAdjPE(pos, ipConnPos)
+                    adjPEPos.append(self.findAdjPE(pos, opConnPos))
+            except Exception as e:
+                print(e)
+                print("skip IO drawing")
+                for u in iports_dict[pos]:
+                    del self.used_input[u]
+                for u in oports_dict[pos]:
+                    del self.used_output[u]
+
+            for k, v in adjPEPos.items():
+                if k in iports_dict[pos]:
+                    self.used_input[k]["adjPE"] = v
+                else:
+                    self.used_output[k]["adjPE"] = v
 
         # count IO for each position
         info_list = list(self.used_input.values())
