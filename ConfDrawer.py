@@ -47,6 +47,7 @@ class ConfDrawer():
         self.xubound = 0
         self.yubound = 0
 
+
         # io drawing info
         # dict of dict:
         #  key: name (str), val: dict
@@ -144,29 +145,28 @@ class ConfDrawer():
         g = CGRA.getNetwork()
         pending_iport_analysis = False
         for pos in io_pos:
-            # for input
-            ipConnPos = {}
-            if len(iports_dict[pos]) > 0:
-                for u in iports_dict[pos]:
-                    ipConnPos[u] = self.getAdjPECandidates(pos, \
-                                        list(g.successors(u)))
-
-            # for output
-            opConnPos = {}
-            if len(oports_dict[pos]) > 0:
-                for u in oports_dict[pos]:
-                    opConnPos[u] = self.getAdjPECandidates(pos, \
-                                        list(g.predecessors(u)))
-
-
             try:
+                # for input
+                ipConnPos = {}
+                if len(iports_dict[pos]) > 0:
+                    for u in iports_dict[pos]:
+                        ipConnPos[u] = self.getAdjPECandidates(pos, \
+                                            list(g.successors(u)))
+
+                # for output
+                opConnPos = {}
+                if len(oports_dict[pos]) > 0:
+                    for u in oports_dict[pos]:
+                        opConnPos[u] = self.getAdjPECandidates(pos, \
+                                            list(g.predecessors(u)))
+
                 if CGRA.isIOShared():
                     connPos = ipConnPos.copy()
                     connPos.update(opConnPos)
                     adjPEPos = self.findAdjPE(pos, connPos)
                 else:
                     adjPEPos = self.findAdjPE(pos, ipConnPos)
-                    adjPEPos.append(self.findAdjPE(pos, opConnPos))
+                    adjPEPos.update(self.findAdjPE(pos, opConnPos))
             except Exception as e:
                 print(e)
                 print("skip IO drawing")
@@ -262,43 +262,32 @@ class ConfDrawer():
 
 
     def getAdjPECandidates(self, pos, connNodes):
+
         coord_set = set()
-        w = len(self.PE_resources)
-        h = len(self.PE_resources[0])
+
         if pos == "left":
             candidate_coord = [(0, y) for y in range(self.height)]
-            additional_coord = {(0, y) for y in range(self.height, h)}
         elif pos == "right":
-            candidate_coord = [(w - 1, y) for y in range(self.height)]
-            additional_coord = {(w - 1, y) for y in range(self.height, h)}
+            candidate_coord = [(self.width - 1, y) \
+                                for y in range(self.height)]
         elif pos == "top":
-            candidate_coord = [(x, h - 1) for x in range(self.width)]
-            additional_coord = {(x, h - 1) for x in range(self.width, w)}
+            candidate_coord = [(x, self.height - 1) \
+                                for x in range(self.width)]
         elif pos == "bottom":
             candidate_coord = [(x, 0) for x in range(self.width)]
-            additional_coord = {(x, 0) for x in range(self.width, w)}
+
 
         if pos in ["left", "right"]:
             forCoordSort = lambda pos: pos[1]
-            updata_size = lambda val: (self.width, val)
         elif pos in ["top", "bottom"]:
             forCoordSort = lambda pos: pos[0]
-            updata_size = lambda val: (val, self.height)
 
         for v in connNodes:
             if self.node_pos[v] in candidate_coord:
                 coord_set.add(self.node_pos[v])
         # serach further node
         if len(coord_set) == 0:
-            l = list(additional_coord & \
-                    {self.node_pos[v] for v in connNodes})
-            if len(l) > 0:
-                coord = sorted(l, key = forCoordSort)[0]
-                coord_set.add(coord)
-                (self.width, self.height) = \
-                    updata_size(forCoordSort(coord) + 1)
-            else:
-                raise Exception("Fail to decide IO position")
+            raise Exception("Fail to find adjcent PE for IOs")
 
         return list(coord_set)
 
