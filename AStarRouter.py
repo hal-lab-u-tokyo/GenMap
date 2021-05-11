@@ -147,6 +147,8 @@ class AStarRouter(RouterBase):
         for v, o in output_edges:
             alu_list.append(CGRA.getNodeName("ALU", pos=mapping[v]))
 
+        remain_edges = len(output_edges)
+
         # check pipeline structure
         path_extend_nodes = []
         free_last_stage_SEs = set()
@@ -164,7 +166,7 @@ class AStarRouter(RouterBase):
             # remove high cost of alu out
             for suc_element in routed_graph.successors(alu):
                 e = alu, suc_element
-                if routed_graph.edges[e]["weight"] < USED_LINK_WEIGHT:
+                if routed_graph.edges[e]["free"]:
                     routed_graph.edges[e]["weight"] = \
                         CGRA.getLinkWeight((alu, suc_element))
 
@@ -173,7 +175,7 @@ class AStarRouter(RouterBase):
                 # extend data path
                 path, cost = AStarRouter.__find_nearest_node(routed_graph, src, free_last_stage_SEs)
                 if path is None:
-                    return PENALTY_CONST
+                    return PENALTY_CONST * remain_edges
                 route_cost += cost
 
                 # update cost and used flag
@@ -196,7 +198,7 @@ class AStarRouter(RouterBase):
             # output routing
             path, cost = AStarRouter.__find_nearest_node(routed_graph, src, out_port_nodes)
             if path is None:
-                return PENALTY_CONST
+                return PENALTY_CONST * remain_edges
 
             route_cost += cost
 
@@ -220,6 +222,8 @@ class AStarRouter(RouterBase):
             out_port_nodes.remove(path[-1])
 
             routed_graph.nodes[path[-1]]["map"] = o
+
+            remain_edges -= 1
 
         return route_cost
 

@@ -218,9 +218,10 @@ class NSGA2():
         self.__toolbox.register("evaluate", self.eval_objectives, self.__eval_list, self.__eval_args, CGRA, app, sim_params, self.__router, rt_options)
         self.__toolbox.register("mate", Individual.cxSet)
         # determine the local serach probability for mutation
-        if len(app.getCompSubGraph().nodes()) == (width * height) or \
-            len(app.getCompSubGraph().nodes()) == 1:
+        if len(app.getCompSubGraph().nodes()) == (width * height):
             ls_prob = 1
+        elif len(app.getCompSubGraph().nodes()) == 1:
+            ls_prob = 0
         else:
             ls_prob = 0.5
         self.__toolbox.register("mutate", Individual.mutSet, ls_prob)
