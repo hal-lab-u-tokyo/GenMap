@@ -72,6 +72,22 @@ def checkFeasibility(CGRA, app):
     return True
 
 if __name__ == '__main__':
+
+    launch_msg = """
+# ==================================================
+#       ____            __  __             
+#      / ___| ___ _ __ |  \/  | __ _ _ __  
+#     | |  _ / _ \ '_ \| |\/| |/ _` | '_ \ 
+#     | |_| |  __/ | | | |  | | (_| | |_) |
+#      \____|\___|_| |_|_|  |_|\__,_| .__/ 
+#                                   |_|   
+# ==================================================
+
+    Copyright (c) 2021 Amano laboratory, Keio University
+    Launching... PID: {0}
+    """.format(os.getpid())
+
+    print(launch_msg)
     args = parser()
 
     # load application dot file

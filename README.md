@@ -19,6 +19,12 @@ GenMap requires some additional packages. So, you have to have root privileges t
 1. CentOS 7
 1. CentOS 8
 
+We provide a docker image to use this tool easily.
+So, if you can use docker, we recommend using it.
+You will be freed from complicated environment construction.
+Also, it will be helpful to use GenMap in another OS.
+See [HowToUseDocker](./docker/HowToUseDocker.md) for more details.
+
 ### Required Packages/Libraries
 1. git
 1. python36
@@ -34,12 +40,12 @@ We recommend installing GenMap on a virtual python environment to avoid python l
 
 For CentOS7,
 ```
- $ yum install git python36 python36-devel python36-libs python36-tkinter graphviz
+ $ yum install git python36 python36-devel python36-libs python36-tkinter graphviz cmake3
 ```
 
 For CentOS8,
 ```
- $ dnf install git python36 python36-devel python3-libs python3-tkinter graphviz
+ $ dnf install git python36 python36-devel python3-libs python3-tkinter graphviz cmake3
 ```
 
 Perhaps, you need to add a yum repository to install python3.
@@ -132,10 +138,11 @@ Please copy optimization setting to working directory.
 
 To run GenMap, please execute:
 ```
-(GenMap_env) # python3 ../GenMap/GenMap.py gray.dot 10 
+(GenMap_env) # python3 ../GenMap/GenMap.py gray.dot 10 [--nproc num]
 ```
 At least, you have to specify two positional arguments. The first is an application DFG file, and the second is operation frequency (default MHz).
 For other optional arguments, please see help (``python GenMap.py -h``)
+You can specify the process count for multiprocessing (default 1).
 
 After GenMap starts, optimization status will appear like below.
 ```
@@ -146,6 +153,22 @@ Op_Mapping_Width: , max=3, min=2
 Power_Consumption: , max=0.589, min=0.347                                           
 Time_Slack: , max=61.2, min=0.462    
 ```
+
+## Stop optimization before reaching termination condition
+The genetic algorithm will stop evolution when satisfying either of the following conditions:
+1. reaching the maximum generation (``Maximum generation``)
+1. no improvement during a specified generation (``Maximum stall``)
+
+These parameters are configured in the setting file ``OptimizationParameters.xml``.
+
+If you want to exit the optimization before satisfying the above condition,
+send ``USR1`` signal to the main process as follows.
+
+```
+$ kill -USR1 {PID of GenMap}
+```
+
+PID will be shown in lauch message.
 
 ## Generate Configuration
 If the above optimization finishes successfully, it will save a result *gray.dump* (in default).
@@ -197,6 +220,27 @@ In the GenMap Shell, the following commands are available.
 1. view: view mapping of the selected solution
 1. save: save configurations of the selected solution
 1. quit: quit the shell
+
+You can see the usage of these command in GenMap Shell with ``--help`` option as follows.
+
+```
+GenMap shell> save --help
+usage: save [options...]
+It generates configuration files of selected solutions
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        specify output directory name
+  -f, --force           overwrite without prompt
+  -p PREFIX, --prefix PREFIX
+                        specify prefix of output file names (default:
+                        app_name)
+  -s STYLE [STYLE ...], --style STYLE [STYLE ...]
+                        Pass the space separated arguments to configuration
+                        generator
+```
+
 
 # How to change ILP solvers
 Some optimization in GenMap is handled as Integer Linear Program (ILP),
