@@ -129,7 +129,7 @@ class NSGA2():
         return {"pool": self}
 
 
-    def setup(self, CGRA, app, sim_params, method, proc_num = multiprocessing.cpu_count()):
+    def setup(self, CGRA, app, sim_params, method, proc_num = 1):
         """Setup NSGA2 optimization
 
             Args:
