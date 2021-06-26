@@ -1,3 +1,7 @@
+#  This file is part of GenMap and released under the MIT License, see LICENSE.
+#  Author: Takuya Kojima
+
+
 import networkx as nx
 import copy
 from pathlib import Path

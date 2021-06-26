@@ -1,3 +1,6 @@
+#  This file is part of GenMap and released under the MIT License, see LICENSE.
+#  Author: Takuya Kojima
+
 from PEArrayModel import PEArrayModel
 from Individual import Individual
 import networkx as nx

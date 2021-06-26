@@ -1,3 +1,6 @@
+#  This file is part of GenMap and released under the MIT License, see LICENSE.
+#  Author: Takuya Kojima
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as pat
 import networkx as nx

@@ -1,3 +1,6 @@
+#  This file is part of GenMap and released under the MIT License, see LICENSE.
+#  Author: Takuya Kojima
+
 from RouterBase import RouterBase
 from SolverSetup import SolverSetup
 

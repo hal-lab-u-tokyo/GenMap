@@ -1,14 +1,25 @@
-# GenMap
-Application Mapping Framework for CMA using Genetic Algorithm
+# About GenMap
+GenMap is an application mapping framework for spatially mapping CGRAs implemented with Python.
+It uses a multi-objective genetic algorithm.
+Therefore, it is easy to add your own objectives to be optimized.
+It also contains a leakage power optimization method, a dynamic power estimation model, and RoMultiC configuration generation.
+
+## Publications
+1. Takuya Kojima, Nguyen Anh Vu Doan, Hideharu Amano, “GenMap: A Genetic Algorithmic Approach for Optimizing Spatial Mapping of Coarse Grained Reconfigurable Architectures”, IEEE Transactions on Very Large Scale Integration Systems (VLSI), Vol. 28, no. 11, pp.2383-2396, Nov 2020. [[IEEE Xplore]](https://ieeexplore.ieee.org/document/9149647)
+1. Takeharu Ikezoe, Takuya Kojima and Hideharu Amano, “A Coarse-Grained Reconfigurable Architecture with a Fault Tolerant Non-Volatile Configurable Memory,” 2019 International Conference on Field-Programmable Technology (ICFPT), Tianjin, China, 2019, pp. 81-89. [[IEEE Xplore]](https://ieeexplore.ieee.org/abstract/document/8977850)
+1. Takuya Kojima and Hideharu Amano, “A Configuration Data Multicasting Method for Coarse-Grained Reconfigurable Architectures”, 28th International Conference on Field Programmable Logic and Applications (FPL), Dublin, Ireland, August, 2018. [[IEEE Xplore]](https://ieeexplore.ieee.org/abstract/document/8533501)
+1. Takuya Kojima, Naoki Ando, Hayate Okuhara, Hideharu Amano, “Glitch-aware Variable Pipeline Optimization for CGRAs”, ReConFig 2017, Mexico, December 2017. [[IEEE Xplore]](https://ieeexplore.ieee.org/document/8279797)
+1. Takuya Kojima, Naoki Ando, Hayate Okuhara, Ng. Anh Vu Doan, Hideharu Amano, “Body Bias Optimization for Variable Pipelined CGRA”, 27th International Conference on Field-Programmable Logic and Applications(FPL), Belgium, September 2017. [[IEEE Xplore]](https://ieeexplore.ieee.org/document/8056851)
+
 
 # Installation Requirements
 GenMap requires some additional packages. So, you have to have root privileges to install them.
 
-### Supported OS
+### Confirmed OS
 1. CentOS 7
 1. CentOS 8
 
-### Required Packages
+### Required Packages/Libraries
 1. git
 1. python36
 1. python36-devel
@@ -17,7 +28,7 @@ GenMap requires some additional packages. So, you have to have root privileges t
 1. graphviz
 
 ## Install Steps
-We recommend to install GenMap on a virtual python environment to avoid python library conflicts.
+We recommend installing GenMap on a virtual python environment to avoid python library conflicts.
 
 1. Install above packages (as necessary)
 
@@ -33,26 +44,26 @@ For CentOS8,
 
 Perhaps, you need to add a yum repository to install python3.
 ```
-sudo yum install https://centos7.iuscommunity.org/ius-release.rpm
+$ sudo yum install https://centos7.iuscommunity.org/ius-release.rpm
 ```
 
 2. Build a virtual python environment
 ```
-# pyvenv-3.6 GenMap_env
+$ pyvenv-3.6 GenMap_env
 ```
-It will create "GenMap_env" directory. You can use your favorite directory name.
+It will create a "GenMap_env" directory. You can use your favorite directory name.
 
 3. Activate the virtual environment
 ```
-# cd GenMap_env
-# source bin/activate
+$ cd GenMap_env
+$ source bin/activate
 ```
 If you want to exit this environment, just execute ``deactivate`` command.
 
 
 4. Install GenMap
  ```
-(GenMap_env) # git clone git@github.com:hungalab/GenMap.git
+(GenMap_env) $ git clone git@github.com:hungalab/GenMap.git
 ```
 
 5. Install Python Libraries
@@ -73,19 +84,23 @@ GenMap requires the following python libraries. Recommended version for each lib
     1. mosek (9.2.38) (necessary to use mosek's solvers)
 
 ```
-(GenMap_env) # pip3 install (package_name)[==version]
+(GenMap_env) $ pip3 install (package_name)[==version]
 ```
  or
  ```
- (GenMap_env) # pip3 install -r requirements.txt(in this repo)
+ (GenMap_env) $ pip3 install -r requirements.txt (in this repo)
+ # Perhaps a version conflict will occur between numpy and cvxpy
+ # In this case, please install only numpy at first. Then, try to install the other packages with requirements.txt
+ # The optional packages are commented out
  ```
 
-# Supported Architectures
-GenMap supports following CMA architectures by default:
-    1. CMA-SOTB2
-    1. CC-SOTB
-    1. CC-SOTB2 (VPCMA)
-    1. VPCMA2
+# Included architecture definitions
+GenMap supports following CGRA architectures by default:
+1. CMA-SOTB2 [[K.Masuyama, *et al*]](https://ieeexplore.ieee.org/abstract/document/7393280) (a.k.a. NVCMA [[T.Ikezoe, *et al*]](https://ieeexplore.ieee.org/abstract/document/8641712) )
+1. CC-SOTB [[Y.Matsushita, *et al*]](https://ieeexplore.ieee.org/abstract/document/7577346) 
+1. CC-SOTB2 (VPCMA) [[N.Ando, *et al*]](https://ieeexplore.ieee.org/abstract/document/7929537) 
+1. VPCMA2 [[T.Kojima, *et al*]](https://ieeexplore.ieee.org/abstract/document/9034924) 
+1. RHP-CGRA [[A.Podobas, *et al*]](https://ieeexplore.ieee.org/abstract/document/9153262)
 
 Architecture information and parameters for some simulation are in the [chip_files](./chip_files)
 
@@ -99,7 +114,7 @@ At first, make a working directory. In this tutorial, the working directory is i
 (GenMap_env) # cd work
 ```
 
-Please copy a sample application file to working direcotry (*gray* in this example).
+Please copy a sample application DFG file to a working directory (*gray* in this example).
 ```
 (GenMap_env) # cp ../GenMap/app_samples/gray.dot ./
 ```
@@ -119,7 +134,7 @@ To run GenMap, please execute:
 ```
 (GenMap_env) # python3 ../GenMap/GenMap.py gray.dot 10 
 ```
-At least, you have to specify two arguments. First is application source file, and second is operation frequency (default MHz).
+At least, you have to specify two positional arguments. The first is an application DFG file, and the second is operation frequency (default MHz).
 For other optional arguments, please see help (``python GenMap.py -h``)
 
 After GenMap starts, optimization status will appear like below.
@@ -133,7 +148,7 @@ Time_Slack: , max=61.2, min=0.462
 ```
 
 ## Generate Configuration
-If the above optimization finishs successfully, it will save a result *gray.dump* (in default).
+If the above optimization finishes successfully, it will save a result *gray.dump* (in default).
 By loading this result, you can generate configuration data for the architecture.
 
 Please execute:
@@ -203,7 +218,7 @@ $ export GMP_ILP_SOLVER=cbc
 ```
 $ export GMP_ILP_SOLVER=gurobi
 ```
-Also, some environment vairiables like GRB_LICENSE_FILE are needed for gurobi itself.
+Also, some environment variables like GRB_LICENSE_FILE are needed for gurobi itself.
 
 Please see [the official web site](https://www.gurobi.com/documentation/9.1/quickstart_mac/setting_environment_variab.html)
 
@@ -213,16 +228,16 @@ $ export GMP_ILP_SOLVER=mosek
 ```
 
 # Write an Application 
-For GenMap, an application data-flow is described in *DOT* format.
-For more information, please refer to [To Be Add]()
+For GenMap, the application DFG file is described in *DOT* format.
+For more information, please refer to [To Be Added]()
 
 # How to customize 
-You can customize the followings.
-1. Architecutes
+You can customize the following:
+1. Architectures
     1. PE Size
     1. PE Array Topology  
     etc.
 1. Optimization objectives
 1. Routing algorithm
 
-For more information, please refer to [To Be Add]()
+For more information, please refer to [To Be Added]()

@@ -1,3 +1,6 @@
+#  This file is part of GenMap and released under the MIT License, see LICENSE.
+#  Author: Takuya Kojima
+
 from GenMapShell import GenMapShell
 from ConfDrawer import ConfDrawer
 from Individual import Individual
