@@ -608,7 +608,7 @@ class PEArrayModel():
             try:
                 src_index = int(index_str)
             except ValueError:
-                raise ValueError("Invalid index of " + dst + ": " + src_index)
+                raise ValueError("Invalid index of " + dst + ": " + index_str)
         else:
             src_index = None
 

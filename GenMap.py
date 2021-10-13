@@ -55,7 +55,7 @@ def checkFeasibility(CGRA, app):
                     w, h, len(comp_dfg.nodes)))
 
     for v in comp_dfg.nodes():
-        op = comp_dfg.nodes[v]["op"]
+        op = comp_dfg.nodes[v]["opcode"]
         if op in need_ops:
             need_ops[op] += 1
         else:

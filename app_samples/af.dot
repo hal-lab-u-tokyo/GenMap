@@ -1,62 +1,62 @@
 digraph{
 	#inputs
-	"INPUT_0" [input=True]
-	"INPUT_1" [input=True]
+	"INPUT_0" [type=input]
+	"INPUT_1" [type=input]
 
 	# operations
-	"op1" [op=SR]
-	"op2" [op=AND]
-	"op3" [op=SR]
-	"op4" [op=AND]
-	"op5" [op=SR]
-	"op6" [op=AND]
-	"op7" [op=SR]
-	"op8" [op=AND]
-	"op9" [op=MULT]
-	"op10" [op=MULT]
-	"op11" [op=MULT]
-	"op12" [op=MULT]
-	"op13" [op=ADD]
-	"op14" [op=MULT]
-	"op15" [op=ADD]
-	"op16" [op=MULT]
-	"op17" [op=SR]
-	"op18" [op=SR]
-	"op19" [op=ADD]
-	"op20" [op=SL]
-	"op21" [op=SL]
-	"op22" [op=SR]
-	"op23" [op=OR]
-	"op24" [op=OR]
+	"op1" [type=op,opcode=SR]
+	"op2" [type=op,opcode=AND]
+	"op3" [type=op,opcode=SR]
+	"op4" [type=op,opcode=AND]
+	"op5" [type=op,opcode=SR]
+	"op6" [type=op,opcode=AND]
+	"op7" [type=op,opcode=SR]
+	"op8" [type=op,opcode=AND]
+	"op9" [type=op,opcode=MULT]
+	"op10" [type=op,opcode=MULT]
+	"op11" [type=op,opcode=MULT]
+	"op12" [type=op,opcode=MULT]
+	"op13" [type=op,opcode=ADD]
+	"op14" [type=op,opcode=MULT]
+	"op15" [type=op,opcode=ADD]
+	"op16" [type=op,opcode=MULT]
+	"op17" [type=op,opcode=SR]
+	"op18" [type=op,opcode=SR]
+	"op19" [type=op,opcode=ADD]
+	"op20" [type=op,opcode=SL]
+	"op21" [type=op,opcode=SL]
+	"op22" [type=op,opcode=SR]
+	"op23" [type=op,opcode=OR]
+	"op24" [type=op,opcode=OR]
 
 	# constants
-	"8" [const=True]
-	"255" [const=True]
-	"100" [const=True]
-	"7" [const=True]
-	"28" [const=True]
-	"16" [const=True]
+	"8" [type=const, int=8]
+	"255" [type=const, int=255]
+	"100" [type=const, int=100]
+	"7" [type=const, int=7]
+	"28" [type=const, int=28]
+	"16" [type=const, int=16]
 
 	# outputs
-	"OUTPUT_0" [output=True]
+	"OUTPUT_0" [type=output]
 
 	# dependencies
-	"INPUT_0" -> "op1" [operand=left];
-	"8" -> "op1" [operand=right];
-	"INPUT_0" -> "op2" [operand=left];
-	"255" -> "op2" [operand=right];
-	"INPUT_1" -> "op3" [operand=left];
-	"8" -> "op3" [operand=right];
-	"INPUT_1" -> "op4" [operand=left];
-	"255" -> "op4" [operand=right];
-	"op1" -> "op5" [operand=left];
-	"8" -> "op5" [operand=right];
-	"op1" -> "op6" [operand=left];
-	"255" -> "op6" [operand=right];
-	"op3" -> "op7" [operand=left];
-	"8" -> "op7" [operand=right];
-	"op3" -> "op8" [operand=left];
-	"255" -> "op8" [operand=right];
+	"INPUT_0" -> "op1" [operand=0];
+	"8" -> "op1" [operand=1];
+	"INPUT_0" -> "op2" [operand=0];
+	"255" -> "op2" [operand=1];
+	"INPUT_1" -> "op3" [operand=0];
+	"8" -> "op3" [operand=1];
+	"INPUT_1" -> "op4" [operand=0];
+	"255" -> "op4" [operand=1];
+	"op1" -> "op5" [operand=0];
+	"8" -> "op5" [operand=1];
+	"op1" -> "op6" [operand=0];
+	"255" -> "op6" [operand=1];
+	"op3" -> "op7" [operand=0];
+	"8" -> "op7" [operand=1];
+	"op3" -> "op8" [operand=0];
+	"255" -> "op8" [operand=1];
 	"op5" -> "op9";
 	"100" -> "op9";
 	"op6" -> "op10";
@@ -73,21 +73,21 @@ digraph{
 	"op12" -> "op15";
 	"op4" -> "op16";
 	"28" -> "op16";
-	"op13" -> "op17" [operand=left];
-	"7" -> "op17" [operand=right];
-	"op15" -> "op18" [operand=left];
-	"7" -> "op18" [operand=right];
+	"op13" -> "op17" [operand=0];
+	"7" -> "op17" [operand=1];
+	"op15" -> "op18" [operand=0];
+	"7" -> "op18" [operand=1];
 	"op14" -> "op19";
 	"op16" -> "op19";
-	"op17" -> "op20" [operand=left];
-	"16" -> "op20" [operand=right];
-	"op18" -> "op21" [operand=left];
-	"8" -> "op21" [operand=right];
-	"op19" -> "op22" [operand=left];
-	"7" -> "op22" [operand=right];
-	"op20" -> "op23" [operand=left];
-	"op21" -> "op23" [operand=right];
-	"op22" -> "op24" [operand=left];
-	"op23" -> "op24" [operand=right];
+	"op17" -> "op20" [operand=0];
+	"16" -> "op20" [operand=1];
+	"op18" -> "op21" [operand=0];
+	"8" -> "op21" [operand=1];
+	"op19" -> "op22" [operand=0];
+	"7" -> "op22" [operand=1];
+	"op20" -> "op23" [operand=0];
+	"op21" -> "op23" [operand=1];
+	"op22" -> "op24" [operand=0];
+	"op23" -> "op24" [operand=1];
 	"op24" -> "OUTPUT_0"
 }

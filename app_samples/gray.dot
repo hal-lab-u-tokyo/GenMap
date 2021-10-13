@@ -1,32 +1,32 @@
 digraph{
 
 	# inputs
-	"INPUT_0" [input=True]
+	"INPUT_0" [type=input]
 
 	# operations
-	"op1" [op=ADD]
-	"op2" [op=SR]
-	"op3" [op=SL]
-	"op4" [op=SR]
-	"op5" [op=AND]
-	"op6" [op=AND]
-	"op7" [op=ADD]
-	"op8" [op=MULT]
-	"op9" [op=SR]
-	"op10" [op=SL]
-	"op11" [op=SL]
-	"op12" [op=OR]
-	"op13" [op=OR]
+	"op1" [type=op,opcode=ADD]
+	"op2" [type=op,opcode=SR]
+	"op3" [type=op,opcode=SL]
+	"op4" [type=op,opcode=SR]
+	"op5" [type=op,opcode=AND]
+	"op6" [type=op,opcode=AND]
+	"op7" [type=op,opcode=ADD]
+	"op8" [type=op,opcode=MULT]
+	"op9" [type=op,opcode=SR]
+	"op10" [type=op,opcode=SL]
+	"op11" [type=op,opcode=SL]
+	"op12" [type=op,opcode=OR]
+	"op13" [type=op,opcode=OR]
 
 	# outputs
-	"OUTPUT_0" [output=True]
+	"OUTPUT_0" [type=output]
 
 	# constants
-	"16" [const=True]
-	"8" [const=True]
-	"255" [const=True]
-	"21" [const=True]
-	"6" [const=True]
+	"16" [type=const,int=16]
+	"8" [type=const,int=8]
+	"255" [type=const,int=255]
+	"21" [type=const,int=21]
+	"6" [type=const,int=6]
 
 	# dependencies
 	"op2" -> "op1"
@@ -39,24 +39,24 @@ digraph{
 	"op8" -> "op9"
 	"op9" -> "op10"
 	"op10" -> "op11"
-	"op9" -> "op12" [operand=right]
-	"op10" -> "op12" [operand=left]
-	"op11" -> "op13" [operand=left]
-	"op12" -> "op13" [operand=right]
+	"op9" -> "op12" [operand=1]
+	"op10" -> "op12" [operand=0]
+	"op11" -> "op13" [operand=0]
+	"op12" -> "op13" [operand=1]
 
 	"INPUT_0" -> "op2"
 	"INPUT_0" -> "op3"
 	"INPUT_0" -> "op6"
 
-	"16" -> "op2" [operand=right]
-	"16" -> "op4" [operand=right]
-	"8" -> "op3" [operand=right]
-	"255" -> "op6" [operand=right]
-	"255" -> "op5" [operand=right]
-	"21" -> "op8" [operand=right]
-	"6" -> "op9" [operand=right]
-	"8" -> "op10" [operand=right]
-	"8" -> "op11" [operand=right]
+	"16" -> "op2" [operand=1]
+	"16" -> "op4" [operand=1]
+	"8" -> "op3" [operand=1]
+	"255" -> "op6" [operand=1]
+	"255" -> "op5" [operand=1]
+	"21" -> "op8" [operand=1]
+	"6" -> "op9" [operand=1]
+	"8" -> "op10" [operand=1]
+	"8" -> "op11" [operand=1]
 
 	"op13" -> "OUTPUT_0"
 

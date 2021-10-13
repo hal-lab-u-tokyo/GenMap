@@ -1,165 +1,165 @@
 strict digraph  {
-	"INPUT_0" [input=True]; //indata_real[0]
-	"INPUT_4" [input=True]; //indata_real[2]
-	"op_%8" [op=ADD];
-	"INPUT_1" [input=True]; //indata_imag[0]
-	"INPUT_5" [input=True]; //indata_imag[2]
-	"op_%12" [op=ADD];
-	"INPUT_2" [input=True]; //indata_real[1]
-	"INPUT_6" [input=True]; //indata_real[3]
-	"op_%17" [op=ADD];
-	"INPUT_3" [input=True]; //indata_imag[1]
-	"INPUT_7" [input=True]; //indata_imag[3]
-	"BUF_%5" [op=CAT];
-	"BUF_%7" [op=CAT];
-	"BUF_%9" [op=CAT];
-	"BUF_%11" [op=CAT];
-	"BUF_%14" [op=CAT];
-	"BUF_%16" [op=CAT];
-	"BUF_%19" [op=CAT];
-	"BUF_%21" [op=CAT];
-	"op_%22" [op=ADD];
-	"op_%23" [op=SUB];
-	"op_%24" [op=SUB];
-	"op_%25" [op=SUB];
-	"op_%26" [op=SUB];
-	"op_%27" [op=ADD];
-	"OUTPUT_%2" [output=True]; //outdata_real[0]
-	"op_%28" [op=ADD];
-	"OUTPUT_%3" [output=True]; //outdata_imag[0]
-	"op_%29" [op=ADD];
-	"op_%30" [op=ADD];
-	"op_%31" [op=MULT];
-	"236" [const=True];
-	"op_%32" [op=MULT];
-	"97" [const=True];
-	"op_%33" [op=ADD];
-	"op_%34" [op=SRA];
-	"8" [const=True];
-	"OUTPUT_%35" [output=True]; //outdata_real[1]
-	"op_%36" [op=MULT];
-	"-97" [const=True];
-	"op_%37" [op=MULT];
-	"op_%38" [op=ADD];
-	"op_%39" [op=SRA];
-	"OUTPUT_%40" [output=True]; //outdata_imag[1]
-	"op_%41" [op=SUB];
-	"op_%42" [op=SUB];
-	"op_%43" [op=ADD];
-	"op_%44" [op=MULT];
-	"181" [const=True];
-	"op_%45" [op=SRA];
-	"OUTPUT_%46" [output=True]; //outdata_real[2]
-	"op_%47" [op=SUB];
-	"op_%48" [op=MULT];
-	"op_%49" [op=SRA];
-	"OUTPUT_%50" [output=True]; //outdata_imag[2]
-	"op_%51" [op=SUB];
-	"op_%52" [op=SUB];
-	"op_%53" [op=MULT];
-	"op_%54" [op=MULT];
-	"op_%55" [op=ADD];
-	"op_%56" [op=SRA];
-	"OUTPUT_%57" [output=True]; //outdata_real[3]
-	"op_%58" [op=MULT];
-	"-236" [const=True];
-	"op_%59" [op=MULT];
-	"op_%60" [op=ADD];
-	"op_%61" [op=SRA];
-	"OUTPUT_%62" [output=True]; //outdata_imag[3]
+	"INPUT_0" [type=input]; //indata_real[0]
+	"INPUT_4" [type=input]; //indata_real[2]
+	"op_%8" [type=op, opcode=ADD];
+	"INPUT_1" [type=input]; //indata_imag[0]
+	"INPUT_5" [type=input]; //indata_imag[2]
+	"op_%12" [type=op, opcode=ADD];
+	"INPUT_2" [type=input]; //indata_real[1]
+	"INPUT_6" [type=input]; //indata_real[3]
+	"op_%17" [type=op, opcode=ADD];
+	"INPUT_3" [type=input]; //indata_imag[1]
+	"INPUT_7" [type=input]; //indata_imag[3]
+	"BUF_%5" [type=op, opcode=CAT];
+	"BUF_%7" [type=op, opcode=CAT];
+	"BUF_%9" [type=op, opcode=CAT];
+	"BUF_%11" [type=op, opcode=CAT];
+	"BUF_%14" [type=op, opcode=CAT];
+	"BUF_%16" [type=op, opcode=CAT];
+	"BUF_%19" [type=op, opcode=CAT];
+	"BUF_%21" [type=op, opcode=CAT];
+	"op_%22" [type=op, opcode=ADD];
+	"op_%23" [type=op, opcode=SUB];
+	"op_%24" [type=op, opcode=SUB];
+	"op_%25" [type=op, opcode=SUB];
+	"op_%26" [type=op, opcode=SUB];
+	"op_%27" [type=op, opcode=ADD];
+	"OUTPUT_%2" [type=output]; //outdata_real[0]
+	"op_%28" [type=op, opcode=ADD];
+	"OUTPUT_%3" [type=output]; //outdata_imag[0]
+	"op_%29" [type=op, opcode=ADD];
+	"op_%30" [type=op, opcode=ADD];
+	"op_%31" [type=op, opcode=MULT];
+	"236" [type=const,int=236];
+	"op_%32" [type=op, opcode=MULT];
+	"97" [type=const,int=97];
+	"op_%33" [type=op, opcode=ADD];
+	"op_%34" [type=op, opcode=SRA];
+	"8" [type=const,int=8];
+	"OUTPUT_%35" [type=output]; //outdata_real[1]
+	"op_%36" [type=op, opcode=MULT];
+	"-97" [type=const,int=-97];
+	"op_%37" [type=op, opcode=MULT];
+	"op_%38" [type=op, opcode=ADD];
+	"op_%39" [type=op, opcode=SRA];
+	"OUTPUT_%40" [type=output]; //outdata_imag[1]
+	"op_%41" [type=op, opcode=SUB];
+	"op_%42" [type=op, opcode=SUB];
+	"op_%43" [type=op, opcode=ADD];
+	"op_%44" [type=op, opcode=MULT];
+	"181" [type=const,int=181];
+	"op_%45" [type=op, opcode=SRA];
+	"OUTPUT_%46" [type=output]; //outdata_real[2]
+	"op_%47" [type=op, opcode=SUB];
+	"op_%48" [type=op, opcode=MULT];
+	"op_%49" [type=op, opcode=SRA];
+	"OUTPUT_%50" [type=output]; //outdata_imag[2]
+	"op_%51" [type=op, opcode=SUB];
+	"op_%52" [type=op, opcode=SUB];
+	"op_%53" [type=op, opcode=MULT];
+	"op_%54" [type=op, opcode=MULT];
+	"op_%55" [type=op, opcode=ADD];
+	"op_%56" [type=op, opcode=SRA];
+	"OUTPUT_%57" [type=output]; //outdata_real[3]
+	"op_%58" [type=op, opcode=MULT];
+	"-236" [type=const,int=-236];
+	"op_%59" [type=op, opcode=MULT];
+	"op_%60" [type=op, opcode=ADD];
+	"op_%61" [type=op, opcode=SRA];
+	"OUTPUT_%62" [type=output]; //outdata_imag[3]
 
-	"INPUT_0" -> "BUF_%5" [operand=left];
-	"INPUT_4" -> "BUF_%7" [operand=left];
-	"INPUT_1" -> "BUF_%9" [operand=left];
-	"INPUT_5" -> "BUF_%11" [operand=left];
-	"INPUT_2" -> "BUF_%14" [operand=left];
-	"INPUT_6" -> "BUF_%16" [operand=left];
-	"INPUT_3" -> "BUF_%19" [operand=left];
-	"INPUT_7" -> "BUF_%21" [operand=left];
+	"INPUT_0" -> "BUF_%5" [operand=0];
+	"INPUT_4" -> "BUF_%7" [operand=0];
+	"INPUT_1" -> "BUF_%9" [operand=0];
+	"INPUT_5" -> "BUF_%11" [operand=0];
+	"INPUT_2" -> "BUF_%14" [operand=0];
+	"INPUT_6" -> "BUF_%16" [operand=0];
+	"INPUT_3" -> "BUF_%19" [operand=0];
+	"INPUT_7" -> "BUF_%21" [operand=0];
 
 
-	"BUF_%5" -> "op_%8"  [operand=right];
-	"BUF_%5" -> "op_%23"  [operand=left];
-	"BUF_%7" -> "op_%8"  [operand=left];
-	"BUF_%7" -> "op_%23"  [operand=right];
-	"op_%8" -> "op_%27"  [operand=right];
-	"op_%8" -> "op_%41"  [operand=left];
-	"BUF_%9" -> "op_%12"  [operand=right];
-	"BUF_%9" -> "op_%24"  [operand=left];
-	"BUF_%11" -> "op_%12"  [operand=left];
-	"BUF_%11" -> "op_%24"  [operand=right];
-	"op_%12" -> "op_%28"  [operand=right];
-	"op_%12" -> "op_%42"  [operand=left];
-	"BUF_%14" -> "op_%17"  [operand=right];
-	"BUF_%14" -> "op_%26"  [operand=right];
-	"BUF_%16" -> "op_%17"  [operand=left];
-	"BUF_%16" -> "op_%26"  [operand=left];
-	"op_%17" -> "op_%27"  [operand=left];
-	"op_%17" -> "op_%41"  [operand=right];
-	"BUF_%19" -> "op_%22"  [operand=right];
-	"BUF_%19" -> "op_%25"  [operand=left];
-	"BUF_%21" -> "op_%22"  [operand=left];
-	"BUF_%21" -> "op_%25"  [operand=right];
-	"op_%22" -> "op_%28"  [operand=left];
-	"op_%22" -> "op_%42"  [operand=right];
-	"op_%23" -> "op_%29"  [operand=right];
-	"op_%23" -> "op_%51"  [operand=left];
-	"op_%24" -> "op_%30"  [operand=right];
-	"op_%24" -> "op_%52"  [operand=left];
-	"op_%25" -> "op_%29"  [operand=left];
-	"op_%25" -> "op_%51"  [operand=right];
-	"op_%26" -> "op_%30"  [operand=left];
-	"op_%26" -> "op_%52"  [operand=right];
+	"BUF_%5" -> "op_%8"  [operand=1];
+	"BUF_%5" -> "op_%23"  [operand=0];
+	"BUF_%7" -> "op_%8"  [operand=0];
+	"BUF_%7" -> "op_%23"  [operand=1];
+	"op_%8" -> "op_%27"  [operand=1];
+	"op_%8" -> "op_%41"  [operand=0];
+	"BUF_%9" -> "op_%12"  [operand=1];
+	"BUF_%9" -> "op_%24"  [operand=0];
+	"BUF_%11" -> "op_%12"  [operand=0];
+	"BUF_%11" -> "op_%24"  [operand=1];
+	"op_%12" -> "op_%28"  [operand=1];
+	"op_%12" -> "op_%42"  [operand=0];
+	"BUF_%14" -> "op_%17"  [operand=1];
+	"BUF_%14" -> "op_%26"  [operand=1];
+	"BUF_%16" -> "op_%17"  [operand=0];
+	"BUF_%16" -> "op_%26"  [operand=0];
+	"op_%17" -> "op_%27"  [operand=0];
+	"op_%17" -> "op_%41"  [operand=1];
+	"BUF_%19" -> "op_%22"  [operand=1];
+	"BUF_%19" -> "op_%25"  [operand=0];
+	"BUF_%21" -> "op_%22"  [operand=0];
+	"BUF_%21" -> "op_%25"  [operand=1];
+	"op_%22" -> "op_%28"  [operand=0];
+	"op_%22" -> "op_%42"  [operand=1];
+	"op_%23" -> "op_%29"  [operand=1];
+	"op_%23" -> "op_%51"  [operand=0];
+	"op_%24" -> "op_%30"  [operand=1];
+	"op_%24" -> "op_%52"  [operand=0];
+	"op_%25" -> "op_%29"  [operand=0];
+	"op_%25" -> "op_%51"  [operand=1];
+	"op_%26" -> "op_%30"  [operand=0];
+	"op_%26" -> "op_%52"  [operand=1];
 	"op_%27" -> "OUTPUT_%2";
 	"op_%28" -> "OUTPUT_%3";
-	"op_%29" -> "op_%31"  [operand=left];
-	"op_%29" -> "op_%36"  [operand=left];
-	"op_%30" -> "op_%32"  [operand=left];
-	"op_%30" -> "op_%37"  [operand=left];
-	"op_%31" -> "op_%33"  [operand=left];
-	"236" -> "op_%31"  [operand=right];
-	"236" -> "op_%37"  [operand=right];
-	"236" -> "op_%54"  [operand=right];
-	"op_%32" -> "op_%33"  [operand=right];
-	"97" -> "op_%32"  [operand=right];
-	"97" -> "op_%53"  [operand=right];
-	"97" -> "op_%59"  [operand=right];
-	"op_%33" -> "op_%34"  [operand=left];
+	"op_%29" -> "op_%31"  [operand=0];
+	"op_%29" -> "op_%36"  [operand=0];
+	"op_%30" -> "op_%32"  [operand=0];
+	"op_%30" -> "op_%37"  [operand=0];
+	"op_%31" -> "op_%33"  [operand=0];
+	"236" -> "op_%31"  [operand=1];
+	"236" -> "op_%37"  [operand=1];
+	"236" -> "op_%54"  [operand=1];
+	"op_%32" -> "op_%33"  [operand=1];
+	"97" -> "op_%32"  [operand=1];
+	"97" -> "op_%53"  [operand=1];
+	"97" -> "op_%59"  [operand=1];
+	"op_%33" -> "op_%34"  [operand=0];
 	"op_%34" -> "OUTPUT_%35";
-	"8" -> "op_%34"  [operand=right];
-	"8" -> "op_%39"  [operand=right];
-	"8" -> "op_%45"  [operand=right];
-	"8" -> "op_%49"  [operand=right];
-	"8" -> "op_%56"  [operand=right];
-	"8" -> "op_%61"  [operand=right];
-	"op_%36" -> "op_%38"  [operand=left];
-	"-97" -> "op_%36"  [operand=right];
-	"op_%37" -> "op_%38"  [operand=right];
-	"op_%38" -> "op_%39"  [operand=left];
+	"8" -> "op_%34"  [operand=1];
+	"8" -> "op_%39"  [operand=1];
+	"8" -> "op_%45"  [operand=1];
+	"8" -> "op_%49"  [operand=1];
+	"8" -> "op_%56"  [operand=1];
+	"8" -> "op_%61"  [operand=1];
+	"op_%36" -> "op_%38"  [operand=0];
+	"-97" -> "op_%36"  [operand=1];
+	"op_%37" -> "op_%38"  [operand=1];
+	"op_%38" -> "op_%39"  [operand=0];
 	"op_%39" -> "OUTPUT_%40";
-	"op_%41" -> "op_%43"  [operand=right];
-	"op_%41" -> "op_%47"  [operand=right];
-	"op_%42" -> "op_%43"  [operand=left];
-	"op_%42" -> "op_%47"  [operand=left];
-	"op_%43" -> "op_%44"  [operand=left];
-	"op_%44" -> "op_%45"  [operand=left];
-	"181" -> "op_%44"  [operand=right];
-	"181" -> "op_%48"  [operand=right];
+	"op_%41" -> "op_%43"  [operand=1];
+	"op_%41" -> "op_%47"  [operand=1];
+	"op_%42" -> "op_%43"  [operand=0];
+	"op_%42" -> "op_%47"  [operand=0];
+	"op_%43" -> "op_%44"  [operand=0];
+	"op_%44" -> "op_%45"  [operand=0];
+	"181" -> "op_%44"  [operand=1];
+	"181" -> "op_%48"  [operand=1];
 	"op_%45" -> "OUTPUT_%46";
-	"op_%47" -> "op_%48"  [operand=left];
-	"op_%48" -> "op_%49"  [operand=left];
+	"op_%47" -> "op_%48"  [operand=0];
+	"op_%48" -> "op_%49"  [operand=0];
 	"op_%49" -> "OUTPUT_%50";
-	"op_%51" -> "op_%53"  [operand=left];
-	"op_%51" -> "op_%58"  [operand=left];
-	"op_%52" -> "op_%54"  [operand=left];
-	"op_%52" -> "op_%59"  [operand=left];
-	"op_%53" -> "op_%55"  [operand=left];
-	"op_%54" -> "op_%55"  [operand=right];
-	"op_%55" -> "op_%56"  [operand=left];
+	"op_%51" -> "op_%53"  [operand=0];
+	"op_%51" -> "op_%58"  [operand=0];
+	"op_%52" -> "op_%54"  [operand=0];
+	"op_%52" -> "op_%59"  [operand=0];
+	"op_%53" -> "op_%55"  [operand=0];
+	"op_%54" -> "op_%55"  [operand=1];
+	"op_%55" -> "op_%56"  [operand=0];
 	"op_%56" -> "OUTPUT_%57";
-	"op_%58" -> "op_%60"  [operand=left];
-	"-236" -> "op_%58"  [operand=right];
-	"op_%59" -> "op_%60"  [operand=right];
-	"op_%60" -> "op_%61"  [operand=left];
+	"op_%58" -> "op_%60"  [operand=0];
+	"-236" -> "op_%58"  [operand=1];
+	"op_%59" -> "op_%60"  [operand=1];
+	"op_%60" -> "op_%61"  [operand=0];
 	"op_%61" -> "OUTPUT_%62";
 }

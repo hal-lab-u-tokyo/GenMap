@@ -341,7 +341,7 @@ class ConfDrawer():
         dfg = app.getCompSubGraph()
         for op_label, (x, y) in individual.mapping.items():
             if op_label in dfg.nodes():
-                opcode = dfg.nodes[op_label]["op"]
+                opcode = dfg.nodes[op_label]["opcode"]
             else:
                 opcode = "RPE"
             self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, y + 1 - pe_margin * 2),\

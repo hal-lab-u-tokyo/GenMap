@@ -30,7 +30,7 @@ class HeterogeneityEval(EvalBase):
         invalid = False
         dfg = app.getCompSubGraph()
         for opnode, pos in individual.mapping.items():
-            op = dfg.nodes[opnode]["op"]
+            op = dfg.nodes[opnode]["opcode"]
             alu_coords = set(CGRA.getSupportedALUs(op))
             if not pos in alu_coords:
                 invalid = True
