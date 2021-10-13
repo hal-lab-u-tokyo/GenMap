@@ -12,6 +12,8 @@ OUT_PORT_node_exp = "OUT_PORT_{index}"
 
 DEFAULT_EDGE_WEIGHT = {"ALU": 1, "SE": 1, "IN_PORT": 0, "OUT_PORT": 0, "Const": 0}
 
+DEFAULT_MUX_NUM = 2
+
 class PEArrayModel():
 
     class InvalidConfigError(Exception):
@@ -42,10 +44,13 @@ class PEArrayModel():
                  <PE coord="(0, 0)">...</PE>
                  <PE coord="(0, 0)" bbdomain="0">...</PE>
 
-            "ALU" Element will be composed of
+            "ALU" Element has an option attribute "mux_num" regarding the number of input (default: 2).
+            Examples:
+                <ALU mux_num="3" > ...
+
+            This elemenet will be composed of
                 "operation" Elements
                 "input" Elements
-
 
             "SE" Element will be composed of
                 "output" Elements
@@ -117,6 +122,12 @@ class PEArrayModel():
         #    2nd index: pos_y
         #    value    : list of opcodes
         self.__operation_list = []
+
+        # maximum number of ALU inputs
+        #    1st index: pos_x
+        #    2nd index: pos_y
+        #    value    : list of opcodes
+        self.__mux_count = []
 
         # resources for each body bias domain
         #    1st key: domain name
@@ -269,6 +280,11 @@ class PEArrayModel():
         # init conf op table
         self.__config_op_table = [[{} for y in range(self.__height)] for x in range(self.__width)]
 
+
+        # init mux count with default value
+        self.__mux_count = [[DEFAULT_MUX_NUM for y in range(self.__height)] \
+                            for x in range(self.__width)]
+
         # get PREG configs
         pregs = [preg for preg in conf if preg.tag == "PREG"]
         for preg in pregs:
@@ -314,6 +330,19 @@ class PEArrayModel():
             if len(list(pe.iter("ALU"))) != 1:
                 raise self.InvalidConfigError("missing an ALU for PE({0}) or it has more than one PEs".format((x, y)))
             ALU = list(pe.iter("ALU"))[0]
+            # get mux num option
+            mux_num_str = ALU.get("mux_num")
+            if mux_num_str is not None:
+                try:
+                    mux_num = int(mux_num_str)
+                except ValueError:
+                    raise self.InvalidConfigError( \
+                        "Invalid mux count for ALU({0},{1}): {2}".format(\
+                            x, y, mux_num_str))
+                if mux_num <= 0:
+                    raise self.InvalidConfigError("Mux count for ALU({0},{1}) must be positive integer but {2} was specified".format(\
+                            x, y, mux_num))
+                self.__mux_count[x][y] = mux_num
             self.__network.add_node(ALU_node_exp.format(pos=(x, y)))
             if not pe.get("bbdomain") is None:
                 self.__bb_domains[pe.get("bbdomain")]["ALU"].append(ALU_node_exp.format(pos=(x, y)))
@@ -1010,6 +1039,18 @@ class PEArrayModel():
                 int: configration value
         """
         return self.__config_net_table[dst][src]
+
+    def getALUMuxCount(self, coord):
+        """Gets mux count of the ALU
+
+            Args:
+                coord (tuple): coordinate of the ALU
+
+            Returns:
+                int: the maximum number of inputs for the ALU
+        """
+        x, y = coord
+        return self.__mux_count[x][y]
 
     def getWireName(self, se):
         """Gets an output channel name"""
