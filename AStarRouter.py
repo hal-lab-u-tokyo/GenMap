@@ -79,7 +79,7 @@ class AStarRouter(RouterBase):
             #       value: operand attributes of edge between the dest and the src
             dest_alus = {CGRA.getNodeName("ALU", pos = mapping[dst_node]): \
                             comp_DFG.edges[src_node, dst_node]["operand"] \
-                            if "operand" in comp_DFG.edges[src_node, dst_node] else None for dst_node in \
+                            for dst_node in \
                             sorted(list(comp_DFG.successors(src_node)), \
                                 key=lambda x: AStarRouter.__manhattan_dist(mapping[x], mapping[src_node])) }
             # route each path
@@ -105,7 +105,6 @@ class AStarRouter(RouterBase):
         for c_reg, edges in const_map.items():
             dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
                         const_DFG.edges[(c, dst_node)]["operand"] \
-                        if "operand" in const_DFG.edges[(c, dst_node)] else None \
                         for c, dst_node in edges}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, c_reg, dst_alus)
 
@@ -127,7 +126,6 @@ class AStarRouter(RouterBase):
         for i_port, edges in input_map.items():
             dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
                         in_DFG.edges[(i, dst_node)]["operand"] \
-                        if "operand" in in_DFG.edges[(i, dst_node)] else None \
                         for i, dst_node in edges}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, i_port, dst_alus)
 
@@ -251,7 +249,6 @@ class AStarRouter(RouterBase):
         for i_port, inode in input_map.items():
             dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
                         in_DFG.edges[(i, dst_node)]["operand"] \
-                        if "operand" in in_DFG.edges[(i, dst_node)] else None \
                         for i, dst_node in edges[inode]}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, i_port, dst_alus)
 
@@ -590,7 +587,6 @@ class AStarRouter(RouterBase):
         graph.nodes[src]["free"] = False
         for v in dsts:
             graph.nodes[v]["free"] = False
-
 
         return route_cost
 
