@@ -169,6 +169,9 @@ class AStarRouter(RouterBase):
             # remove high cost of alu out
             for suc_element in routed_graph.successors(alu):
                 e = alu, suc_element
+                if CGRA.isALU(suc_element) and \
+                    routed_graph.edges[e]["weight"] == PENALTY_CONST:
+                    continue
                 if routed_graph.edges[e]["free"]:
                     routed_graph.edges[e]["weight"] = \
                         CGRA.getLinkWeight((alu, suc_element))
