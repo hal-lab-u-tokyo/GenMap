@@ -4,14 +4,39 @@
 import networkx as nx
 import random
 import math
+from operator import mul
 
 from multiprocessing import Pool
 import multiprocessing as multi
 
 
+
 class Placer():
 
-    def __init__(self, method, iterations = 50, randomness = "Full"):
+    DATA_FLOW = {"left-right": lambda pos: Placer.__to_horizontal(pos),\
+                 "right-left": lambda pos: Placer.__to_horizontal(pos, False),\
+                 "bottom-top": lambda pos: Placer.__to_vertical(pos),\
+                 "top-bottom": lambda pos: Placer.__to_vertical(pos, False),\
+                 "horizontal": lambda pos: Placer.__to_horizontal(pos, \
+                                            bool(random.randint(0, 1))),\
+                 "vertical":   lambda pos: Placer.__to_vertical(pos, \
+                                            bool(random.randint(0, 1))),\
+                 "any":        lambda pos: Placer.__to_horizontal(pos, \
+                                            bool(random.randint(0, 1))) \
+                                            if  bool(random.randint(0, 1)) \
+                                            else Placer.__to_vertical(pos, \
+                                            bool(random.randint(0, 1)))}
+
+    ORIGIN_COORDS = {"left-right": [(0.0, 0.5)],
+                    "right-left": [(1.0, 0.5)],
+                    "bottom-top": [(0.5, 0.0)],
+                    "top-bottom": [(0.5, 1.0)],
+                    "horizontal": [(0.0, 0.5), (1.0, 0.5)],
+                    "vertical": [(0.5, 0.0), (0.5, 1.0)],
+                    "any": [(0.0, 0.5), (1.0, 0.5), (0.5, 0.0), (0.5, 1.0)]
+                 }
+
+    def __init__(self, method, dir, iterations = 50, randomness = "Full"):
         """ Initializes this class
 
             Args:
@@ -20,6 +45,8 @@ class Placer():
                                         1. graphviz (default)
                                         2. tsort
                                         3. random
+                dir (str)       : data flow direction
+                                    available values corresponds to the keys of the dict "DATA_FLOW"
                 iterations (int): maximum iteration number for generating a node position.
                                   Default = 50
                 randomness (str): randomness of rounding.
@@ -29,10 +56,38 @@ class Placer():
 
         self.__iterations = iterations
         self.__method = method
+        self.__dir = dir
         if not randomness in ["Full", "Partial"]:
             raise ValueError("Invalid randomness type: " + randomness)
         else:
             self.__randomness = randomness
+
+    @staticmethod
+    def __to_vertical(pos, bottom2top = True):
+        # make sink nodes upper side
+        if bottom2top:
+            pos = {v: (x, 1 - y) for v, (x, y) in pos.items()}
+
+        # randomly flip x position
+        if random.randint(0, 1) == 0:
+            pos = {v: (1 - x, y) for v, (x, y) in pos.items()}
+
+        return pos
+
+    @staticmethod
+    def __to_horizontal(pos, left2right = True):
+        if left2right:
+            # rotate by + 90 deg
+            pos = {v: (1 - y, x) for v, (x, y) in pos.items()}
+        else:
+            # rotate by -90 deg
+            pos = {v: (y, 1 - x) for v, (x, y) in pos.items()}
+
+        # randomly flip y position
+        if random.randint(0, 1) == 0:
+            pos = {v: (x, 1 - y) for v, (x, y) in pos.items()}
+
+        return pos
 
     def generate_init_mappings(self, dag, width, height, count, proc_num=multi.cpu_count()):
         """Returns multiple initial mappings.
@@ -63,6 +118,7 @@ class Placer():
                     if not mapping.values() in init_hashable_mapping:
                         init_mapping.append(mapping)
                         init_hashable_mapping.add(mapping.values())
+
             return init_mapping
 
         elif self.__method == "tsort":
@@ -109,16 +165,8 @@ class Placer():
         max_y = max([y for (x, y) in pos.values()])
         pos = {v: (x / max_x, y / max_y) for v, (x, y) in pos.items()}
 
-        # make sink nodes upper side
-        pos = {v: (x, 1 - y) for v, (x, y) in pos.items()}
-
-        # randomly rotate by 90 deg.
-        if random.randint(0, 1) == 0:
-            pos = {v: (y, 1 - x) for v, (x, y) in pos.items()}
-
-        # randomly flip x position
-        if random.randint(0, 1) == 0:
-            pos = {v: (1 - x, y) for v, (x, y) in pos.items()}
+        # adjust for the data flow direction
+        pos = self.DATA_FLOW[self.__dir](pos)
 
         # choose a rectangle pattern
         (map_width, map_height) = rect_pattern[random.randint(0, len(rect_pattern) - 1)]
@@ -171,8 +219,7 @@ class Placer():
 
         return mapping
 
-    @staticmethod
-    def make_random_mappings(dag, width, height, size, sort_prob = 0.5):
+    def make_random_mappings(self, dag, width, height, size, sort_prob = 0.5):
         """ Generate random mappings
 
             Args:
@@ -212,10 +259,9 @@ class Placer():
             positions = random.sample([(x, y) for x in range(map_width) for y in range(map_height)], node_num)
 
             if topological_sort_enable:
-                if random.randint(0, 1) == 0:
-                    origin = (0, 0)
-                else:
-                    origin = (map_width - 1, 0)
+                norm_origin = random.choice(self.ORIGIN_COORDS[self.__dir])
+                origin = tuple(map(mul, norm_origin, \
+                                (map_width - 1, map_height - 1)))
                 positions = sorted(positions, key=lambda x: \
                                     (x[0] - origin[0])**2 + (x[1] - origin[1]) ** 2)
                 rtn_list.append({k: v for k, v in zip(list(nx.topological_sort(dag)), positions)})

@@ -18,6 +18,23 @@ from EvalBase import EvalBase
 from RouterBase import RouterBase
 from Placer import Placer
 
+DEFAULT_PARAMS = {
+    "Maximum generation":           300,
+    "Minimum generation":           30,
+    "Maximum stall":                100,
+    "Initial population size":      300,
+    "Offspring size":               100,
+    "Select size":                  45,
+    "Random population size":       10,
+    "Crossover probability":        0.7,
+    "Mutation probability":         0.3,
+    "Local mulatation probability": 0.5,
+    "Initial place iteration":      100,
+    "Initial place count":          200,
+    "Random place count":           100,
+    "Topological sort probability": 0.5
+}
+
 class NSGA2():
     def __init__(self, config, logfile = None):
         """Constructor of the NSGA2 class.
@@ -37,7 +54,7 @@ class NSGA2():
         self.__toolbox = base.Toolbox()
 
         # get parameters
-        self.__params = {}
+        self.__params = copy.deepcopy(DEFAULT_PARAMS)
         for param in config.iter("parameter"):
             if "name" in param.attrib:
                 if not param.text is None:
@@ -129,7 +146,7 @@ class NSGA2():
         return {"pool": self}
 
 
-    def setup(self, CGRA, app, sim_params, method, proc_num = 1):
+    def setup(self, CGRA, app, sim_params, method, dir, proc_num = 1):
         """Setup NSGA2 optimization
 
             Args:
@@ -141,6 +158,8 @@ class NSGA2():
                         1. graphviz (default)
                         2. tsort
                         3. random
+                dir (str): data flow direction
+                           available values corresponds to the keys of the dict "DATA_FLOW" in "Placer"
                 Option:
                     proc_num (int): the number of process
                                     Default is equal to cpu count
@@ -184,7 +203,7 @@ class NSGA2():
         comp_dfg = app.getCompSubGraph()
 
         # generate initial placer
-        self.__placer = Placer(method, iterations = self.__params["Initial place iteration"], \
+        self.__placer = Placer(method, dir, iterations = self.__params["Initial place iteration"], \
                                 randomness = "Full")
 
         # make initial mappings
@@ -411,7 +430,8 @@ class NSGA2():
                                             obj = self.status_disp[i].desc, min = stats["min"][i],\
                                             max=stats["max"][i]))
 
-            if self.__quit and gen_count >= 30:
+            if self.__quit and \
+                gen_count >= self.__params["Minimum generation"]:
                 break;
 
         self.__pool.close()

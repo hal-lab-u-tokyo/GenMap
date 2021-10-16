@@ -41,6 +41,24 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def __init_ALU(CGRA, mapping, routed_graph):
+        """Initialize ALU nodes in the PE array graph.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                mapping (dict): mapping of the DFG
+                    keys (str): operation label of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): A graph where the paths are routed
+
+            Details:
+                For operation mapped ALUs or unused ALU, which can work as routing node,
+                    True of "routable" attribute is added.
+                    This is a flag for routing.
+                    "in_capacity" attribute is added as int.
+                    This is a count of in_edges.
+                For the other ALUs,
+                    False of "routable" attribute is added not to be used as routing node.
+        """
         w, h = CGRA.getSize()
         used_coords = mapping.values()
         for x in range(w):
@@ -67,6 +85,14 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def __remove_other_edges(graph, target, srcs):
+        """remove edges other than the specified edges
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                target (str): target node (successor)
+                src (str): predecessor node of the edge to be remained
+
+        """
         remove_edges = [(p, target) for p in \
                             graph.predecessors(target) \
                             if p not in srcs]
@@ -74,6 +100,14 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def __rm_ALU_out_cost(CGRA, graph, alu):
+        """remove high cost of ALU outputs which are available for the routing
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                graph (networkx DiGraph): A graph where the paths are routed
+                alu (str): a node name of the target ALU
+
+        """
         for suc_element in graph.successors(alu):
             if CGRA.isALU(suc_element) and \
                     not graph.nodes[suc_element]["routable"]:
@@ -85,17 +119,37 @@ class AStarRouter(RouterBase):
 
     @staticmethod
     def __disable_free_inedge(graph, target):
+        """disable all free incoming edge
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                target (str): target node (successor)
+        """
         for e in graph.in_edges(target):
             if graph.edges[e]["free"]:
                 graph.edges[e]["weight"] = USED_LINK_WEIGHT
 
     @staticmethod
     def __mark_used_node(graph, v):
+        """mark the node as used
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                v (str): the used node
+
+        """
         for e in graph.out_edges(v):
             graph.edges[e]["weight"] = USED_LINK_WEIGHT
 
     @staticmethod
     def __mark_used_edge(graph, e):
+        """mark the edge as used
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                e (tuple of str): the used edge
+
+        """
         graph.edges[e]["weight"] = USED_LINK_WEIGHT
         graph.edges[e]["free"] = False
 
@@ -225,10 +279,10 @@ class AStarRouter(RouterBase):
                     routed_graph.nodes[path[i]]["free"] = False
                     # remove other input edges
                     AStarRouter.__remove_other_edges(routed_graph, path[i+1],\
-                                                        [path[i]])
+                                                        path[i])
                     if CGRA.isALU(path[i+1]):
                         routed_graph.nodes[path[i+1]]["route"] = True
-                        routed_graph.nodes[e[1]]["in_capacity"] = 0
+                        routed_graph.nodes[path[i+1]]["in_capacity"] = 0
                 routed_graph.nodes[path[-1]]["free"] = False
 
                 free_last_stage_SEs -= set(path)
@@ -251,10 +305,10 @@ class AStarRouter(RouterBase):
                 routed_graph.nodes[path[i]]["free"] = False
                 # remove other input edges
                 AStarRouter.__remove_other_edges(routed_graph, path[i+1],\
-                                                        [path[i]])
+                                                        path[i])
                 if CGRA.isALU(path[i+1]):
                     routed_graph.nodes[path[i+1]]["route"] = True
-                    routed_graph.nodes[e[1]]["in_capacity"] = 0
+                    routed_graph.nodes[path[i+1]]["in_capacity"] = 0
             routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
 
@@ -316,10 +370,10 @@ class AStarRouter(RouterBase):
                         routed_graph.nodes[path[i]]["free"] = False
                         # remove other input edges
                         AStarRouter.__remove_other_edges(routed_graph,\
-                                                    path[i+1], [path[i]])
+                                                    path[i+1], path[i])
                         if CGRA.isALU(path[i+1]):
                             routed_graph.nodes[path[i+1]]["route"] = True
-                            routed_graph.nodes[e[1]]["in_capacity"] = 0
+                            routed_graph.nodes[path[i+1]]["in_capacity"] = 0
                     routed_graph.nodes[path[-1]]["free"] = False
 
                     # update ALU out link cost and used flag
@@ -597,7 +651,7 @@ class AStarRouter(RouterBase):
                             graph.edges[e]["weight"] = 0
                             # remove other input edges
                             AStarRouter.__remove_other_edges(graph, path[i+1],\
-                                                                [path[i]])
+                                                                path[i])
                             if isALU:
                                 graph.nodes[e[1]]["route"] = True
                                 graph.nodes[e[1]]["in_capacity"] = 0

@@ -6,6 +6,7 @@
 	<eval args='{"duplicate_enable": True}' >PowerEval</eval>
 	<eval>TimeSlackEval</eval>
 	<parameter name="Maximum generation" >300</parameter>
+	<parameter name="Minimum generation" >30</parameter>
 	<parameter name="Maximum stall" >100</parameter>
 	<parameter name="Initial population size" >300</parameter>
 	<parameter name="Offspring size" >100</parameter>

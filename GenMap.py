@@ -42,6 +42,9 @@ def parser():
                             help="specify the prefix of frequency unit (default = M)")
     argparser.add_argument("--log", type=str, help="specify log file name (default: no logging)")
     argparser.add_argument("--nproc", type=int, help="specify the number of multi-process (default: cpu count)")
+    argparser.add_argument("--data-flow", type=str, \
+                            help="specify the data flow direction", \
+                            choices=Placer.DATA_FLOW.keys(), default="any")
     args = argparser.parse_args()
     return args
 
@@ -195,9 +198,11 @@ if __name__ == '__main__':
         exit()
 
     if not args.nproc is None:
-        success_setup = optimizer.setup(model, app, sim_params, args.init_map, proc_num = args.nproc)
+        success_setup = optimizer.setup(model, app, sim_params, args.init_map,\
+                            args.data_flow, proc_num = args.nproc)
     else:
-        success_setup = optimizer.setup(model, app, sim_params, args.init_map)
+        success_setup = optimizer.setup(model, app, sim_params, args.init_map,\
+                                            args.data_flow)
 
     # run optimization
     if success_setup:
