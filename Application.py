@@ -359,3 +359,6 @@ class Application():
 
     def getOutputCount(self):
         return len(self.__output_nodes)
+
+    def getConstValue(self, node):
+        return self.__const_nodes[node]

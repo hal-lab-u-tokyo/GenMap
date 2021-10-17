@@ -1,6 +1,7 @@
 #  This file is part of GenMap and released under the MIT License, see LICENSE.
 #  Author: Takuya Kojima
 
+from ast import parse
 from cmd import Cmd
 from argparse import ArgumentParser
 import prettytable
@@ -224,7 +225,8 @@ class GenMapShell(Cmd):
         print("usage: select {0}\nIt selects a solution".format(\
             self.__bold_font("solution_ID")))
 
-    def do_view(self, _):
+    def do_view(self, line):
+        parsed_args = self.parse_view(line.split(" "))
         if self.selected_id < 0:
             print("view: a solution is not selected")
         else:
@@ -232,14 +234,56 @@ class GenMapShell(Cmd):
             ind = self.data["hof"][self.selected_id]
             app = self.header["app"]
             try:
-                drawer = ConfDrawer(model, ind)
+                drawer = ConfDrawer(model, ind, parsed_args.origin)
                 drawer.draw_PEArray(model, ind, app)
                 drawer.show()
             except TclError as e:
                 print(e)
 
+    def parse_view(self, args):
+        usage = "view [options...]\nIt shows mapping of the selected solution"
+        parser = ArgumentParser(prog = "view", usage=usage)
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('--left-bottom', action='store_const', \
+                            dest="origin", const="left-bottom", \
+                            help="set left bottom as the origin")
+        group.add_argument('--left-top', action='store_const', \
+                            dest="origin", const="left-top", \
+                            help="set left top as the origin")
+        group.add_argument('--right-bottom', action='store_const', \
+                            dest="origin", const="right-bottom", \
+                            help="set right bottom as the origin")
+        group.add_argument('--right-top', action='store_const', \
+                            dest="origin", const="right-top", \
+                            help="set right top as the origin")
+        parser.set_defaults(origin="left-bottom")
+        try:
+            parsed_args = parser.parse_args(args=[argv for argv in args if argv != ""])
+        except SystemExit:
+            return None
+
+        return parsed_args
+
     def help_view(self):
         print("usage: view\nIt visualizes the selected solution")
+
+    def complete_view(self, text, line, begidx, endidx):
+        args = line.split(" ")
+        args = [argv for argv in args if argv != ""]
+        if text == "":
+            args.append(text)
+
+        pos = args.index(text)
+
+        opt_list = ["--left-bottom", "--left-top", "--right-bottom", \
+                    "--right-top"]
+
+        if pos == 1:
+            comp_args = [opt for opt in opt_list if opt.startswith(text)]
+        else:
+            comp_args = []
+
+        return comp_args
 
     def do_save(self, line):
         parsed_args = self.parse_save(line.split(" "))

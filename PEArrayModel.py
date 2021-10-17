@@ -542,6 +542,10 @@ class PEArrayModel():
                 else:
                     if attr["index"] in self.__const_reg_range:
                         src_node = CONST_node_exp.format(index=attr["index"])
+                    elif self.__infini_const:
+                        # just save conf value
+                        self.__reg_config_net_table(dst, src_node, attr["conf_value"])
+                        return
                     else:
                         raise self.InvalidConfigError(str(attr["index"]) + " is out of range for const registers")
 
@@ -1026,7 +1030,11 @@ class PEArrayModel():
                 int: configration value
         """
         x, y = coord
-        return self.__config_op_table[x][y][opcode]
+        try:
+            return self.__config_op_table[x][y][opcode]
+        except KeyError:
+            print("Warnning: Opcode \"{0}\" for ALU ({1}, {2}) is not defined".format(opcode, coord[0], coord[1]))
+            return None
 
     def getNetConfValue(self, dst, src):
         """Gets configration value of SE
@@ -1038,7 +1046,11 @@ class PEArrayModel():
             Returns:
                 int: configration value
         """
-        return self.__config_net_table[dst][src]
+        try:
+            return self.__config_net_table[dst][src]
+        except KeyError:
+            print("Warnning: Configuration value to route from {0} to {1} is not defined".format(src, dst))
+            return None
 
     def getALUMuxCount(self, coord):
         """Gets mux count of the ALU

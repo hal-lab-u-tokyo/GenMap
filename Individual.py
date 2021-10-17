@@ -60,6 +60,9 @@ class Individual():
         else:
             return None
 
+    def getAllEvaluatedData(self):
+        return copy.deepcopy(self.__userData)
+
     def mapping_compaction(self):
         """
         Shift the mapping as far as possible
