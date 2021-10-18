@@ -33,9 +33,9 @@ class Generic_ConfGen(ConfGenBase):
         self.style_types = {"v_duplicate": bool, "h_duplicate": bool, \
                             "readable": bool, "origin": str}
         self.style_default = {"v_duplicate": False, "h_duplicate": False, \
-                                "readable": False, "origin": "left-bottom"}
-        self.style_choices = {"origin": ["left-bottom", "left-top",\
-                                             "right-bottom", "right-top"]}
+                                "readable": False, "origin": "bottom-left"}
+        self.style_choices = {"origin": ["bottom-left", "top-left",\
+                                             "bottom-right", "top-right"]}
 
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
@@ -306,10 +306,12 @@ class Generic_ConfGen(ConfGenBase):
                             opcode = CGRA.getRoutingOpcode(alu)
                             confs[x][y]["opcode"] = save_opcode((x, y), opcode)
                             confs[x][y]["label"] = "ROUTE"
+                            confs[x][y]["imm"] = []
                             pre_node = list(routed_graph.predecessors(alu))[0]
                             confs[x][y]["mux"] = \
                                 [ save_net_conf(alu, pre_node) \
                                     for _ in range(mux_count) ]
+                            confs[x][y]["imm_sel"] = [None for _ in range(mux_count)]
 
 
         # SEs
@@ -372,6 +374,7 @@ class Generic_ConfGen(ConfGenBase):
             if inode in mem_loads:
                 load_conf[i]["label"] = routed_graph.nodes[inode]["map"]
 
+
         for i in range(osize):
             onode = CGRA.getNodeName("OUT_PORT", index = i)
             if onode in mem_stores:
@@ -383,6 +386,7 @@ class Generic_ConfGen(ConfGenBase):
 
                 store_conf[i] = {"label": routed_graph.nodes[onode]["map"],
                         "mux": sel}
+
 
         if CGRA.isIOShared():
             mem_conf = []
@@ -435,7 +439,7 @@ class Generic_ConfGen(ConfGenBase):
                         "arch": dict of architecture info
                         "mapping": dict of mapping info
         """
-        CGRA = header["arch"]
+        CGRA : PEArrayModel = header["arch"]
         app = header["app"]
         sim_params = header["sim_params"]
 
@@ -451,6 +455,27 @@ class Generic_ConfGen(ConfGenBase):
         else:
             arch_info["mem_load_size"] = len(CGRA.getInputPorts())
             arch_info["mem_store_size"] = len(CGRA.getInputPorts())
+
+        # IO pos info
+        pos_list = ["left", "right", "bottom", "top"]
+        ip_pos = {pos: [] for pos in pos_list}
+        op_pos = {pos: [] for pos in pos_list}
+        isize = len(CGRA.getInoutPorts())
+        osize = len(CGRA.getOutputPorts())
+        iport_node2index = {CGRA.getNodeName("IN_PORT", index=i):i for i in range(isize)}
+        oport_node2index = {CGRA.getNodeName("OUT_PORT", index=i):i for i in range(osize)}
+
+        for pos in pos_list:
+            for ip in CGRA.getInputPortsByPos(pos):
+                ip_pos[pos].append(iport_node2index[ip])
+            for op in CGRA.getOutputPortsByPos(pos):
+                op_pos[pos].append(oport_node2index[op])
+        if CGRA.isIOShared():
+            pos_info = {k: v for k, v in ip_pos.items() if len(v) > 0}
+        else:
+            pos_info = {"load": {k: v for k, v in ip_pos.items() if len(v) > 0},
+                        "store": {k: v for k, v in op_pos.items() if len(v) > 0}}
+        arch_info["mem_pos"] = pos_info
 
         # mapping info
         mapping_info = {}

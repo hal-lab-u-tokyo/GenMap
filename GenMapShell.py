@@ -244,19 +244,19 @@ class GenMapShell(Cmd):
         usage = "view [options...]\nIt shows mapping of the selected solution"
         parser = ArgumentParser(prog = "view", usage=usage)
         group = parser.add_mutually_exclusive_group()
-        group.add_argument('--left-bottom', action='store_const', \
-                            dest="origin", const="left-bottom", \
+        group.add_argument('--bottom-left', action='store_const', \
+                            dest="origin", const="bottom-left", \
                             help="set left bottom as the origin")
-        group.add_argument('--left-top', action='store_const', \
-                            dest="origin", const="left-top", \
+        group.add_argument('--top-left', action='store_const', \
+                            dest="origin", const="top-left", \
                             help="set left top as the origin")
-        group.add_argument('--right-bottom', action='store_const', \
-                            dest="origin", const="right-bottom", \
+        group.add_argument('--bottom-right', action='store_const', \
+                            dest="origin", const="bottom-right", \
                             help="set right bottom as the origin")
-        group.add_argument('--right-top', action='store_const', \
-                            dest="origin", const="right-top", \
+        group.add_argument('--top-right', action='store_const', \
+                            dest="origin", const="top-right", \
                             help="set right top as the origin")
-        parser.set_defaults(origin="left-bottom")
+        parser.set_defaults(origin="bottom-left")
         try:
             parsed_args = parser.parse_args(args=[argv for argv in args if argv != ""])
         except SystemExit:
@@ -275,8 +275,8 @@ class GenMapShell(Cmd):
 
         pos = args.index(text)
 
-        opt_list = ["--left-bottom", "--left-top", "--right-bottom", \
-                    "--right-top"]
+        opt_list = ["--bottom-left", "--top-left", "--bottom-right", \
+                    "--top-right"]
 
         if pos == 1:
             comp_args = [opt for opt in opt_list if opt.startswith(text)]

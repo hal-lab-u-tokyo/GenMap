@@ -105,7 +105,8 @@ class SolverSetup():
 
     def __cbc_ilp_setup(self):
         self.__solver = pulp.PULP_CBC_CMD(msg = False,\
-                                         threads = self.__threads)
+                                         threads = self.__threads if self.__threads > 1 \
+                                                                  else None)
 
     def __ecos_cp_setup(self):
         if not "ECOS" in cp.installed_solvers():

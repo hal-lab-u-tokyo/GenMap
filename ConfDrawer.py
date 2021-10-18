@@ -34,7 +34,7 @@ oport_color = "magenta"
 
 class ConfDrawer():
 
-    def __init__(self, CGRA, individual, origin = "left-bottom"):
+    def __init__(self, CGRA , individual, origin = "bottom-left"):
         """Constructor of this class
 
             Args:
@@ -42,7 +42,7 @@ class ConfDrawer():
                 individual (Individual): An individual to be evaluated
                 origin (str): position of coordinate origin
                     available values are following:
-                        "left-bottom", "left-top", "right-bottom", "right-top"
+                        "bottom-left", "top-left", "bottom-right", "top-right"
         """
 
         self.width, self.height = CGRA.getSize()
@@ -126,14 +126,14 @@ class ConfDrawer():
         # coord,pos re-mapping
         io_remap = {pos: pos for pos in ["left", "right", "top", "bottom"]}
         self.preg_remap = lambda preg_pos: preg_pos
-        if origin == "left-top":
+        if origin == "top-left":
             self.coord_remap = lambda pos: (pos[0], self.height - 1 - pos[1])
             io_remap["top"], io_remap["bottom"] = io_remap["bottom"], io_remap["top"]
             self.preg_remap = lambda preg_pos: [v - height_diff for v in  preg_pos[::-1]]
-        elif origin == "right-bottom":
+        elif origin == "bottom-right":
             self.coord_remap = lambda pos: (self.width - 1 - pos[0], pos[1])
             io_remap["left"], io_remap["right"] = io_remap["right"], io_remap["left"]
-        elif origin == "right-top":
+        elif origin == "top-right":
             self.coord_remap = lambda pos: (self.width - 1 - pos[0], \
                                                 self.height - 1 - pos[1])
             io_remap["left"], io_remap["right"] = io_remap["right"], io_remap["left"]
