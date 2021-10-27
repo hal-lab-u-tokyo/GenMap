@@ -17,6 +17,7 @@ from Individual import Individual
 from EvalBase import EvalBase
 from RouterBase import RouterBase
 from Placer import Placer
+from WireLengthEval import WireLengthEval
 
 DEFAULT_PARAMS = {
     "Maximum generation":           300,
@@ -94,8 +95,9 @@ class NSGA2():
         # get objectives
         eval_names = [ele.text for ele in config.iter("eval")]
 
-        if len(eval_names) == 0:
-            raise ValueError("At least, one objective is needed")
+        if not "WireLengthEval" in eval_names:
+            eval_names = ["WireLengthEval"] + eval_names
+
         if None in eval_names:
             raise ValueError("missing No." + str(eval_names.index(None) + 1) + " objective name")
         self.__eval_list = []
@@ -162,7 +164,7 @@ class NSGA2():
                            available values corresponds to the keys of the dict "DATA_FLOW" in "Placer"
                 Option:
                     proc_num (int): the number of process
-                                    Default is equal to cpu count
+                                    Default is 1
 
             Returns:
                 bool: if the setup successes, return True, otherwise return False.
