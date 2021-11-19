@@ -1,8 +1,9 @@
 ## Pull docker image
 You can pull a pre-built docker image from DockerHub.
 ```
-$ docker pull tkojima0107/genmap
+$ docker pull tkojima0107/genmap[:tag]
 ```
+You can specify the tag name corresponding to the released version.
 
 Of course, this repository contains Dockerfile.
 So, you can also build the same image on your machine as follows:

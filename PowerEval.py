@@ -175,7 +175,7 @@ class PowerEval(EvalBase):
         """
         mapping = individual.mapping
         graph = individual.routed_graph
-        op_attr = nx.get_node_attributes(app.getCompSubGraph(), "op")
+        op_attr = nx.get_node_attributes(app.getCompSubGraph(), "opcode")
         opcodes = {CGRA.getNodeName("ALU", pos): op_attr[op_label] \
                      if op_label in op_attr.keys() else "CAT" \
                          for op_label, pos in mapping.items()}

@@ -378,6 +378,7 @@ class AStarRouter(RouterBase):
 
                     # update ALU out link cost and used flag
                     AStarRouter.__mark_used_node(routed_graph, alu)
+                    route_cost += cost
 
             except nx.exception.NetworkXNoPath:
                 route_cost += PENALTY_CONST

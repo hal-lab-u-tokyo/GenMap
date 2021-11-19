@@ -5,6 +5,12 @@
 import networkx as nx
 import copy
 from pathlib import Path
+import numpy as np
+
+const_itypes = {"int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64",
+                "byte", "ubyte", "ushort", "short", "intc", "uintc", "uint", "int"}
+const_ftypes = {"float16", "half", "float32", "single", "float64", "double", "float"}
+const_alias = {"float": "single", "int": "int32"}
 
 class Application():
 
@@ -26,6 +32,8 @@ class Application():
         # key: tuple of edge
         # value: int of operand or None
         self.__operands = dict()
+        self.comments = []
+        self.endian = ">" # default is big-endian
 
 
     def read_dot(self, file):
@@ -68,6 +76,17 @@ class Application():
         path = Path(file)
         self.__app_name = path.stem
 
+        # get comments
+        if "graph" in g.graph:
+            if "comment" in g.graph["graph"]:
+                self.comments = g.graph["graph"]["comment"].strip('"').split(",")
+
+        # endian setting
+        if "little-endian" in self.comments:
+            self.endian = "<"
+        elif "big-endian" in self.comments:
+            self.endian = ">"
+
         # check if it is a DAG
         if nx.is_directed_acyclic_graph(g):
             dag = nx.DiGraph(g)
@@ -75,8 +94,8 @@ class Application():
             for u, attr in dag.nodes(data=True):
                 try:
                     self.__verifyNodeAttr(u, attr)
-                except Exception as E:
-                    print(E.args)
+                except ValueError as E:
+                    print(E)
                     return False
             # check attributes of edges
             for u1, u2, attr in dag.edges(data=True):
@@ -124,21 +143,7 @@ class Application():
                     self.__op_nodes[node] = attr["opcode"]
             # const node
             elif attr_type == "const":
-                if "int" in attr.keys():
-                    try:
-                        cvalue = int(attr["int"])
-                    except ValueError:
-                        raise ValueError("Invalid value for const integer: ", \
-                                            attr["int"])
-                elif "float" in attr.keys():
-                    try:
-                        cvalue = int(attr["float"])
-                    except ValueError:
-                        raise ValueError("Invalid value for const float: ", \
-                                            attr["float"])
-                else:
-                    raise ValueError("Missing const value (int or float) for node: ", node)
-                self.__const_nodes[node] = cvalue
+                self.__const_nodes[node] = self.__decode_const(node, attr)
             elif attr_type == "input":
                 self.__input_nodes.add(node)
             elif attr_type == "output":
@@ -146,7 +151,49 @@ class Application():
             else:
                 raise ValueError("Unknown node type \"{0}\" for node: {1}".format(attr_type, node))
         else:
-            raise ValueError("Missing type attribute for node: ", node)
+            raise ValueError("Missing type attribute for node: " + node)
+
+
+    def __decode_const(self, node, attr):
+        attr_set = set(attr.keys())
+        itypes = attr_set & const_itypes
+        ftypes = attr_set & const_ftypes
+        if len(itypes | ftypes) > 1:
+            raise ValueError("Multiple types are specified", itypes | ftypes)
+
+        if len(itypes) == 1:
+            # decode as integer
+            type_name = itypes.pop()
+            attr[type_name] = attr[type_name].strip("\"")
+            cstr = attr[type_name]
+            if cstr.startswith("0x"):
+                base = 16
+                cstr = cstr[2:]
+            else:
+                base = 10
+            try:
+                cvalue = int(cstr, base)
+            except ValueError:
+                raise ValueError("Invalid {0} value for {1}: {2}".format( \
+                                    type_name, node, attr[type_name]))
+
+        elif len(ftypes) == 1:
+            # decode as float
+            type_name = ftypes.pop()
+            attr[type_name] = attr[type_name].strip("\"")
+            try:
+                cvalue = float(attr[type_name])
+            except ValueError:
+                raise ValueError("Invalid {0} value for {1}: {2}".format( \
+                                    type_name, node, attr[type_name]))
+
+        else:
+            raise ValueError("Missing const value (int or float) for node: " + node)
+
+        if type_name in const_alias:
+            type_name = const_alias[type_name]
+        # convert to the specified data type
+        return int(getattr(np, type_name)(cvalue).newbyteorder(self.endian).tobytes().hex(), 16)
 
     def getAppName(self):
         """Returns application name

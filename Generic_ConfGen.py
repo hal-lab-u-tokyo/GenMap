@@ -4,6 +4,9 @@
 from operator import index
 import os
 import json
+import math
+
+from networkx.algorithms.core import k_core
 
 from ConfGenBase import ConfGenBase
 from ConfDrawer import ConfDrawer
@@ -114,7 +117,8 @@ class Generic_ConfGen(ConfGenBase):
                 try:
                     self.save_latency_analysis(CGRA, individual, size,\
                                                     file_list["hist"],\
-                                                    file_list["heat"])
+                                                    file_list["heat"],\
+                                                    style_opt["origin"])
                 except TclError as e:
                     print("Fail to save latency analysis graph because", e)
 
@@ -122,7 +126,7 @@ class Generic_ConfGen(ConfGenBase):
             print("No such direcotry: ", args["output_dir"])
 
     def save_latency_analysis(self, CGRA, ind, size, hist_file_name,\
-                                heat_file_name):
+                                heat_file_name, origin):
         """save latency analysis result
             Args:
                 CGRA (PEArrayModel)         : the target architecture
@@ -132,6 +136,9 @@ class Generic_ConfGen(ConfGenBase):
                                                 latency diffrence histgram
                 heat_file_name (str)        : file name for
                                                 latency diffrence heatmap
+                origin (str): position of coordinate origin
+                    available values are following:
+                        "bottom-left", "top-left", "bottom-right", "top-right"
 
             Returns: None
 
@@ -141,11 +148,11 @@ class Generic_ConfGen(ConfGenBase):
             # not evaluated
             latency_diff = LatencyBalanceEval.analyze_latency_diff(CGRA, ind)
 
-        lat_rng = [i for i in range(min(latency_diff.values()), \
-                    max(latency_diff.values()) + 1)]
+        lat_rng = [i for i in range(math.floor(min(latency_diff.values())), \
+                    math.floor(max(latency_diff.values())) + 1)]
         node_count = {i: 0 for i in lat_rng}
         for k, v in latency_diff.items():
-            node_count[v] += 1
+            node_count[round(v)] += 1
 
         fig, ax = plt.subplots()
         ax.get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
@@ -160,12 +167,16 @@ class Generic_ConfGen(ConfGenBase):
         fig = plt.figure()
         width, height = size
         xtick = list(range(width))
-        ytick = list(range(height))[::-1]
+        if origin in ["top-right", "bottom-right"]:
+            xtick = xtick[::-1]
+        ytick = list(range(height))
+        if origin in ["bottom-left", "bottom-right"]:
+            ytick = ytick[::-1]
         mask = [ [ True for x in range(width) ] for y in range(height)]
         lat = [ [ 0 for x in range(width) ] for y in range(height)]
         for x in range(width):
             for y in range(height):
-                alu = CGRA.getNodeName("ALU", pos = (x, ytick[y]))
+                alu = CGRA.getNodeName("ALU", pos = (xtick[x], ytick[y]))
                 if alu in latency_diff.keys():
                     lat[y][x] = latency_diff[alu]
                     mask[y][x] = False
@@ -276,6 +287,7 @@ class Generic_ConfGen(ConfGenBase):
                         const_reg.append(c_node)
                         if not sel is None:
                             operands[sel] = c_node
+                            mux_remain.remove(sel)
                         else:
                             pre_nodes.append(c_node)
                 confs[x][y]["imm"] = imm_list
@@ -460,7 +472,7 @@ class Generic_ConfGen(ConfGenBase):
         pos_list = ["left", "right", "bottom", "top"]
         ip_pos = {pos: [] for pos in pos_list}
         op_pos = {pos: [] for pos in pos_list}
-        isize = len(CGRA.getInoutPorts())
+        isize = len(CGRA.getInputPorts())
         osize = len(CGRA.getOutputPorts())
         iport_node2index = {CGRA.getNodeName("IN_PORT", index=i):i for i in range(isize)}
         oport_node2index = {CGRA.getNodeName("OUT_PORT", index=i):i for i in range(osize)}
