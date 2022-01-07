@@ -1,7 +1,7 @@
 digraph{
 
 	# inputs
-	"INPUT_0" [type=input]
+	"INPUT_0" [type=op,opcode=LD]
 
 	# operations
 	"op1" [type=op,opcode=ADD]
@@ -19,7 +19,7 @@ digraph{
 	"op13" [type=op,opcode=OR]
 
 	# outputs
-	"OUTPUT_0" [type=output]
+	"OUTPUT_0" [type=op,opcode=ST]
 
 	# constants
 	"16" [type=const,int=16]
