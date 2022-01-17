@@ -70,6 +70,7 @@ class AStarRouter(RouterBase):
                     routed_graph.nodes[alu]["routable"] = True
                     routed_graph.nodes[alu]["in_capacity"] = \
                         CGRA.getALUMuxCount((x, y))
+                    routed_graph.nodes[alu]["free"] = False
                 else:
                     if CGRA.isRoutingALU((x, y)):
                         # remove high cost of ALU out
