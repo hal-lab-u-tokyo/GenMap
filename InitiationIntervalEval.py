@@ -6,7 +6,7 @@ from random import weibullvariate
 from EvalBase import EvalBase
 
 
-class InitialIntervalEval(EvalBase):
+class InitiationIntervalEval(EvalBase):
     def __init__(self):
         pass
 
