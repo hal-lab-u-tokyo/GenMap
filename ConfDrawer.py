@@ -28,15 +28,13 @@ alu_scale = 0.3
 alu_color = "lightcoral"
 pe_size = 1 - pe_margin * 2
 preg_color = "purple"
-arrow_setting = dict(facecolor='black', width=0.8,
-                     headwidth=4.0, headlength=4.0, shrink=0.01)
+arrow_setting = dict(facecolor='black', width =0.8 ,headwidth=4.0,headlength=4.0,shrink=0.01)
 iport_color = "darkorange"
 oport_color = "magenta"
 
-
 class ConfDrawer():
 
-    def __init__(self, CGRA, individual, origin="bottom-left"):
+    def __init__(self, CGRA , individual, origin = "bottom-left"):
         """Constructor of this class
 
             Args:
@@ -48,15 +46,16 @@ class ConfDrawer():
         """
 
         self.width, self.height = CGRA.getSize()
-        self.used_PE = [[False for y in range(
-            self.height)] for x in range(self.width)]
-        self.PE_resources = [
-            [[] for y in range(self.height)] for x in range(self.width)]
+        self.used_PE = [ [False for y in range(self.height)] for x in range(self.width)]
+        self.PE_resources = [ [ [] for y in range(self.height)] for x in range(self.width)]
         self.node_pos = {}
         self.xlbound = 0
         self.ylbound = 0
         self.xubound = 0
         self.yubound = 0
+        self.has_input_port = len(CGRA.getInputPorts()) > 0
+        self.has_output_port = len(CGRA.getOutputPorts()) > 0
+        self.has_io_port = lambda : (self.has_input_port or self.has_output_port)
 
         # io drawing info
         # dict of dict:
@@ -70,10 +69,9 @@ class ConfDrawer():
         # dict of dict
         # 1st key: IO pos, 2nd key: coord of adj PE
         self.io_count = {pos: {} for pos in ["left", "right", "top", "bottom"]}
-        self.io_placed_count = {pos: {}
-                                for pos in ["left", "right", "top", "bottom"]}
-        # drawing
-        self.io_size = pe_size  # it cloud be updated after anylyzeIO
+        self.io_placed_count =  {pos: {} for pos in ["left", "right", "top", "bottom"]}
+        # drawing 
+        self.io_size = pe_size # it cloud be updated after anylyzeIO
 
         for x in range(self.width):
             for y in range(self.height):
@@ -83,6 +81,7 @@ class ConfDrawer():
                     self.PE_resources[x][y].extend(SEs)
                 for v in self.PE_resources[x][y]:
                     self.node_pos[v] = (x, y)
+
 
         for v in individual.routed_graph.nodes():
             for x in range(self.width):
@@ -96,24 +95,34 @@ class ConfDrawer():
                 self.used_output[v] = {}
 
         # get IO config
-        horizontal_ofset = 1 if len(self.io_count["left"]) > 0 \
-            or len(self.io_count["right"]) > 0 else 0
-        vertical_ofset = 1 if len(self.io_count["top"]) > 0 \
-            or len(self.io_count["bottom"]) > 0 else 0
+        horizontal_offset = 0
+        vertical_offset = 0
+        if self.has_io_port():
+            self.analyzeIO(CGRA)
+            if len(self.io_count["left"]) > 0 \
+                or len(self.io_count["right"]):
+                horizontal_offset = 1
+            if len(self.io_count["top"]) > 0 \
+                or  len(self.io_count["bottom"]):
+                vertical_offset = 1
 
-        used_PE_coords = [(x, y) for x in range(self.width)
-                          for y in range(self.height) if self.used_PE[x][y]]
 
-        actual_width = max([x for (x, y) in used_PE_coords])
-        actual_height = max([y for (x, y) in used_PE_coords])
+        used_PE_coords = [(x, y) for x in range(self.width) for y in range(self.height) if self.used_PE[x][y]]
+        used_ip_coords = [v["adjPE"] for v in self.used_input.values()] 
+        used_op_coords = [v["adjPE"] for v in self.used_output.values()]
+
+        actual_width = max([x for (x, y) in \
+            sum([used_PE_coords, used_ip_coords, used_op_coords], [])]) + 1
+        actual_height = max([y for (x, y) in \
+            sum([used_PE_coords, used_ip_coords, used_op_coords], [])]) + 1
 
         # draw the used PEs
         height_diff = self.height - actual_height
         self.width = actual_width
         self.height = actual_height
 
-        self.xubound = self.width + horizontal_ofset
-        self.yubound = self.height + vertical_ofset
+        self.xubound = self.width + horizontal_offset
+        self.yubound = self.height + vertical_offset
 
         self.fig = plt.figure(figsize=(self.xubound, self.yubound))
         self.ax = self.fig.add_subplot(1, 1, 1)
@@ -128,18 +137,16 @@ class ConfDrawer():
         if origin == "top-left":
             self.coord_remap = lambda pos: (pos[0], self.height - 1 - pos[1])
             io_remap["top"], io_remap["bottom"] = io_remap["bottom"], io_remap["top"]
-            self.preg_remap = lambda preg_pos: [
-                v - height_diff for v in preg_pos[::-1]]
+            self.preg_remap = lambda preg_pos: [v - height_diff for v in  preg_pos[::-1]]
         elif origin == "bottom-right":
             self.coord_remap = lambda pos: (self.width - 1 - pos[0], pos[1])
             io_remap["left"], io_remap["right"] = io_remap["right"], io_remap["left"]
         elif origin == "top-right":
-            self.coord_remap = lambda pos: (self.width - 1 - pos[0],
-                                            self.height - 1 - pos[1])
+            self.coord_remap = lambda pos: (self.width - 1 - pos[0], \
+                                                self.height - 1 - pos[1])
             io_remap["left"], io_remap["right"] = io_remap["right"], io_remap["left"]
             io_remap["top"], io_remap["bottom"] = io_remap["bottom"], io_remap["top"]
-            self.preg_remap = lambda preg_pos: [
-                v - height_diff for v in preg_pos[::-1]]
+            self.preg_remap = lambda preg_pos: [v - height_diff for v in  preg_pos[::-1]]
         else:
             self.coord_remap = lambda pos: pos
 
@@ -178,15 +185,15 @@ class ConfDrawer():
                 ipConnPos = {}
                 if len(iports_dict[pos]) > 0:
                     for u in iports_dict[pos]:
-                        ipConnPos[u] = self.getAdjPECandidates(pos,
-                                                               list(g.successors(u)))
+                        ipConnPos[u] = self.getAdjPECandidates(pos, \
+                                            list(g.successors(u)))
 
                 # for output
                 opConnPos = {}
                 if len(oports_dict[pos]) > 0:
                     for u in oports_dict[pos]:
-                        opConnPos[u] = self.getAdjPECandidates(pos,
-                                                               list(g.predecessors(u)))
+                        opConnPos[u] = self.getAdjPECandidates(pos, \
+                                            list(g.predecessors(u)))
 
                 if CGRA.isIOShared():
                     connPos = ipConnPos.copy()
@@ -221,8 +228,8 @@ class ConfDrawer():
             else:
                 self.io_count[pos][coord] += 1
 
-        max_io_count = max([count for count_list in self.io_count.values()
-                            for count in count_list.values()])
+        max_io_count = max([count for count_list in self.io_count.values() \
+                                for count in count_list.values()])
         self.length = pe_size / float(max_io_count)
         if CGRA.isIOShared() and max_io_count > 1:
             print("Warning: the target CGRA shares IO ports for both input and output but some IO are drawn at the same position")
@@ -237,19 +244,20 @@ class ConfDrawer():
         if "top" in used_pos:
             self.yubound += 1
 
+
     def findAdjPE(self, pos, _connTable):
         prob = pulp.LpProblem("coord_round", pulp.LpMinimize)
         round_coord = {}
 
         if pos in ["left", "right"]:
-            def getCoord(coord): return coord[1]
-            def retCoord(coord, val): return (coord[0], val)
+            getCoord = lambda coord: coord[1]
+            retCoord = lambda coord, val: (coord[0], val)
         else:
-            def getCoord(coord): return coord[0]
-            def retCoord(coord, val): return (val, coord[1])
+            getCoord = lambda coord: coord[0]
+            retCoord = lambda coord, val: (val, coord[1])
 
-        coord_range = set([getCoord(coord) for l in _connTable.values()
-                           for coord in l])
+        coord_range = set([getCoord(coord) for l in _connTable.values()\
+                         for coord in l ])
         # remain conntable
         connTable = {}
         for k in _connTable.keys():
@@ -257,13 +265,13 @@ class ConfDrawer():
             for v in _connTable[k]:
                 connTable[k][getCoord(v)] = True
 
-        x = pulp.LpVariable.dicts("coord", (connTable.keys(), coord_range),
-                                  0, 1,  cat="Binary")
+        x = pulp.LpVariable.dicts("coord", (connTable.keys(), coord_range), \
+                                     0, 1,  cat = "Binary")
 
         # objective
-        prob += pulp.lpSum([sum([abs(w - v) for w in coord_range
-                                 if connTable[k][w]]) * x[k][v]
-                            for k in connTable.keys()
+        prob += pulp.lpSum([ sum([abs(w - v) for w in coord_range \
+                                    if connTable[k][w]]) * x[k][v] \
+                            for k in connTable.keys() \
                             for v in coord_range])
         # constraints
         for k in connTable.keys():
@@ -280,12 +288,13 @@ class ConfDrawer():
         result = prob.objective.value()
         if pulp.LpStatus[stat] == "Optimal":
             for k in connTable.keys():
-                for v in coord_range:
+                for v in  coord_range:
                     if x[k][v].value() == 1.0:
                         round_coord[k] = retCoord(_connTable[k][0], v)
             return round_coord
         else:
             raise Exception("Fail to decide IO position")
+
 
     def getAdjPECandidates(self, pos, connNodes):
 
@@ -294,18 +303,19 @@ class ConfDrawer():
         if pos == "left":
             candidate_coord = [(0, y) for y in range(self.height)]
         elif pos == "right":
-            candidate_coord = [(self.width - 1, y)
-                               for y in range(self.height)]
+            candidate_coord = [(self.width - 1, y) \
+                                for y in range(self.height)]
         elif pos == "top":
-            candidate_coord = [(x, self.height - 1)
-                               for x in range(self.width)]
+            candidate_coord = [(x, self.height - 1) \
+                                for x in range(self.width)]
         elif pos == "bottom":
             candidate_coord = [(x, 0) for x in range(self.width)]
 
+
         if pos in ["left", "right"]:
-            def forCoordSort(pos): return pos[1]
+            forCoordSort = lambda pos: pos[1]
         elif pos in ["top", "bottom"]:
-            def forCoordSort(pos): return pos[0]
+            forCoordSort = lambda pos: pos[0]
 
         for v in connNodes:
             if self.node_pos[v] in candidate_coord:
@@ -315,6 +325,7 @@ class ConfDrawer():
             raise Exception("Fail to find adjcent PE for IOs")
 
         return list(coord_set)
+
 
     def draw_PEArray(self, CGRA, individual, app):
         """Draws a PE array where application is mapped
@@ -344,8 +355,7 @@ class ConfDrawer():
                 for y in range(self.height):
                     if v in self.PE_resources[x][y]:
                         if CGRA.isALU(v):
-                            alu = self.__make_ALU_patch(
-                                self.coord_remap((x, y)))
+                            alu = self.__make_ALU_patch(self.coord_remap((x, y)))
                             self.ax.add_patch(alu)
                             self.node_to_patch[v] = alu
                             if "route" in individual.routed_graph.nodes[v].keys():
@@ -355,8 +365,7 @@ class ConfDrawer():
                         else:
                             for SE_id, SEs in CGRA.get_PE_resources((x, y))["SE"].items():
                                 if v in SEs:
-                                    se = self.__make_SE_patch(
-                                        self.coord_remap((x, y)), SE_id)
+                                    se = self.__make_SE_patch(self.coord_remap((x, y)), SE_id)
                                     self.ax.add_patch(se)
                                     self.node_to_patch[v] = se
 
@@ -368,39 +377,43 @@ class ConfDrawer():
             else:
                 opcode = "RPE"
             (x, y) = self.coord_remap((org_x, org_y))
-            self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, y + 1 - pe_margin * 2),
-                             size=12)
+            self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, y + 1 - pe_margin * 2),\
+                                size=12)
 
         # add routing node
         for (org_x, org_y) in routing_alus:
-            opcode = CGRA.getRoutingOpcode(
+            opcode = CGRA.getRoutingOpcode(\
                 CGRA.getNodeName("ALU", pos=(org_x, org_y)))
             (x, y) = self.coord_remap((org_x, org_y))
-            self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3,
-                                         y + 1 - pe_margin * 2), size=12)
+            self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, \
+                            y + 1 - pe_margin * 2), size=12)
 
         # add Input port
         for iport in self.used_input.keys():
+            ip = self.__make_IOPort(iport, True)
             self.ax.add_patch(ip)
             self.node_to_patch[iport] = ip
         # add Output port
         for oport in self.used_output.keys():
+            op = self.__make_IOPort(oport, False)
             self.ax.add_patch(op)
             self.node_to_patch[oport] = op
 
         # draw routing
         for u, v in individual.routed_graph.edges():
             if u in self.node_to_patch.keys() and \
-                    v in self.node_to_patch.keys():
-                self.ax.annotate("", xy=self.__get_center(self.node_to_patch[v]),
-                                 xytext=self.__get_center(
-                                     self.node_to_patch[u]),
-                                 arrowprops=arrow_setting)
+                v in self.node_to_patch.keys():
+                self.ax.annotate("", xy=self.__get_center(self.node_to_patch[v]),\
+                            xytext=self.__get_center(self.node_to_patch[u]),\
+                             arrowprops=arrow_setting)
+
 
         preg_positions = self.preg_remap(CGRA.getPregPositions())
         for i in range(CGRA.getPregNumber()):
             if individual.preg[i]:
                 self.ax.add_patch(self.__make_preg(preg_positions[i]))
+
+
 
     @staticmethod
     def __make_PE_patch(coord, color):
@@ -414,10 +427,9 @@ class ConfDrawer():
                 patch of matplotlib: a square
         """
         x, y = coord
-        return pat.Rectangle(xy=(x + pe_margin, y + pe_margin),
-                             width=pe_size, height=pe_size,
-                             angle=0, facecolor=color, edgecolor="black")
-
+        return pat.Rectangle(xy = (x + pe_margin, y + pe_margin), \
+                            width = pe_size, height = pe_size, \
+                            angle = 0, facecolor = color, edgecolor="black")
     @staticmethod
     def __make_ALU_patch(coord):
         """Makes a patch for ALU
@@ -452,9 +464,9 @@ class ConfDrawer():
         pos_x = x + pe_margin + se_margin
         # pos_y = y + pe_margin + pe_size - (se_margin + (se_size + se_margin) * (SE_id + 1))
         pos_y = y + pe_margin + pe_size - (se_size + se_margin) * (SE_id + 1)
-        return pat.Rectangle(xy=(pos_x, pos_y),
-                             width=se_size, height=se_size,
-                             angle=0, color=se_color)
+        return pat.Rectangle(xy = (pos_x, pos_y), \
+                                width = se_size, height = se_size, \
+                                angle = 0, color = se_color)
 
     def __make_preg(self, pos):
         """Makes a line for activated pipeline regs
@@ -465,9 +477,9 @@ class ConfDrawer():
             Returns:
                 patch of matplotlib: a rectangle
         """
-        return pat.Rectangle(xy=(0, pos - pe_margin / 2),
-                             width=self.width, height=pe_margin,
-                             angle=0, color=preg_color)
+        return pat.Rectangle(xy = (0,pos - pe_margin / 2), \
+                                width = self.width, height = pe_margin, \
+                                angle = 0, color = preg_color)
 
     def __make_IOPort(self, node_name, isInput):
         """Makes a triangle for input/oport port
@@ -480,7 +492,7 @@ class ConfDrawer():
                 patch of matplotlib: a triangle
         """
         info = self.used_input[node_name] if isInput else \
-            self.used_output[node_name]
+                self.used_output[node_name]
 
         adjPEPos = info["adjPE"]
         draw_adjPEPos = self.coord_remap(adjPEPos)
@@ -490,8 +502,8 @@ class ConfDrawer():
         margin_to_PE = length / 2.0
         placed_count = self.io_placed_count[pos][adjPEPos]
         io_count = self.io_count[pos][adjPEPos]
-        port_ofst = ((pe_size / float(io_count * 2))
-                     * (placed_count * 2 + 1))
+        port_ofst = ((pe_size / float(io_count * 2))\
+                 * (placed_count * 2 + 1))
         color = iport_color if isInput else oport_color
 
         # calc offset and rotation angles
@@ -506,7 +518,7 @@ class ConfDrawer():
         elif draw_pos == "top":
             pos_x = draw_adjPEPos[0] + pe_margin + port_ofst
             pos_y = draw_adjPEPos[1] + margin_to_PE + 1
-            angle = math.radians(180) if isInput else math.radians(0)
+            angle =  math.radians(180) if isInput else math.radians(0)
         elif draw_pos == "bottom":
             pos_x = draw_adjPEPos[0] + pe_margin + port_ofst
             pos_y = draw_adjPEPos[1] - margin_to_PE
@@ -514,9 +526,10 @@ class ConfDrawer():
 
         self.io_placed_count[pos][adjPEPos] += 1
 
-        return pat.RegularPolygon(xy=(pos_x, pos_y), radius=length / 2,
-                                  numVertices=3, fc=color,
-                                  ec="black", orientation=angle)
+        return pat.RegularPolygon(xy = (pos_x, pos_y), radius = length / 2,\
+                                numVertices= 3, fc = color, \
+                                ec = "black", orientation=angle)
+
 
     @staticmethod
     def __get_center(patch):
@@ -539,6 +552,8 @@ class ConfDrawer():
             min_y = min(y_list)
             max_y = max(y_list)
             return (min_x + (max_x - min_x) / 2, min_y + (max_y - min_y) / 2)
+
+
 
     def show(self):
         """Shows a drawn figure"""
