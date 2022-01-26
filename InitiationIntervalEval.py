@@ -12,7 +12,7 @@ class InitiationIntervalEval(EvalBase):
 
     @staticmethod
     def eval(CGRA, app, sim_params, individual):
-        """Return initial interval.
+        """Return initiation interval.
 
             Args:
                 CGRA (PEArrayModel): A model of the CGRA
@@ -21,7 +21,7 @@ class InitiationIntervalEval(EvalBase):
                 individual (Individual): An individual to be evaluated
 
             Returns:
-                int: initial interval
+                int: initiation interval
 
         """
         coords = []
