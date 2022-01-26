@@ -82,8 +82,10 @@ if __name__ == "__main__":
         'success: ' + str(success_num) + '\n' + \
         'min_hi: ' + str(min_height) + '\n' + \
         'avg_hi: ' + str(mean_min_height) + '\n' + \
+        'hi_list: ' + str(min_heights) + '\n' + \
         'min_II: ' + str(min_II) + '\n' + \
-        'avg_II: ' + str(mean_min_II) + '\n'
+        'avg_II: ' + str(mean_min_II) + '\n' + \
+        'II_list: ' + str(min_IIs) + '\n'
 
     with open(generator.parse_dircname() + 'stat_report.txt', 'w') as f:
         f.write(stat_rep)
