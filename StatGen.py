@@ -15,7 +15,7 @@ from Application import Application
 from PEArrayModel import PEArrayModel
 from SimParameters import SimParameters
 from MapHeightEval import MapHeightEval
-from InitialIntervalEval import InitiationIntervalEval
+from InitiationIntervalEval import InitiationIntervalEval
 
 
 class StatGen():
@@ -78,7 +78,8 @@ if __name__ == "__main__":
     mean_min_height = np.mean(min_heights)
     mean_min_II = np.mean(min_IIs)
 
-    stat_rep = 'success: ' + str(success_num) + '\n' + \
+    stat_rep = 'sample: ' + str(sample_num) + '\n' + \
+        'success: ' + str(success_num) + '\n' + \
         'min_hi: ' + str(min_height) + '\n' + \
         'avg_hi: ' + str(mean_min_height) + '\n' + \
         'min_II: ' + str(min_II) + '\n' + \
