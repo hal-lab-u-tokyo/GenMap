@@ -29,8 +29,8 @@ class StatGen():
         return args.DIRC
 
     def parse_filenames(self):
-        dircname = self.parse_dircname
-        filenames = glob.glob(dircname() + "/*.dump")
+        dircname = self.parse_dircname()
+        filenames = glob.glob(dircname + "/*.dump")
         return filenames
 
 
