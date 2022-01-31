@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
-from os import name, write
+from os import name, openpty, write
 from wsgiref.handlers import IISCGIHandler
 from deap import base
 from deap import creator
@@ -89,5 +89,8 @@ if __name__ == "__main__":
 
     with open(generator.parse_dircname() + 'stat_report.txt', 'w') as f:
         f.write(stat_rep)
+
+    np.savetxt(generator.parse_dircname() + 'min_heights.txt', min_heights)
+    np.savetxt(generator.parse_dircname() + 'min_IIs.txt', min_IIs)
 
     print(stat_rep)
