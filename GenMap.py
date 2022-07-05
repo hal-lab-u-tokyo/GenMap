@@ -23,7 +23,7 @@ def parser():
     usage = 'Usage: python3 {0} [options...] dot_file frequency'.format(__file__)
     argparser = ArgumentParser(usage=usage)
     argparser.add_argument("dot_file", type=str, help="application data-flow-graph")
-    argparser.add_argument("freq", type=float, help='operation frequency')
+    argparser.add_argument("--freq", type=float, help='operation frequency', default=1.0)
     argparser.add_argument("-o", "--output", type=str, \
                             help="specify the output file name(default = {app_name}.dump")
     argparser.add_argument("--arch", type=str, help="specify architecure definition file " + \

@@ -30,15 +30,15 @@ strict digraph  {
 	"op_%29" [type=op, opcode=ADD];
 	"op_%30" [type=op, opcode=ADD];
 	"op_%31" [type=op, opcode=MULT];
-	"236" [type=const,int=236];
+	"236" [type=const,datatype=int,value=236];
 	"op_%32" [type=op, opcode=MULT];
-	"97" [type=const,int=97];
+	"97" [type=const,datatype=int,value=97];
 	"op_%33" [type=op, opcode=ADD];
 	"op_%34" [type=op, opcode=SRA];
-	"8" [type=const,int=8];
+	"8" [type=const,datatype=int,value=8];
 	"OUTPUT_%35" [type=output]; //outdata_real[1]
 	"op_%36" [type=op, opcode=MULT];
-	"-97" [type=const,int=-97];
+	"-97" [type=const,datatype=int,value=-97];
 	"op_%37" [type=op, opcode=MULT];
 	"op_%38" [type=op, opcode=ADD];
 	"op_%39" [type=op, opcode=SRA];
@@ -47,7 +47,7 @@ strict digraph  {
 	"op_%42" [type=op, opcode=SUB];
 	"op_%43" [type=op, opcode=ADD];
 	"op_%44" [type=op, opcode=MULT];
-	"181" [type=const,int=181];
+	"181" [type=const,datatype=int,value=181];
 	"op_%45" [type=op, opcode=SRA];
 	"OUTPUT_%46" [type=output]; //outdata_real[2]
 	"op_%47" [type=op, opcode=SUB];
@@ -62,7 +62,7 @@ strict digraph  {
 	"op_%56" [type=op, opcode=SRA];
 	"OUTPUT_%57" [type=output]; //outdata_real[3]
 	"op_%58" [type=op, opcode=MULT];
-	"-236" [type=const,int=-236];
+	"-236" [type=const,datatype=int,value=-236];
 	"op_%59" [type=op, opcode=MULT];
 	"op_%60" [type=op, opcode=ADD];
 	"op_%61" [type=op, opcode=SRA];

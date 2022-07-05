@@ -1,6 +1,7 @@
 #  This file is part of GenMap and released under the MIT License, see LICENSE.
 #  Author: Takuya Kojima
 
+from tabnanny import check
 from deap import tools
 from deap import base
 from deap import algorithms
@@ -29,7 +30,7 @@ DEFAULT_PARAMS = {
     "Random population size":       10,
     "Crossover probability":        0.7,
     "Mutation probability":         0.3,
-    "Local mulatation probability": 0.5,
+    "Local mutation probability": 0.5,
     "Initial place iteration":      100,
     "Initial place count":          200,
     "Random place count":           100,
@@ -93,10 +94,13 @@ class NSGA2():
         self.__inout_route_en = False
 
         # get objectives
+
         eval_names = [ele.text for ele in config.iter("eval")]
 
         if not "WireLengthEval" in eval_names:
             eval_names = ["WireLengthEval"] + eval_names
+
+
 
         if None in eval_names:
             raise ValueError("missing No." + str(eval_names.index(None) + 1) + " objective name")
@@ -110,12 +114,23 @@ class NSGA2():
                 raise TypeError(evl.__name__ + " is not EvalBase class")
             self.__eval_list.append(evl)
 
+        # threshold value for each objective (if any)
+        # each of element is lambda
+        #   args : tumple of (min, max) fitnesses in the population
+        #  returns bool (true: termination condition met, false: otherwise)
+        self.__fitness_threshold_checker = []
+
         # get options for each objective
         eval_args_str = [ele.get("args") for ele in config.iter("eval")]
         self.__eval_args = []
-        for args in eval_args_str:
+        # for args in eval_args_str:
+        for i in range(len(self.__eval_list)):
+            args = eval_args_str[i]
+            objective = self.__eval_list[i]
             if args is None:
                 self.__eval_args.append({})
+                # do not have termination cond, so always return false
+                self.__fitness_threshold_checker.append(lambda x:  False)
             else:
                 try:
                     args_obj = eval(args)
@@ -124,6 +139,15 @@ class NSGA2():
                                      str(eval_args_str.index(args) + 1) + " objective")
                 if isinstance(args_obj, dict):
                     self.__eval_args.append(args_obj)
+                    if "threshold" in self.__eval_args[-1].keys():
+                        th = self.__eval_args[-1]["threshold"]
+                        if objective.isMinimize():
+                            checker = lambda x: (x[0] <= th)
+                        else:
+                            checker = lambda x: (x[1] >= th)
+                    else:
+                        checker = lambda x: False
+                    self.__fitness_threshold_checker.append(checker)
                 else:
                     raise ValueError("Arguments of evaluation function must be dict: " + str(args_obj))
 
@@ -431,6 +455,17 @@ class NSGA2():
                     self.__logfile.write("\t{obj}: min = {min}, max = {max}\n".format(\
                                             obj = self.status_disp[i].desc, min = stats["min"][i],\
                                             max=stats["max"][i]))
+
+            # check termination condition is met or not
+            termination = False
+            for i in range(len(stats["min"])):
+                if self.__fitness_threshold_checker[i]((stats["min"][i], stats["max"][i])):
+                    termination = True
+                    break
+            if termination:
+                print("threshold")
+                break
+                
 
             if self.__quit and \
                 gen_count >= self.__params["Minimum generation"]:

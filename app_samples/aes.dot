@@ -4,11 +4,11 @@ strict digraph  {
 	"INPUT_%14" [type=input];
 	"INPUT_%16" [type=input];
 	"op_%17" [type=op,opcode=SL];
-	"1" [type=const, int=1];
+	"1" [type=const, datatype=int, value=1];
 	"op_%18" [type=op,opcode=LT];
-	"0" [type=const, int=0];
+	"0" [type=const, datatype=int, value=0];
 	"op_%19" [type=op,opcode=XOR];
-	"27" [type=const, int=27];
+	"27" [type=const, datatype=int, value=27];
 	"op_%20" [type=op,opcode=SEL];
 	"merge_%20" [type=op,opcode=OR];
 	"op_%21" [type=op,opcode=SL];

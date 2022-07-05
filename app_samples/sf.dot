@@ -29,17 +29,17 @@ digraph{
 	"OUTPUT_0" [type=output]
 
 	# constants
-	"16" [type=const,int=16]
-	"8" [type=const,int=8]
-	"306" [type=const,int=306]
-	"255" [type=const,int=255]
-	"601" [type=const,int=601]
-	"117" [type=const,int=117]
-	"10" [type=const,int=10]
-	"240" [type=const,int=240]
-	"200" [type=const,int=200]
-	"145" [type=const,int=145]
-	"16" [type=const,int=16]
+	"16" [type=const,datatype=int,value=16]
+	"8" [type=const,datatype=int,value=8]
+	"306" [type=const,datatype=int,value=306]
+	"255" [type=const,datatype=int,value=255]
+	"601" [type=const,datatype=int,value=601]
+	"117" [type=const,datatype=int,value=117]
+	"10" [type=const,datatype=int,value=10]
+	"240" [type=const,datatype=int,value=240]
+	"200" [type=const,datatype=int,value=200]
+	"145" [type=const,datatype=int,value=145]
+	"16" [type=const,datatype=int,value=16]
 
 	# dependencies
 	"INPUT_0" -> "r0"

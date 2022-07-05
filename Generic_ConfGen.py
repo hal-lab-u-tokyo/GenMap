@@ -40,6 +40,7 @@ class Generic_ConfGen(ConfGenBase):
         self.style_choices = {"origin": ["bottom-left", "top-left",\
                                              "bottom-right", "top-right"]}
 
+
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
         individual = data["hof"][individual_id]
@@ -115,7 +116,7 @@ class Generic_ConfGen(ConfGenBase):
 
                 size = (map_width, map_height)
                 try:
-                    self.save_latency_analysis(CGRA, individual, size,\
+                    self.save_latency_analysis(CGRA, app, sim_params, individual, size,\
                                                     file_list["hist"],\
                                                     file_list["heat"],\
                                                     style_opt["origin"])
@@ -125,11 +126,13 @@ class Generic_ConfGen(ConfGenBase):
         else:
             print("No such direcotry: ", args["output_dir"])
 
-    def save_latency_analysis(self, CGRA, ind, size, hist_file_name,\
+    def save_latency_analysis(self, CGRA,  app, sim_params, ind, size, hist_file_name,\
                                 heat_file_name, origin):
         """save latency analysis result
             Args:
                 CGRA (PEArrayModel)         : the target architecture
+                app (Application): An application to be optimized
+                sim_params (SimParameters): parameters for some simulations
                 individual (Individual)     : selected inidividual to be generated
                 size (tuple)                : width x height to create heatmap
                 hist_file_name (str)        : file name for
@@ -146,10 +149,12 @@ class Generic_ConfGen(ConfGenBase):
         latency_diff = ind.getEvaluatedData("latency_diff")
         if latency_diff is None:
             # not evaluated
-            latency_diff = LatencyBalanceEval.analyze_latency_diff(CGRA, ind)
+            LatencyBalanceEval.eval(CGRA, app, sim_params, ind)
+            latency_diff = ind.getEvaluatedData("latency_diff")
 
         lat_rng = [i for i in range(math.floor(min(latency_diff.values())), \
-                    math.floor(max(latency_diff.values())) + 1)]
+                    math.ceil(max(latency_diff.values())) + 1)]
+
         node_count = {i: 0 for i in lat_rng}
         for k, v in latency_diff.items():
             node_count[round(v)] += 1

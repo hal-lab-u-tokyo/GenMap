@@ -250,8 +250,6 @@ class PEArrayModel():
                 # virtually create both inpout port and output port
                 self.__in_port_range = list(range(inout_size))
                 self.__out_port_range = list(range(inout_size))
-                for i in self.__in_port_range:
-                    self.__network.add_node(IN_PORT_node_exp.format(index=i))
 
 
         if not self.__inout_used:
@@ -263,8 +261,6 @@ class PEArrayModel():
                 raise ValueError("Invalid PE array attribute: input_port")
             else:
                 self.__in_port_range = list(range(int(inport_str)))
-            for iport in self.__in_port_range:
-                self.__network.add_node(IN_PORT_node_exp.format(index=iport))
 
             # init PE array outport
             outport_str = conf.get("output_port")
@@ -274,6 +270,12 @@ class PEArrayModel():
                 raise ValueError("Invalid PE array attribute: output_port")
             else:
                 self.__out_port_range = list(range(int(outport_str)))
+
+        # make input, output port nodes
+        for i in self.__in_port_range:
+            self.__network.add_node(IN_PORT_node_exp.format(index=i))
+        for i in self.__out_port_range:
+            self.__network.add_node(OUT_PORT_node_exp.format(index=i))
 
         # init operation list
         self.__operation_list = [[[] for y in range(self.__height)] for x in range(self.__width)]

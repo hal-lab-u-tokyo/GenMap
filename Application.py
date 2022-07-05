@@ -10,7 +10,7 @@ import numpy as np
 const_itypes = {"int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64",
                 "byte", "ubyte", "ushort", "short", "intc", "uintc", "uint", "int"}
 const_ftypes = {"float16", "half", "float32", "single", "float64", "double", "float"}
-const_alias = {"float": "single", "int": "int32"}
+const_alias = {"float": "single", "int": "int32", "uint": "uint32"}
 
 class Application():
 
@@ -155,17 +155,18 @@ class Application():
 
 
     def __decode_const(self, node, attr):
-        attr_set = set(attr.keys())
-        itypes = attr_set & const_itypes
-        ftypes = attr_set & const_ftypes
-        if len(itypes | ftypes) > 1:
-            raise ValueError("Multiple types are specified", itypes | ftypes)
+        if not "datatype" in attr.keys():
+            dtype = "int"
+        else:
+            dtype = attr["datatype"]
 
-        if len(itypes) == 1:
-            # decode as integer
-            type_name = itypes.pop()
-            attr[type_name] = attr[type_name].strip("\"")
-            cstr = attr[type_name]
+        if not "value" in attr.keys():
+            value = "0"
+        else:
+            value = attr["value"]
+
+        if dtype in const_itypes:
+            cstr = value
             if cstr.startswith("0x"):
                 base = 16
                 cstr = cstr[2:]
@@ -174,26 +175,22 @@ class Application():
             try:
                 cvalue = int(cstr, base)
             except ValueError:
-                raise ValueError("Invalid {0} value for {1}: {2}".format( \
-                                    type_name, node, attr[type_name]))
+                print("Warning: unable to decode {0} as {1} type value", value, dtype)
 
-        elif len(ftypes) == 1:
-            # decode as float
-            type_name = ftypes.pop()
-            attr[type_name] = attr[type_name].strip("\"")
+        elif dtype in const_ftypes:
             try:
-                cvalue = float(attr[type_name])
+                cvalue = float(value)
             except ValueError:
-                raise ValueError("Invalid {0} value for {1}: {2}".format( \
-                                    type_name, node, attr[type_name]))
+                print("Warning: unable to decode {0} as {1} type value", value, dtype)
 
         else:
             raise ValueError("Missing const value (int or float) for node: " + node)
 
-        if type_name in const_alias:
-            type_name = const_alias[type_name]
+        if dtype in const_alias:
+            dtype = const_alias[dtype]
         # convert to the specified data type
-        return int(getattr(np, type_name)(cvalue).newbyteorder(self.endian).tobytes().hex(), 16)
+        return int(getattr(np, dtype)(cvalue).newbyteorder(self.endian).tobytes().hex(), 16)
+        
 
     def getAppName(self):
         """Returns application name

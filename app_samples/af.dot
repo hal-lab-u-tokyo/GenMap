@@ -30,12 +30,12 @@ digraph{
 	"op24" [type=op,opcode=OR]
 
 	# constants
-	"8" [type=const, int=8]
-	"255" [type=const, int=255]
-	"100" [type=const, int=100]
-	"7" [type=const, int=7]
-	"28" [type=const, int=28]
-	"16" [type=const, int=16]
+	"8" [type=const, datatype=int, value=8]
+	"255" [type=const, datatype=int, value=255]
+	"100" [type=const, datatype=int, value=100]
+	"7" [type=const, datatype=int, value=7]
+	"28" [type=const, datatype=int, value=28]
+	"16" [type=const, datatype=int, value=16]
 
 	# outputs
 	"OUTPUT_0" [type=output]

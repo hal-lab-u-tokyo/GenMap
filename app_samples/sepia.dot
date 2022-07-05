@@ -20,14 +20,14 @@ digraph{
 	"op12" [type=op,opcode=SR]  # SR_3
 
 	# constants
-	"601" [type=const,int=601]
-	"117" [type=const,int=117]
-	"306" [type=const,int=306]
-	"10"  [type=const,int=10]
-	"145" [type=const,int=145]
-	"240" [type=const,int=240]
-	"200" [type=const,int=200]
-	"8"   [type=const,int=8]
+	"601" [type=const,datatype=int,value=601]
+	"117" [type=const,datatype=int,value=117]
+	"306" [type=const,datatype=int,value=306]
+	"10"  [type=const,datatype=int,value=10]
+	"145" [type=const,datatype=int,value=145]
+	"240" [type=const,datatype=int,value=240]
+	"200" [type=const,datatype=int,value=200]
+	"8"   [type=const,datatype=int,value=8]
 
 	# outputs
 	"OUTPUT_0" [type=output]

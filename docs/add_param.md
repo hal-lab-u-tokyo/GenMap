@@ -1,6 +1,6 @@
 # Simulation parameters
 
-The file needs to contain at least following information:
+The file needs to contain at least the following information:
 1. Bias range
 1. Timing information
 1. Power information

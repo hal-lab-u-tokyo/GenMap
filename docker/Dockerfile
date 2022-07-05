@@ -10,6 +10,7 @@ RUN dnf -y groupinstall "Development Tools"
 RUN dnf -y install git python36 python36-devel python3-libs python3-tkinter graphviz cmake
 
 RUN echo "installing python packages"
+RUN pip3 install pyparsing==3.0.1
 RUN pip3 install numpy==1.18.1
 RUN pip3 install deap==1.0.1
 RUN pip3 install matplotlib==3.0.0

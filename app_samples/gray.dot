@@ -22,11 +22,11 @@ digraph{
 	"OUTPUT_0" [type=output]
 
 	# constants
-	"16" [type=const,int=16]
-	"8" [type=const,int=8]
-	"255" [type=const,int=255]
-	"21" [type=const,int=21]
-	"6" [type=const,int=6]
+	"16" [type=const,datatype=int,value=16]
+	"8" [type=const,datatype=int,value=8]
+	"255" [type=const,datatype=int,value=255]
+	"21" [type=const,datatype=int,value=21]
+	"6" [type=const,datatype=int,value=6]
 
 	# dependencies
 	"op2" -> "op1"
