@@ -462,13 +462,12 @@ class NSGA2():
                 if self.__fitness_threshold_checker[i]((stats["min"][i], stats["max"][i])):
                     termination = True
                     break
-            if termination:
-                print("threshold")
+            if termination and \
+                gen_count >= self.__params["Minimum generation"]:
                 break
                 
 
-            if self.__quit and \
-                gen_count >= self.__params["Minimum generation"]:
+            if self.__quit:
                 break;
 
         self.__pool.close()

@@ -5,6 +5,9 @@ from operator import index
 import os
 import json
 import math
+import sys
+from argparse import ArgumentParser
+from importlib import import_module
 
 from networkx.algorithms.core import k_core
 
@@ -14,6 +17,7 @@ from ConfDrawer import ConfDrawer
 from MapHeightEval import MapHeightEval
 from MapWidthEval import MapWidthEval
 from LatencyBalanceEval import LatencyBalanceEval
+from EvalBase import EvalBase
 
 import matplotlib
 import warnings
@@ -39,7 +43,35 @@ class Generic_ConfGen(ConfGenBase):
                                 "readable": False, "origin": "bottom-left"}
         self.style_choices = {"origin": ["bottom-left", "top-left",\
                                              "bottom-right", "top-right"]}
+        self.extra_eval = set()
+        self.lat_analysis_en = False
 
+    # override parser
+    def parser(self):
+        usage = 'Usage: python3 {0} optimization_result'.format(self.__class__.__name__ + ".py")
+        argparser = ArgumentParser(usage=usage)
+        argparser.add_argument("result", type=str, help="optimization result")
+        argparser.add_argument("--eval", nargs="*", action="store", type=str, \
+                                help="report additional evaluation result")
+        argparser.add_argument("--enable-latency-analysis", action="store_true", \
+                                help="enables latency analysis and creates report files")
+        argparser.set_defaults(eval=[])
+        args = argparser.parse_args()
+        self.make_eval_instance(set(args.eval))
+        self.lat_analysis_en = args.enable_latency_analysis
+        return args
+
+    def make_eval_instance(self, eval_list):
+        for eval_name in eval_list:
+            try:
+                evl = getattr(import_module(eval_name), eval_name)
+            except ModuleNotFoundError:
+                print("Import Error for an objective: " + eval_name)
+                sys.exit(1)
+            if not issubclass(evl, EvalBase):
+                print(evl.__name__ + " is not EvalBase class")
+                sys.exit(1)
+            self.extra_eval.add(evl)
 
     def generate(self, header, data, individual_id, args):
         CGRA = header["arch"]
@@ -61,9 +93,11 @@ class Generic_ConfGen(ConfGenBase):
                                 args["prefix"] + "_map.png"
             file_list["conf"] = args["output_dir"] + "/" + args["prefix"] + \
                                     "_conf.json"
-            file_list["hist"] = args["output_dir"] + "/" + \
+
+            if self.lat_analysis_en:
+                file_list["hist"] = args["output_dir"] + "/" + \
                                     args["prefix"] + "_latency_hist.png"
-            file_list["heat"] = args["output_dir"] + "/" + \
+                file_list["heat"] = args["output_dir"] + "/" + \
                                     args["prefix"] + "_latency_heat.png"
 
             # check if any files already exist
@@ -115,13 +149,14 @@ class Generic_ConfGen(ConfGenBase):
                     print("Fail to save mapping figure because", e)
 
                 size = (map_width, map_height)
-                try:
-                    self.save_latency_analysis(CGRA, app, sim_params, individual, size,\
-                                                    file_list["hist"],\
-                                                    file_list["heat"],\
-                                                    style_opt["origin"])
-                except TclError as e:
-                    print("Fail to save latency analysis graph because", e)
+                if self.lat_analysis_en:
+                    try:
+                        self.save_latency_analysis(CGRA, app, sim_params, individual, size,\
+                                                        file_list["hist"],\
+                                                        file_list["heat"],\
+                                                        style_opt["origin"])
+                    except TclError as e:
+                        print("Fail to save latency analysis graph because", e)
 
         else:
             print("No such direcotry: ", args["output_dir"])
@@ -517,6 +552,13 @@ class Generic_ConfGen(ConfGenBase):
             eval_res[eval_name] = value
 
         eval_res.update(individual.getAllEvaluatedData().items())
+
+        # get extra evaluation
+        for objective in self.extra_eval:
+            if not objective.name() in eval_res:
+                eval_res[objective.name()] = \
+                        objective.eval(CGRA, app, sim_params, individual)
+                
 
         mapping_info["Evaluation results"] = eval_res
 
