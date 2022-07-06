@@ -20,7 +20,7 @@ class ConfGenBase(metaclass=ABCMeta):
 
     def __init__(self):
         self.style_types = {}
-        self.style_choises = {}
+        self.style_choices = {}
         self.style_default = {}
 
     def style_args_parser(self, args):
@@ -34,7 +34,7 @@ class ConfGenBase(metaclass=ABCMeta):
             An option with an argument is given as "optionanme=argment"
 
             To set option name and it default value,
-            override style_types (dict), style_choises, and style_default (dict)
+            override style_types (dict), style_choices, and style_default (dict)
                 style_types:
                     key: option name
                     value: type of the value
@@ -70,10 +70,10 @@ class ConfGenBase(metaclass=ABCMeta):
             elif (len(temp) == 2):
                 if temp[0] in self.style_types.keys():
                     if type(temp[1]) == self.style_types[temp[0]]:
-                        if temp[0] in self.style_choises.keys():
-                            if not temp[1] in self.style_choises[temp[0]]:
+                        if temp[0] in self.style_choices.keys():
+                            if not temp[1] in self.style_choices[temp[0]]:
                                 print("-s: arguemnt \"{1}\" of {0} is not allowed.\nSelect from {2}".format(\
-                                    temp[0], temp[1], self.style_choises[temp[0]]))
+                                    temp[0], temp[1], self.style_choices[temp[0]]))
                                 return None
                         parsed_args[temp[0]] = temp[1]
                     else:

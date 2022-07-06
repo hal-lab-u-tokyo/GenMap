@@ -1,6 +1,7 @@
 #  This file is part of GenMap and released under the MIT License, see LICENSE.
 #  Author: Takuya Kojima
 
+from tabnanny import check
 from deap import tools
 from deap import base
 from deap import algorithms
@@ -17,6 +18,24 @@ from Individual import Individual
 from EvalBase import EvalBase
 from RouterBase import RouterBase
 from Placer import Placer
+from WireLengthEval import WireLengthEval
+
+DEFAULT_PARAMS = {
+    "Maximum generation":           300,
+    "Minimum generation":           30,
+    "Maximum stall":                100,
+    "Initial population size":      300,
+    "Offspring size":               100,
+    "Select size":                  45,
+    "Random population size":       10,
+    "Crossover probability":        0.7,
+    "Mutation probability":         0.3,
+    "Local mutation probability": 0.5,
+    "Initial place iteration":      100,
+    "Initial place count":          200,
+    "Random place count":           100,
+    "Topological sort probability": 0.5
+}
 
 class NSGA2():
     def __init__(self, config, logfile = None):
@@ -37,7 +56,7 @@ class NSGA2():
         self.__toolbox = base.Toolbox()
 
         # get parameters
-        self.__params = {}
+        self.__params = copy.deepcopy(DEFAULT_PARAMS)
         for param in config.iter("parameter"):
             if "name" in param.attrib:
                 if not param.text is None:
@@ -75,10 +94,14 @@ class NSGA2():
         self.__inout_route_en = False
 
         # get objectives
+
         eval_names = [ele.text for ele in config.iter("eval")]
 
-        if len(eval_names) == 0:
-            raise ValueError("At least, one objective is needed")
+        if not "WireLengthEval" in eval_names:
+            eval_names = ["WireLengthEval"] + eval_names
+
+
+
         if None in eval_names:
             raise ValueError("missing No." + str(eval_names.index(None) + 1) + " objective name")
         self.__eval_list = []
@@ -91,12 +114,23 @@ class NSGA2():
                 raise TypeError(evl.__name__ + " is not EvalBase class")
             self.__eval_list.append(evl)
 
+        # threshold value for each objective (if any)
+        # each of element is lambda
+        #   args : tumple of (min, max) fitnesses in the population
+        #  returns bool (true: termination condition met, false: otherwise)
+        self.__fitness_threshold_checker = []
+
         # get options for each objective
         eval_args_str = [ele.get("args") for ele in config.iter("eval")]
         self.__eval_args = []
-        for args in eval_args_str:
+        # for args in eval_args_str:
+        for i in range(len(self.__eval_list)):
+            args = eval_args_str[i]
+            objective = self.__eval_list[i]
             if args is None:
                 self.__eval_args.append({})
+                # do not have termination cond, so always return false
+                self.__fitness_threshold_checker.append(lambda x:  False)
             else:
                 try:
                     args_obj = eval(args)
@@ -105,6 +139,15 @@ class NSGA2():
                                      str(eval_args_str.index(args) + 1) + " objective")
                 if isinstance(args_obj, dict):
                     self.__eval_args.append(args_obj)
+                    if "threshold" in self.__eval_args[-1].keys():
+                        th = self.__eval_args[-1]["threshold"]
+                        if objective.isMinimize():
+                            checker = lambda x: (x[0] <= th)
+                        else:
+                            checker = lambda x: (x[1] >= th)
+                    else:
+                        checker = lambda x: False
+                    self.__fitness_threshold_checker.append(checker)
                 else:
                     raise ValueError("Arguments of evaluation function must be dict: " + str(args_obj))
 
@@ -129,7 +172,7 @@ class NSGA2():
         return {"pool": self}
 
 
-    def setup(self, CGRA, app, sim_params, method, proc_num = 1):
+    def setup(self, CGRA, app, sim_params, method, dir, proc_num = 1):
         """Setup NSGA2 optimization
 
             Args:
@@ -141,9 +184,11 @@ class NSGA2():
                         1. graphviz (default)
                         2. tsort
                         3. random
+                dir (str): data flow direction
+                           available values corresponds to the keys of the dict "DATA_FLOW" in "Placer"
                 Option:
                     proc_num (int): the number of process
-                                    Default is equal to cpu count
+                                    Default is 1
 
             Returns:
                 bool: if the setup successes, return True, otherwise return False.
@@ -184,7 +229,7 @@ class NSGA2():
         comp_dfg = app.getCompSubGraph()
 
         # generate initial placer
-        self.__placer = Placer(method, iterations = self.__params["Initial place iteration"], \
+        self.__placer = Placer(method, dir, iterations = self.__params["Initial place iteration"], \
                                 randomness = "Full")
 
         # make initial mappings
@@ -411,7 +456,18 @@ class NSGA2():
                                             obj = self.status_disp[i].desc, min = stats["min"][i],\
                                             max=stats["max"][i]))
 
-            if self.__quit and gen_count >= 30:
+            # check termination condition is met or not
+            termination = False
+            for i in range(len(stats["min"])):
+                if self.__fitness_threshold_checker[i]((stats["min"][i], stats["max"][i])):
+                    termination = True
+                    break
+            if termination and \
+                gen_count >= self.__params["Minimum generation"]:
+                break
+                
+
+            if self.__quit:
                 break;
 
         self.__pool.close()

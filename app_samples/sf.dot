@@ -1,52 +1,52 @@
 digraph{
 
 	# inputs
-	"INPUT_0" [input=True]
+	"INPUT_0" [type=input]
 
 	# operations
-	"r0" 	[op=SR]
-	"g00"	[op=SR]
-	"rp0" 	[op=MULT]
-	"g0" 	[op=AND]
-	"b0" 	[op=AND]
-	"gp0" 	[op=MULT]
-	"bp0" 	[op=MULT]
-	"rgp0" 	[op=ADD]
-	"rgbp0" [op=ADD]
-	"y0" 	[op=SR]
-	"sr000" [op=MULT]
-	"sg000" [op=MULT]
-	"sr00" 	[op=SR]
-	"sg00" 	[op=SR]
-	"sb00" 	[op=MULT]
-	"sr0" 	[op=SL]
-	"sg0" 	[op=SL]
-	"sb0" 	[op=SR]
-	"srg0" 	[op=OR]
-	"out0" 	[op=OR]
+	"r0" 	[type=op,opcode=SR]
+	"g00"	[type=op,opcode=SR]
+	"rp0" 	[type=op,opcode=MULT]
+	"g0" 	[type=op,opcode=AND]
+	"b0" 	[type=op,opcode=AND]
+	"gp0" 	[type=op,opcode=MULT]
+	"bp0" 	[type=op,opcode=MULT]
+	"rgp0" 	[type=op,opcode=ADD]
+	"rgbp0" [type=op,opcode=ADD]
+	"y0" 	[type=op,opcode=SR]
+	"sr000" [type=op,opcode=MULT]
+	"sg000" [type=op,opcode=MULT]
+	"sr00" 	[type=op,opcode=SR]
+	"sg00" 	[type=op,opcode=SR]
+	"sb00" 	[type=op,opcode=MULT]
+	"sr0" 	[type=op,opcode=SL]
+	"sg0" 	[type=op,opcode=SL]
+	"sb0" 	[type=op,opcode=SR]
+	"srg0" 	[type=op,opcode=OR]
+	"out0" 	[type=op,opcode=OR]
 
 	# outputs
-	"OUTPUT_0" [output=True]
+	"OUTPUT_0" [type=output]
 
 	# constants
-	"16" [const=True]
-	"8" [const=True]
-	"306" [const=True]
-	"255" [const=True]
-	"601" [const=True]
-	"117" [const=True]
-	"10" [const=True]
-	"240" [const=True]
-	"200" [const=True]
-	"145" [const=True]
-	"16" [const=True]
+	"16" [type=const,datatype=int,value=16]
+	"8" [type=const,datatype=int,value=8]
+	"306" [type=const,datatype=int,value=306]
+	"255" [type=const,datatype=int,value=255]
+	"601" [type=const,datatype=int,value=601]
+	"117" [type=const,datatype=int,value=117]
+	"10" [type=const,datatype=int,value=10]
+	"240" [type=const,datatype=int,value=240]
+	"200" [type=const,datatype=int,value=200]
+	"145" [type=const,datatype=int,value=145]
+	"16" [type=const,datatype=int,value=16]
 
 	# dependencies
 	"INPUT_0" -> "r0"
-	"16" -> "r0" [operand=right]
+	"16" -> "r0" [operand=1]
 
 	"INPUT_0" -> "g00"
-	"8" -> "g00" [operand=right]
+	"8" -> "g00" [operand=1]
 
 	"r0" -> "rp0"
 	"306" -> "rp0"
@@ -71,7 +71,7 @@ digraph{
 	"bp0" -> "rgbp0"
 
 	"rgbp0" -> "y0"
-	"10" -> "y0" [operand=right]
+	"10" -> "y0" [operand=1]
 
 	"y0" -> "sr000"
 	"240" -> "sr000"
@@ -80,22 +80,22 @@ digraph{
 	"200" -> "sg000"
 
 	"sr000" -> "sr00"
-	"8" -> "sr00" [operand=right]
+	"8" -> "sr00" [operand=1]
 
 	"sg000" -> "sg00"
-	"8" -> "sg00" [operand=right]
+	"8" -> "sg00" [operand=1]
 
 	"y0" -> "sb00"
 	"145" -> "sb00"
 
 	"sr00" -> "sr0"
-	"16" -> "sr0" [operand=right]
+	"16" -> "sr0" [operand=1]
 
 	"sg00" -> "sg0"
-	"8" -> "sg0" [operand=right]
+	"8" -> "sg0" [operand=1]
 
 	"sb00" -> "sb0"
-	"8" -> "sb0" [operand=right]
+	"8" -> "sb0" [operand=1]
 
 	"sr0" -> "srg0"
 	"sg0" -> "srg0"

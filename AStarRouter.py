@@ -40,7 +40,25 @@ class AStarRouter(RouterBase):
         CGRA.setInitEdgeAttr("weight", ALU_OUT_WEIGTH, "ALU")
 
     @staticmethod
-    def __set_unused_ALU(CGRA, mapping, routed_graph):
+    def __init_ALU(CGRA, mapping, routed_graph):
+        """Initialize ALU nodes in the PE array graph.
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                mapping (dict): mapping of the DFG
+                    keys (str): operation label of DFG
+                    values (tuple): PE coordinates
+                routed_graph (networkx DiGraph): A graph where the paths are routed
+
+            Details:
+                For operation mapped ALUs or unused ALU, which can work as routing node,
+                    True of "routable" attribute is added.
+                    This is a flag for routing.
+                    "in_capacity" attribute is added as int.
+                    This is a count of in_edges.
+                For the other ALUs,
+                    False of "routable" attribute is added not to be used as routing node.
+        """
         w, h = CGRA.getSize()
         used_coords = mapping.values()
         for x in range(w):
@@ -48,21 +66,96 @@ class AStarRouter(RouterBase):
                 alu = CGRA.getNodeName("ALU", pos = (x, y))
 
                 if (x, y) in used_coords:
+                    # op mapped ALUs
                     routed_graph.nodes[alu]["routable"] = True
+                    routed_graph.nodes[alu]["in_capacity"] = \
+                        CGRA.getALUMuxCount((x, y))
                 else:
                     if CGRA.isRoutingALU((x, y)):
                         # remove high cost of ALU out
                         for suc_element in routed_graph.successors(alu):
                             routed_graph.edges[alu, suc_element]["weight"] = \
                                 CGRA.getLinkWeight((alu, suc_element))
+                        # Routing ALU candidates
                         routed_graph.nodes[alu]["routable"] = True
+                        routed_graph.nodes[alu]["in_capacity"] = 1
                     else:
+                        # not used for both op and routing
                         routed_graph.nodes[alu]["routable"] = False
 
+    @staticmethod
+    def __remove_other_edges(graph, target, srcs):
+        """remove edges other than the specified edges
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                target (str): target node (successor)
+                src (str): predecessor node of the edge to be remained
+
+        """
+        remove_edges = [(p, target) for p in \
+                            graph.predecessors(target) \
+                            if p not in srcs]
+        graph.remove_edges_from(remove_edges)
+
+    @staticmethod
+    def __rm_ALU_out_cost(CGRA, graph, alu):
+        """remove high cost of ALU outputs which are available for the routing
+
+            Args:
+                CGRA (PEArrayModel): A model of the CGRA
+                graph (networkx DiGraph): A graph where the paths are routed
+                alu (str): a node name of the target ALU
+
+        """
+        for suc_element in graph.successors(alu):
+            if CGRA.isALU(suc_element) and \
+                    not graph.nodes[suc_element]["routable"]:
+                continue
+            e = (alu, suc_element)
+            if graph.edges[e]["free"]:
+                graph.edges[e]["weight"] = \
+                    CGRA.getLinkWeight(e)
+
+    @staticmethod
+    def __disable_free_inedge(graph, target):
+        """disable all free incoming edge
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                target (str): target node (successor)
+        """
+        for e in graph.in_edges(target):
+            if graph.edges[e]["free"]:
+                graph.edges[e]["weight"] = USED_LINK_WEIGHT
+
+    @staticmethod
+    def __mark_used_node(graph, v):
+        """mark the node as used
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                v (str): the used node
+
+        """
+        for e in graph.out_edges(v):
+            graph.edges[e]["weight"] = USED_LINK_WEIGHT
+
+    @staticmethod
+    def __mark_used_edge(graph, e):
+        """mark the edge as used
+
+            Args:
+                graph (networkx DiGraph): A graph where the paths are routed
+                e (tuple of str): the used edge
+
+        """
+        graph.edges[e]["weight"] = USED_LINK_WEIGHT
+        graph.edges[e]["free"] = False
 
     @staticmethod
     def comp_routing(CGRA, comp_DFG, mapping, routed_graph, **info):
-        AStarRouter.__set_unused_ALU(CGRA, mapping, routed_graph)
+        AStarRouter.__init_ALU(CGRA, mapping, routed_graph)
 
         # get out degree for each node
         out_deg = {v: comp_DFG.out_degree(v) for v in comp_DFG.nodes() if comp_DFG.out_degree(v) > 0 }
@@ -76,19 +169,14 @@ class AStarRouter(RouterBase):
             src_alu = CGRA.getNodeName("ALU", pos = mapping[src_node])
 
             # remove high cost of alu out
-            for suc_element in routed_graph.successors(src_alu):
-                if CGRA.isALU(suc_element) and \
-                        not routed_graph.nodes[suc_element]["routable"]:
-                    continue
-                routed_graph.edges[src_alu, suc_element]["weight"] = \
-                    CGRA.getLinkWeight((src_alu, suc_element))
+            AStarRouter.__rm_ALU_out_cost(CGRA, routed_graph, src_alu)
 
             # get destination alus in ascending order of manhattan distance from the src node
             #       key  : dst alu node name
             #       value: operand attributes of edge between the dest and the src
             dest_alus = {CGRA.getNodeName("ALU", pos = mapping[dst_node]): \
                             comp_DFG.edges[src_node, dst_node]["operand"] \
-                            if "operand" in comp_DFG.edges[src_node, dst_node] else None for dst_node in \
+                            for dst_node in \
                             sorted(list(comp_DFG.successors(src_node)), \
                                 key=lambda x: AStarRouter.__manhattan_dist(mapping[x], mapping[src_node])) }
             # route each path
@@ -114,7 +202,6 @@ class AStarRouter(RouterBase):
         for c_reg, edges in const_map.items():
             dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
                         const_DFG.edges[(c, dst_node)]["operand"] \
-                        if "operand" in const_DFG.edges[(c, dst_node)] else None \
                         for c, dst_node in edges}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, c_reg, dst_alus)
 
@@ -136,7 +223,6 @@ class AStarRouter(RouterBase):
         for i_port, edges in input_map.items():
             dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
                         in_DFG.edges[(i, dst_node)]["operand"] \
-                        if "operand" in in_DFG.edges[(i, dst_node)] else None \
                         for i, dst_node in edges}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, i_port, dst_alus)
 
@@ -176,14 +262,7 @@ class AStarRouter(RouterBase):
             # get alu name
             alu = CGRA.getNodeName("ALU", pos=mapping[v])
             # remove high cost of alu out
-            for suc_element in routed_graph.successors(alu):
-                e = alu, suc_element
-                if CGRA.isALU(suc_element) and \
-                        not routed_graph.nodes[suc_element]["routable"]:
-                    continue
-                if routed_graph.edges[e]["free"]:
-                    routed_graph.edges[e]["weight"] = \
-                        CGRA.getLinkWeight((alu, suc_element))
+            AStarRouter.__rm_ALU_out_cost(CGRA, routed_graph, alu)
 
             src = alu
             if src in path_extend_nodes:
@@ -195,20 +274,20 @@ class AStarRouter(RouterBase):
 
                 # update cost and used flag
                 for i in range(len(path) - 1):
-                    routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
-                    routed_graph.edges[path[i], path[i + 1]]["free"] = False
+                    AStarRouter.__mark_used_edge(routed_graph,\
+                                                (path[i], path[i+1]))
                     routed_graph.nodes[path[i]]["free"] = False
                     # remove other input edges
-                    remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
-                    routed_graph.remove_edges_from(remove_edges)
+                    AStarRouter.__remove_other_edges(routed_graph, path[i+1],\
+                                                        path[i])
                     if CGRA.isALU(path[i+1]):
                         routed_graph.nodes[path[i+1]]["route"] = True
+                        routed_graph.nodes[path[i+1]]["in_capacity"] = 0
                 routed_graph.nodes[path[-1]]["free"] = False
 
                 free_last_stage_SEs -= set(path)
 
-                for u in routed_graph.successors(src):
-                    routed_graph.edges[(src,u)]["weight"] = USED_LINK_WEIGHT
+                AStarRouter.__mark_used_node(routed_graph, src)
 
                 # change source node, alu -> se
                 src = path[-1]
@@ -221,20 +300,20 @@ class AStarRouter(RouterBase):
 
             # update cost and used flags
             for i in range(len(path) - 1):
-                routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
-                routed_graph.edges[path[i], path[i + 1]]["free"] = False
+                AStarRouter.__mark_used_edge(routed_graph,\
+                                                (path[i], path[i+1]))
                 routed_graph.nodes[path[i]]["free"] = False
                 # remove other input edges
-                remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
-                routed_graph.remove_edges_from(remove_edges)
+                AStarRouter.__remove_other_edges(routed_graph, path[i+1],\
+                                                        path[i])
                 if CGRA.isALU(path[i+1]):
                     routed_graph.nodes[path[i+1]]["route"] = True
+                    routed_graph.nodes[path[i+1]]["in_capacity"] = 0
             routed_graph.nodes[path[-1]]["free"] = False
             free_last_stage_SEs -= set(path)
 
             # update ALU out link cost and used flag
-            for suc in routed_graph.successors(src):
-                routed_graph.edges[src, suc]["weight"] = USED_LINK_WEIGHT
+            AStarRouter.__mark_used_node(routed_graph, src)
 
             out_port_nodes.remove(path[-1])
 
@@ -265,7 +344,6 @@ class AStarRouter(RouterBase):
         for i_port, inode in input_map.items():
             dst_alus = {CGRA.getNodeName("ALU", pos=mapping[dst_node]):\
                         in_DFG.edges[(i, dst_node)]["operand"] \
-                        if "operand" in in_DFG.edges[(i, dst_node)] else None \
                         for i, dst_node in edges[inode]}
             route_cost += AStarRouter.__single_src_multi_dest_route(CGRA, routed_graph, i_port, dst_alus)
 
@@ -275,9 +353,7 @@ class AStarRouter(RouterBase):
             src_node = list(out_DFG.predecessors(onode))[0]
             alu = CGRA.getNodeName("ALU", pos=mapping[src_node])
             # update link cost around the alu
-            for suc_element in routed_graph.successors(alu):
-                routed_graph.edges[alu, suc_element]["weight"] = \
-                    CGRA.getLinkWeight((alu, suc_element))
+            AStarRouter.__rm_ALU_out_cost(CGRA, routed_graph, alu)
             # get shortest path
             try:
                 path = nx.astar_path(routed_graph, alu, o_port)
@@ -289,19 +365,21 @@ class AStarRouter(RouterBase):
                 else:
                     # update cost and used flags
                     for i in range(len(path) - 1):
-                        routed_graph.edges[path[i], path[i + 1]]["weight"] = USED_LINK_WEIGHT
-                        routed_graph.edges[path[i], path[i + 1]]["free"] = False
+                        AStarRouter.__mark_used_edge(routed_graph,\
+                                                (path[i], path[i+1]))
                         routed_graph.nodes[path[i]]["free"] = False
                         # remove other input edges
-                        remove_edges = [(p, path[i + 1]) for p in routed_graph.predecessors(path[i + 1]) if p != path[i]]
-                        routed_graph.remove_edges_from(remove_edges)
+                        AStarRouter.__remove_other_edges(routed_graph,\
+                                                    path[i+1], path[i])
                         if CGRA.isALU(path[i+1]):
                             routed_graph.nodes[path[i+1]]["route"] = True
+                            routed_graph.nodes[path[i+1]]["in_capacity"] = 0
                     routed_graph.nodes[path[-1]]["free"] = False
 
                     # update ALU out link cost and used flag
-                    for suc in routed_graph.successors(alu):
-                        routed_graph.edges[alu, suc]["weight"] = USED_LINK_WEIGHT
+                    AStarRouter.__mark_used_node(routed_graph, alu)
+                    route_cost += cost
+
             except nx.exception.NetworkXNoPath:
                 route_cost += PENALTY_CONST
 
@@ -573,18 +651,24 @@ class AStarRouter(RouterBase):
                             shared_edges.add(e)
                             graph.edges[e]["weight"] = 0
                             # remove other input edges
-                            remove_edges = [(p, path[i + 1]) for p in graph.predecessors(path[i + 1]) if p != path[i]]
-                            graph.remove_edges_from(remove_edges)
+                            AStarRouter.__remove_other_edges(graph, path[i+1],\
+                                                                path[i])
                             if isALU:
                                 graph.nodes[e[1]]["route"] = True
+                                graph.nodes[e[1]]["in_capacity"] = 0
                         else:
                             # other than SE's
-                            graph.edges[e]["weight"] = USED_LINK_WEIGHT
-                            graph.edges[e]["free"] = False
+                            AStarRouter.__mark_used_edge(graph, e)
 
                     # add operand attr
                     if not operand is None:
                         graph.edges[(path[-2], path[-1])]["operand"] = operand
+
+                    # check input capacity
+                    graph.nodes[dst]["in_capacity"] -= 1
+                    if graph.nodes[dst]["in_capacity"] == 0:
+                        AStarRouter.__disable_free_inedge(graph, dst)
+
             except nx.exception.NetworkXNoPath:
                 # there is no path
                 # print("Fail:", src, "->", dst)
@@ -592,17 +676,15 @@ class AStarRouter(RouterBase):
 
         # update SE edges link cost and used flag
         for e in shared_edges:
-            graph.edges[e]["weight"] = USED_LINK_WEIGHT
-            graph.edges[e]["free"] = False
+            AStarRouter.__mark_used_edge(graph, e)
             graph.nodes[e[1]]["free"] = False
 
         # update ALU out link cost and used flag
-        for v in graph.successors(src):
-            graph.edges[src, v]["weight"] = USED_LINK_WEIGHT
+        AStarRouter.__mark_used_node(graph, src)
         graph.nodes[src]["free"] = False
+
         for v in dsts:
             graph.nodes[v]["free"] = False
-
 
         return route_cost
 

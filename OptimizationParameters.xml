@@ -6,6 +6,7 @@
 	<eval args='{"duplicate_enable": True}' >PowerEval</eval>
 	<eval>TimeSlackEval</eval>
 	<parameter name="Maximum generation" >300</parameter>
+	<parameter name="Minimum generation" >30</parameter>
 	<parameter name="Maximum stall" >100</parameter>
 	<parameter name="Initial population size" >300</parameter>
 	<parameter name="Offspring size" >100</parameter>
@@ -13,7 +14,7 @@
 	<parameter name="Random population size" >10</parameter>
 	<parameter name="Crossover probability" >0.7</parameter>
 	<parameter name="Mutation probability" >0.3</parameter>
-	<parameter name="Local mulatation probability" >0.5</parameter>
+	<parameter name="Local mutation probability" >0.5</parameter>
 	<parameter name="Initial place iteration" >100</parameter>
 	<parameter name="Initial place count" >200</parameter>
 	<parameter name="Random place count" >100</parameter>

@@ -61,7 +61,7 @@ class VPCMA2_ConfGen(ConfGenBase):
     def __init__(self):
         # override style option setting
         self.style_types = {"format": str, "romultic": str, "duplicate": bool}
-        self.style_choises = {"romultic": ["espresso", "ILP"], "format": ["packet", "remdata", "llvm-ir"]}
+        self.style_choices = {"romultic": ["espresso", "ILP"], "format": ["packet", "remdata", "llvm-ir"]}
         self.style_default = {"format": "packet", "romultic": None, "duplicate": False}
         self.export_remdata = False
         self.export_packet = False
@@ -510,43 +510,32 @@ class VPCMA2_ConfGen(ConfGenBase):
 
         const_regs = [CGRA.getNodeName("Const", index=i) for i in range(len(CGRA.getConstRegs()))]
 
+        mux_name = {0: "SEL_A", 1: "SEL_B"}
+
         # ALUs
         for op_label, (x, y) in individual.mapping.items():
             if op_label in comp_dfg.nodes():
-                opcode = comp_dfg.node[op_label]["op"]
-            else:
-                opcode = "CAT"
+                opcode = comp_dfg.node[op_label]["opcode"]
+
             confs[x][y]["OPCODE"] = CGRA.getOpConfValue((x, y), opcode)
             alu = CGRA.get_PE_resources((x, y))["ALU"]
             pre_nodes = list(routed_graph.predecessors(alu))
+            operands = {routed_graph.edges[(v, alu)]["operand"]: v \
+                        for v in pre_nodes\
+                        if "operand" in routed_graph.edges[(v, alu)]}
+            mux_remain = set(mux_name.keys()) - set(operands.keys())
+            for v in pre_nodes:
+                if not v in operands.values():
+                    operands[mux_remain.pop()] = v
+
+            for k, v in operands.items():
+                confs[x][y][mux_name[k]] = CGRA.getNetConfValue(alu, v)
 
             # decode consts
             for v in pre_nodes:
                 if v in const_regs:
                     confs[x][y]["CONST_SEL"] = const_regs.index(v)
                     break
-
-            operands = {routed_graph.edges[(v, alu)]["operand"]: v \
-                        for v in pre_nodes\
-                        if "operand" in routed_graph.edges[(v, alu)]}
-
-            if "left" in operands and "right" in operands:
-                confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, operands["left"])
-                confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, operands["right"])
-            elif "left" in operands:
-                confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, operands["left"])
-                pre_nodes.remove(operands["left"])
-                if len(pre_nodes) > 0:
-                    confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-            elif "right" in operands:
-                confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, operands["right"])
-                pre_nodes.remove(operands["right"])
-                if len(pre_nodes) > 0:
-                    confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-            else:
-                confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-                if len(pre_nodes) > 1:
-                    confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, pre_nodes[1])
 
         # routing ALU
         for x in range(width):
@@ -572,7 +561,7 @@ class VPCMA2_ConfGen(ConfGenBase):
                             pre_node = list(routed_graph.predecessors(se))[0]
                             confs[x][y][CGRA.getWireName(se)] = CGRA.getNetConfValue(se, pre_node)
                 else:
-                    raise TypeError("CCSOTB2 assumes one SE per PE")
+                    raise TypeError("VPCMA2 assumes one SE per PE")
 
         return confs
 

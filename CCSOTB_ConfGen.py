@@ -253,36 +253,26 @@ class CCSOTB_ConfGen(ConfGenBase):
 
         confs = [ [ {} for y in range(height)] for x in range(width)]
 
+        mux_name = {0: "SEL_A", 1: "SEL_B"}
+
         # ALUs
         for op_label, (x, y) in individual.mapping.items():
             if op_label in comp_dfg.nodes():
-                opcode = comp_dfg.node[op_label]["op"]
-            else:
-                opcode = "CAT"
+                opcode = comp_dfg.node[op_label]["opcode"]
+
             confs[x][y]["OPCODE"] = CGRA.getOpConfValue((x, y), opcode)
             alu = CGRA.get_PE_resources((x, y))["ALU"]
             pre_nodes = list(routed_graph.predecessors(alu))
             operands = {routed_graph.edges[(v, alu)]["operand"]: v \
                         for v in pre_nodes\
                         if "operand" in routed_graph.edges[(v, alu)]}
+            mux_remain = set(mux_name.keys()) - set(operands.keys())
+            for v in pre_nodes:
+                if not v in operands.values():
+                    operands[mux_remain.pop()] = v
 
-            if "left" in operands and "right" in operands:
-                confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, operands["left"])
-                confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, operands["right"])
-            elif "left" in operands:
-                confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, operands["left"])
-                pre_nodes.remove(operands["left"])
-                if len(pre_nodes) > 0:
-                    confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-            elif "right" in operands:
-                confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, operands["right"])
-                pre_nodes.remove(operands["right"])
-                if len(pre_nodes) > 0:
-                    confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-            else:
-                confs[x][y]["SEL_A"] = CGRA.getNetConfValue(alu, pre_nodes[0])
-                if len(pre_nodes) > 1:
-                    confs[x][y]["SEL_B"] = CGRA.getNetConfValue(alu, pre_nodes[1])
+            for k, v in operands.items():
+                confs[x][y][mux_name[k]] = CGRA.getNetConfValue(alu, v)
 
         # routing ALU
         for x in range(width):

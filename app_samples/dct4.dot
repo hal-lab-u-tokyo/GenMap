@@ -1,72 +1,72 @@
 strict digraph  {
-	"INPUT_%3" [input=True]; //indata[0]
-	"INPUT_%5" [input=True]; //indata[1]
-	"INPUT_%7" [input=True]; //indata[2]
-	"INPUT_%9" [input=True]; //indata[3]
-	"op_%10" [op=ADD];
-	"op_%11" [op=ADD];
-	"op_%12" [op=SRA];
-	"1" [const=True];
-	"op_%13" [op=SRA];
-	"op_%14" [op=ADD];
-	"op_%15" [op=SUB];
-	"op_%17" [op=SUB];
-	"op_%18" [op=SUB];
-	"op_%19" [op=MULT];
-	"21407" [const=True];
-	"op_%20" [op=SRA];
-	"15" [const=True];
-	"op_%21" [op=MULT];
-	"8835" [const=True];
-	"op_%22" [op=SRA];
-	"op_%23" [op=MULT];
-	"op_%24" [op=SRA];
-	"op_%25" [op=MULT];
-	"op_%26" [op=SRA];
-	"op_%27" [op=ADD];
-	"op_%28" [op=SUB];
-	"OUTPUT_0" [output=True]; //outdata[0]
-	"OUTPUT_1" [output=True]; //outdata[1]
-	"OUTPUT_2" [output=True]; //outdata[2]
-	"OUTPUT_3" [output=True]; //outdata[3]
-	"INPUT_%3" -> "op_%10"  [operand=right];
-	"INPUT_%3" -> "op_%17"  [operand=left];
-	"INPUT_%5" -> "op_%11"  [operand=right];
-	"INPUT_%5" -> "op_%18"  [operand=left];
-	"INPUT_%7" -> "op_%11"  [operand=left];
-	"INPUT_%7" -> "op_%18"  [operand=right];
-	"INPUT_%9" -> "op_%10"  [operand=left];
-	"INPUT_%9" -> "op_%17"  [operand=right];
-	"op_%10" -> "op_%12"  [operand=left];
-	"op_%11" -> "op_%13"  [operand=left];
-	"op_%12" -> "op_%14"  [operand=left];
-	"op_%12" -> "op_%15"  [operand=left];
-	"1" -> "op_%12"  [operand=right];
-	"1" -> "op_%13"  [operand=right];
-	"op_%13" -> "op_%14"  [operand=right];
-	"op_%13" -> "op_%15"  [operand=right];
+	"INPUT_%3" [type=input]; //indata[0]
+	"INPUT_%5" [type=input]; //indata[1]
+	"INPUT_%7" [type=input]; //indata[2]
+	"INPUT_%9" [type=input]; //indata[3]
+	"op_%10" [type=op,opcode=ADD];
+	"op_%11" [type=op,opcode=ADD];
+	"op_%12" [type=op,opcode=SRA];
+	"1" [type=const,datatype=int, value=1];
+	"op_%13" [type=op,opcode=SRA];
+	"op_%14" [type=op,opcode=ADD];
+	"op_%15" [type=op,opcode=SUB];
+	"op_%17" [type=op,opcode=SUB];
+	"op_%18" [type=op,opcode=SUB];
+	"op_%19" [type=op,opcode=MULT];
+	"21407" [type=const,datatype=int, value=21407];
+	"op_%20" [type=op,opcode=SRA];
+	"15" [type=const,datatype=int, value=15];
+	"op_%21" [type=op,opcode=MULT];
+	"8835" [type=const,datatype=int, value=8835];
+	"op_%22" [type=op,opcode=SRA];
+	"op_%23" [type=op,opcode=MULT];
+	"op_%24" [type=op,opcode=SRA];
+	"op_%25" [type=op,opcode=MULT];
+	"op_%26" [type=op,opcode=SRA];
+	"op_%27" [type=op,opcode=ADD];
+	"op_%28" [type=op,opcode=SUB];
+	"OUTPUT_0" [type=output]; //outdata[0]
+	"OUTPUT_1" [type=output]; //outdata[1]
+	"OUTPUT_2" [type=output]; //outdata[2]
+	"OUTPUT_3" [type=output]; //outdata[3]
+	"INPUT_%3" -> "op_%10"  [operand=1];
+	"INPUT_%3" -> "op_%17"  [operand=0];
+	"INPUT_%5" -> "op_%11"  [operand=1];
+	"INPUT_%5" -> "op_%18"  [operand=0];
+	"INPUT_%7" -> "op_%11"  [operand=0];
+	"INPUT_%7" -> "op_%18"  [operand=1];
+	"INPUT_%9" -> "op_%10"  [operand=0];
+	"INPUT_%9" -> "op_%17"  [operand=1];
+	"op_%10" -> "op_%12"  [operand=0];
+	"op_%11" -> "op_%13"  [operand=0];
+	"op_%12" -> "op_%14"  [operand=0];
+	"op_%12" -> "op_%15"  [operand=0];
+	"1" -> "op_%12"  [operand=1];
+	"1" -> "op_%13"  [operand=1];
+	"op_%13" -> "op_%14"  [operand=1];
+	"op_%13" -> "op_%15"  [operand=1];
 	"op_%14" -> "OUTPUT_0";
 	"op_%15" -> "OUTPUT_2";
-	"op_%17" -> "op_%19"  [operand=left];
-	"op_%17" -> "op_%21"  [operand=left];
-	"op_%18" -> "op_%23"  [operand=left];
-	"op_%18" -> "op_%25"  [operand=left];
-	"op_%19" -> "op_%20"  [operand=left];
-	"21407" -> "op_%19"  [operand=right];
-	"21407" -> "op_%23"  [operand=right];
-	"op_%20" -> "op_%27"  [operand=left];
-	"15" -> "op_%20"  [operand=right];
-	"15" -> "op_%22"  [operand=right];
-	"15" -> "op_%24"  [operand=right];
-	"15" -> "op_%26"  [operand=right];
-	"op_%21" -> "op_%22"  [operand=left];
-	"8835" -> "op_%21"  [operand=right];
-	"8835" -> "op_%25"  [operand=right];
-	"op_%22" -> "op_%28"  [operand=left];
-	"op_%23" -> "op_%24"  [operand=left];
-	"op_%24" -> "op_%28"  [operand=right];
-	"op_%25" -> "op_%26"  [operand=left];
-	"op_%26" -> "op_%27"  [operand=right];
+	"op_%17" -> "op_%19"  [operand=0];
+	"op_%17" -> "op_%21"  [operand=0];
+	"op_%18" -> "op_%23"  [operand=0];
+	"op_%18" -> "op_%25"  [operand=0];
+	"op_%19" -> "op_%20"  [operand=0];
+	"21407" -> "op_%19"  [operand=1];
+	"21407" -> "op_%23"  [operand=1];
+	"op_%20" -> "op_%27"  [operand=0];
+	"15" -> "op_%20"  [operand=1];
+	"15" -> "op_%22"  [operand=1];
+	"15" -> "op_%24"  [operand=1];
+	"15" -> "op_%26"  [operand=1];
+	"op_%21" -> "op_%22"  [operand=0];
+	"8835" -> "op_%21"  [operand=1];
+	"8835" -> "op_%25"  [operand=1];
+	"op_%22" -> "op_%28"  [operand=0];
+	"op_%23" -> "op_%24"  [operand=0];
+	"op_%24" -> "op_%28"  [operand=1];
+	"op_%25" -> "op_%26"  [operand=0];
+	"op_%26" -> "op_%27"  [operand=1];
 	"op_%27" -> "OUTPUT_1";
 	"op_%28" -> "OUTPUT_3";
 }

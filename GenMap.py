@@ -23,7 +23,7 @@ def parser():
     usage = 'Usage: python3 {0} [options...] dot_file frequency'.format(__file__)
     argparser = ArgumentParser(usage=usage)
     argparser.add_argument("dot_file", type=str, help="application data-flow-graph")
-    argparser.add_argument("freq", type=float, help='operation frequency')
+    argparser.add_argument("--freq", type=float, help='operation frequency', default=1.0)
     argparser.add_argument("-o", "--output", type=str, \
                             help="specify the output file name(default = {app_name}.dump")
     argparser.add_argument("--arch", type=str, help="specify architecure definition file " + \
@@ -42,6 +42,9 @@ def parser():
                             help="specify the prefix of frequency unit (default = M)")
     argparser.add_argument("--log", type=str, help="specify log file name (default: no logging)")
     argparser.add_argument("--nproc", type=int, help="specify the number of multi-process (default: cpu count)")
+    argparser.add_argument("--data-flow", type=str, \
+                            help="specify the data flow direction", \
+                            choices=Placer.DATA_FLOW.keys(), default="any")
     args = argparser.parse_args()
     return args
 
@@ -55,7 +58,7 @@ def checkFeasibility(CGRA, app):
                     w, h, len(comp_dfg.nodes)))
 
     for v in comp_dfg.nodes():
-        op = comp_dfg.nodes[v]["op"]
+        op = comp_dfg.nodes[v]["opcode"]
         if op in need_ops:
             need_ops[op] += 1
         else:
@@ -195,9 +198,11 @@ if __name__ == '__main__':
         exit()
 
     if not args.nproc is None:
-        success_setup = optimizer.setup(model, app, sim_params, args.init_map, proc_num = args.nproc)
+        success_setup = optimizer.setup(model, app, sim_params, args.init_map,\
+                            args.data_flow, proc_num = args.nproc)
     else:
-        success_setup = optimizer.setup(model, app, sim_params, args.init_map)
+        success_setup = optimizer.setup(model, app, sim_params, args.init_map,\
+                                            args.data_flow)
 
     # run optimization
     if success_setup:

@@ -9,6 +9,7 @@ import pulp
 from SolverSetup import SolverSetup
 
 import math
+import sys
 
 # setting up for pulp solver
 try:
@@ -33,12 +34,15 @@ oport_color = "magenta"
 
 class ConfDrawer():
 
-    def __init__(self, CGRA, individual):
+    def __init__(self, CGRA , individual, origin = "bottom-left"):
         """Constructor of this class
 
             Args:
                 CGRA: (PEArrayModel): A model of the CGRA
                 individual (Individual): An individual to be evaluated
+                origin (str): position of coordinate origin
+                    available values are following:
+                        "bottom-left", "top-left", "bottom-right", "top-right"
         """
 
         self.width, self.height = CGRA.getSize()
@@ -49,7 +53,6 @@ class ConfDrawer():
         self.ylbound = 0
         self.xubound = 0
         self.yubound = 0
-
 
         # io drawing info
         # dict of dict:
@@ -106,6 +109,7 @@ class ConfDrawer():
             sum([used_PE_coords, used_ip_coords, used_op_coords], [])]) + 1
 
         # draw the used PEs
+        height_diff = self.height - actual_height
         self.width = actual_width
         self.height = actual_height
 
@@ -119,6 +123,26 @@ class ConfDrawer():
 
         self.node_to_patch = {}
 
+        # coord,pos re-mapping
+        io_remap = {pos: pos for pos in ["left", "right", "top", "bottom"]}
+        self.preg_remap = lambda preg_pos: preg_pos
+        if origin == "top-left":
+            self.coord_remap = lambda pos: (pos[0], self.height - 1 - pos[1])
+            io_remap["top"], io_remap["bottom"] = io_remap["bottom"], io_remap["top"]
+            self.preg_remap = lambda preg_pos: [v - height_diff for v in  preg_pos[::-1]]
+        elif origin == "bottom-right":
+            self.coord_remap = lambda pos: (self.width - 1 - pos[0], pos[1])
+            io_remap["left"], io_remap["right"] = io_remap["right"], io_remap["left"]
+        elif origin == "top-right":
+            self.coord_remap = lambda pos: (self.width - 1 - pos[0], \
+                                                self.height - 1 - pos[1])
+            io_remap["left"], io_remap["right"] = io_remap["right"], io_remap["left"]
+            io_remap["top"], io_remap["bottom"] = io_remap["bottom"], io_remap["top"]
+            self.preg_remap = lambda preg_pos: [v - height_diff for v in  preg_pos[::-1]]
+        else:
+            self.coord_remap = lambda pos: pos
+
+        self.io_remap = io_remap
 
     def analyzeIO(self, CGRA):
         # analyze used io pos
@@ -313,7 +337,7 @@ class ConfDrawer():
                     color = pe_color
                 else:
                     color = "white"
-                pe = self.__make_PE_patch((x, y), color)
+                pe = self.__make_PE_patch(self.coord_remap((x, y)), color)
                 self.ax.add_patch(pe)
 
         # add ALUs & SEs
@@ -323,7 +347,7 @@ class ConfDrawer():
                 for y in range(self.height):
                     if v in self.PE_resources[x][y]:
                         if CGRA.isALU(v):
-                            alu = self.__make_ALU_patch((x, y))
+                            alu = self.__make_ALU_patch(self.coord_remap((x, y)))
                             self.ax.add_patch(alu)
                             self.node_to_patch[v] = alu
                             if "route" in individual.routed_graph.nodes[v].keys():
@@ -333,24 +357,26 @@ class ConfDrawer():
                         else:
                             for SE_id, SEs in CGRA.get_PE_resources((x, y))["SE"].items():
                                 if v in SEs:
-                                    se = self.__make_SE_patch((x, y), SE_id)
+                                    se = self.__make_SE_patch(self.coord_remap((x, y)), SE_id)
                                     self.ax.add_patch(se)
                                     self.node_to_patch[v] = se
 
         # add op labels
         dfg = app.getCompSubGraph()
-        for op_label, (x, y) in individual.mapping.items():
+        for op_label, (org_x, org_y) in individual.mapping.items():
             if op_label in dfg.nodes():
-                opcode = dfg.nodes[op_label]["op"]
+                opcode = dfg.nodes[op_label]["opcode"]
             else:
                 opcode = "RPE"
+            (x, y) = self.coord_remap((org_x, org_y))
             self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, y + 1 - pe_margin * 2),\
                                 size=12)
 
         # add routing node
-        for (x, y) in routing_alus:
+        for (org_x, org_y) in routing_alus:
             opcode = CGRA.getRoutingOpcode(\
-                CGRA.getNodeName("ALU", pos=(x, y)))
+                CGRA.getNodeName("ALU", pos=(org_x, org_y)))
+            (x, y) = self.coord_remap((org_x, org_y))
             self.ax.annotate(opcode, xy=(x + 1 - pe_margin * 3, \
                             y + 1 - pe_margin * 2), size=12)
 
@@ -374,7 +400,7 @@ class ConfDrawer():
                              arrowprops=arrow_setting)
 
 
-        preg_positions = CGRA.getPregPositions()
+        preg_positions = self.preg_remap(CGRA.getPregPositions())
         for i in range(CGRA.getPregNumber()):
             if individual.preg[i]:
                 self.ax.add_patch(self.__make_preg(preg_positions[i]))
@@ -461,7 +487,9 @@ class ConfDrawer():
                 self.used_output[node_name]
 
         adjPEPos = info["adjPE"]
+        draw_adjPEPos = self.coord_remap(adjPEPos)
         pos = info["pos"]
+        draw_pos = self.io_remap[pos]
         length = self.length
         margin_to_PE = length / 2.0
         placed_count = self.io_placed_count[pos][adjPEPos]
@@ -471,21 +499,21 @@ class ConfDrawer():
         color = iport_color if isInput else oport_color
 
         # calc offset and rotation angles
-        if info["pos"] == "left":
-            pos_x = adjPEPos[0] - margin_to_PE
-            pos_y = adjPEPos[1] + pe_margin + port_ofst
+        if draw_pos == "left":
+            pos_x = draw_adjPEPos[0] - margin_to_PE
+            pos_y = draw_adjPEPos[1] + pe_margin + port_ofst
             angle = math.radians(270) if isInput else math.radians(90)
-        elif info["pos"] == "right":
-            pos_x = adjPEPos[0] + margin_to_PE + 1
-            pos_y = adjPEPos[1] + pe_margin + port_ofst
+        elif draw_pos == "right":
+            pos_x = draw_adjPEPos[0] + margin_to_PE + 1
+            pos_y = draw_adjPEPos[1] + pe_margin + port_ofst
             angle = math.radians(90) if isInput else math.radians(270)
-        elif info["pos"] == "top":
-            pos_x = adjPEPos[0] + pe_margin + port_ofst
-            pos_y = adjPEPos[1] + margin_to_PE + 1
+        elif draw_pos == "top":
+            pos_x = draw_adjPEPos[0] + pe_margin + port_ofst
+            pos_y = draw_adjPEPos[1] + margin_to_PE + 1
             angle =  math.radians(180) if isInput else math.radians(0)
-        elif info["pos"] == "bottom":
-            pos_x = adjPEPos[0] + pe_margin + port_ofst
-            pos_y = adjPEPos[1] - margin_to_PE
+        elif draw_pos == "bottom":
+            pos_x = draw_adjPEPos[0] + pe_margin + port_ofst
+            pos_y = draw_adjPEPos[1] - margin_to_PE
             angle = math.radians(0) if isInput else math.radians(180)
 
         self.io_placed_count[pos][adjPEPos] += 1
