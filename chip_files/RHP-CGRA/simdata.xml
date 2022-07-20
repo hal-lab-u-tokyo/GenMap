@@ -3,21 +3,21 @@
 		<bias>0.0</bias>
 	</BiasRange>
 	<Delay unit="ns">
-		<ALU bias="0.0" op="NOP">0</ALU>
-		<ALU bias="0.0" op="ADD">0</ALU>
-		<ALU bias="0.0" op="SUB">0</ALU>
-		<ALU bias="0.0" op="MUL">0</ALU>
-		<ALU bias="0.0" op="DIV">0</ALU>
-		<ALU bias="0.0" op="AND">0</ALU>
-		<ALU bias="0.0" op="XOR">0</ALU>
-		<ALU bias="0.0" op="OR">0</ALU>
-		<ALU bias="0.0" op="NOT">0</ALU>
-		<ALU bias="0.0" op="FADD">0</ALU>
-		<ALU bias="0.0" op="FSUB">0</ALU>
-		<ALU bias="0.0" op="FMUL">0</ALU>
-		<ALU bias="0.0" op="FDIV">0</ALU>
-		<ALU bias="0.0" op="FEXP">0</ALU>
-		<ALU bias="0.0" op="FSIN">0</ALU>
+		<ALU bias="0.0" op="nop">0</ALU>
+		<ALU bias="0.0" op="add">0</ALU>
+		<ALU bias="0.0" op="sub">0</ALU>
+		<ALU bias="0.0" op="mul">0</ALU>
+		<ALU bias="0.0" op="div">0</ALU>
+		<ALU bias="0.0" op="and">0</ALU>
+		<ALU bias="0.0" op="xor">0</ALU>
+		<ALU bias="0.0" op="or">0</ALU>
+		<ALU bias="0.0" op="not">0</ALU>
+		<ALU bias="0.0" op="fadd">0</ALU>
+		<ALU bias="0.0" op="fsub">0</ALU>
+		<ALU bias="0.0" op="fmul">0</ALU>
+		<ALU bias="0.0" op="fdiv">0</ALU>
+		<ALU bias="0.0" op="fexp">0</ALU>
+		<ALU bias="0.0" op="fsin">0</ALU>
 		<!-- delay of SE -->
 		<SE bias="0.0">0</SE>
 	</Delay>
@@ -31,21 +31,21 @@
 			<Propagation>0</Propagation>
 			<Decay>0</Decay>
 			<SE_weight>0</SE_weight>
-			<Switching op="NOP">0</Switching>
-			<Switching op="ADD">0</Switching>
-			<Switching op="SUB">0</Switching>
-			<Switching op="MUL">0</Switching>
-			<Switching op="DIV">0</Switching>
-			<Switching op="AND">0</Switching>
-			<Switching op="XOR">0</Switching>
-			<Switching op="OR">0</Switching>
-			<Switching op="NOT">0</Switching>
-			<Switching op="FADD">0</Switching>
-			<Switching op="FSUB">0</Switching>
-			<Switching op="FMUL">0</Switching>
-			<Switching op="FDIV">0</Switching>
-			<Switching op="FEXP">0</Switching>
-			<Switching op="FSIN">0</Switching>
+			<Switching op="nop">0</Switching>
+			<Switching op="add">0</Switching>
+			<Switching op="sub">0</Switching>
+			<Switching op="mul">0</Switching>
+			<Switching op="div">0</Switching>
+			<Switching op="and">0</Switching>
+			<Switching op="xor">0</Switching>
+			<Switching op="or">0</Switching>
+			<Switching op="not">0</Switching>
+			<Switching op="fadd">0</Switching>
+			<Switching op="fsub">0</Switching>
+			<Switching op="fmul">0</Switching>
+			<Switching op="fdiv">0</Switching>
+			<Switching op="fexp">0</Switching>
+			<Switching op="fsin">0</Switching>
 		</Dynamic>
 	</Power>
 </DATA>

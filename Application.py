@@ -158,12 +158,12 @@ class Application():
         if not "datatype" in attr.keys():
             dtype = "int"
         else:
-            dtype = attr["datatype"]
+            dtype = attr["datatype"].strip("\"")
 
         if not "value" in attr.keys():
             value = "0"
         else:
-            value = attr["value"]
+            value = attr["value"].strip("\"")
 
         if dtype in const_itypes:
             cstr = value
