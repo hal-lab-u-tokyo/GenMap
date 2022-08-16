@@ -79,7 +79,7 @@ class CMASOTB2_ConfGen(ConfGenBase):
                 PE_confs = self.make_PE_conf(CGRA, app, individual)
                 ld_conf = self.make_LD_Dmanu(CGRA, individual.routed_graph)
                 st_conf = self.make_ST_Dmanu(CGRA, individual.routed_graph)
-                const_conf = self.make_Const(CGRA, individual.routed_graph)
+                const_conf = self.make_Const(CGRA, app, individual.routed_graph)
 
                 if style_opt["duplicate"]:
                     map_width = individual.getEvaluatedData("map_width")
@@ -295,14 +295,26 @@ class CMASOTB2_ConfGen(ConfGenBase):
 
         return st_conf
 
-    def make_Const(self, CGRA, routed_graph):
+    def make_Const(self, CGRA, app, routed_graph):
+        """analyzes value of constant register from mapping results
+            Args:
+                CGRA (PEArrayModel)             : the target architecture
+                app (Application)               : the target application
+                routed_graph (networkx DiGraph) : routed graph on PE array resources
+
+            Returns:
+                list of int: const values
+        """
+
         const_num = len(CGRA.getConstRegs())
         const_conf = [0 for i in range(const_num)]
+        g = app.getConstSubGraph()
 
         for i in range(const_num):
             c_reg = CGRA.getNodeName("Const", index=i)
             if c_reg in routed_graph.nodes():
-                const_conf[i] = routed_graph.nodes[c_reg]["value"]
+                const_node = routed_graph.nodes[c_reg]["value"]
+                const_conf[i] = g.nodes[const_node]["value"]
 
         return const_conf
 

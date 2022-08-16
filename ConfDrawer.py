@@ -92,16 +92,21 @@ class ConfDrawer():
                 self.used_output[v] = {}
 
         # get IO config
-        self.analyzeIO(CGRA)
-        horizontal_ofset = 1 if len(self.io_count["left"]) > 0 \
-            or len(self.io_count["right"]) > 0 else 0
-        vertical_ofset = 1 if len(self.io_count["top"]) > 0 \
-            or  len(self.io_count["bottom"]) > 0 else 0
+        if self.analyzeIO(CGRA):
+            horizontal_offset = 1 if len(self.io_count["left"]) > 0 \
+                or len(self.io_count["right"]) > 0 else 0
+            vertical_offset = 1 if len(self.io_count["top"]) > 0 \
+                or  len(self.io_count["bottom"]) > 0 else 0
+            used_ip_coords = [v["adjPE"] for v in self.used_input.values()]
+            used_op_coords = [v["adjPE"] for v in self.used_output.values()]
+        else:
+            horizontal_offset = 0
+            vertical_offset = 0
+            used_ip_coords = []
+            used_op_coords = []
 
 
         used_PE_coords = [(x, y) for x in range(self.width) for y in range(self.height) if self.used_PE[x][y]]
-        used_ip_coords = [v["adjPE"] for v in self.used_input.values()]
-        used_op_coords = [v["adjPE"] for v in self.used_output.values()]
 
         actual_width = max([x for (x, y) in \
             sum([used_PE_coords, used_ip_coords, used_op_coords], [])]) + 1
@@ -113,8 +118,8 @@ class ConfDrawer():
         self.width = actual_width
         self.height = actual_height
 
-        self.xubound = self.width + horizontal_ofset
-        self.yubound = self.height + vertical_ofset
+        self.xubound = self.width + horizontal_offset
+        self.yubound = self.height + vertical_offset
 
         self.fig = plt.figure(figsize=(self.xubound, self.yubound))
         self.ax = self.fig.add_subplot(1, 1, 1)
@@ -168,6 +173,17 @@ class ConfDrawer():
                     oports_dict[pos].append(op_name)
                     info["pos"] = pos
 
+        if len([v for v in self.used_input.values() if "pos" in v]) != \
+            len(self.used_input) or \
+            len([v for v in self.used_output.values() if "pos" in v]) != \
+            len(self.used_output):
+            print("Incorrect or nothing about position info. Skip IO drawing")
+            for u in iports_dict[pos]:
+                del self.used_input[u]
+            for u in oports_dict[pos]:
+                del self.used_output[u]
+            return
+    
         # estimate adjPE for each pos
         g = CGRA.getNetwork()
         pending_iport_analysis = False
@@ -196,11 +212,12 @@ class ConfDrawer():
                     adjPEPos.update(self.findAdjPE(pos, opConnPos))
             except Exception as e:
                 print(e)
-                print("skip IO drawing")
+                print("Failed to determine drawing IO position.  Skip IO drawing")
                 for u in iports_dict[pos]:
                     del self.used_input[u]
                 for u in oports_dict[pos]:
                     del self.used_output[u]
+                return
 
             for k, v in adjPEPos.items():
                 if k in iports_dict[pos]:
@@ -382,15 +399,20 @@ class ConfDrawer():
 
         # add Input port
         for iport in self.used_input.keys():
-            ip = self.__make_IOPort(iport, True)
-            self.ax.add_patch(ip)
-            self.node_to_patch[iport] = ip
+            try:
+                ip = self.__make_IOPort(iport, True)
+                self.ax.add_patch(ip)
+                self.node_to_patch[iport] = ip
+            except KeyError:
+                pass
         # add Output port
         for oport in self.used_output.keys():
-            op = self.__make_IOPort(oport, False)
-            self.ax.add_patch(op)
-            self.node_to_patch[oport] = op
-
+            try:
+                op = self.__make_IOPort(oport, False)
+                self.ax.add_patch(op)
+                self.node_to_patch[oport] = op
+            except KeyError:
+                pass
         # draw routing
         for u, v in individual.routed_graph.edges():
             if u in self.node_to_patch.keys() and \
