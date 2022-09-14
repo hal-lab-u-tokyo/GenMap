@@ -69,6 +69,7 @@ class ConfDrawer():
         self.io_placed_count =  {pos: {} for pos in ["left", "right", "top", "bottom"]}
         # drawing 
         self.io_size = pe_size # it cloud be updated after anylyzeIO
+        self.length = pe_size
 
         for x in range(self.width):
             for y in range(self.height):
@@ -182,11 +183,10 @@ class ConfDrawer():
                 del self.used_input[u]
             for u in oports_dict[pos]:
                 del self.used_output[u]
-            return
+            return False
     
         # estimate adjPE for each pos
         g = CGRA.getNetwork()
-        pending_iport_analysis = False
         for pos in io_pos:
             try:
                 # for input
@@ -211,13 +211,12 @@ class ConfDrawer():
                     adjPEPos = self.findAdjPE(pos, ipConnPos)
                     adjPEPos.update(self.findAdjPE(pos, opConnPos))
             except Exception as e:
-                print(e)
                 print("Failed to determine drawing IO position.  Skip IO drawing")
                 for u in iports_dict[pos]:
                     del self.used_input[u]
                 for u in oports_dict[pos]:
                     del self.used_output[u]
-                return
+                return False
 
             for k, v in adjPEPos.items():
                 if k in iports_dict[pos]:
@@ -252,6 +251,8 @@ class ConfDrawer():
             self.ylbound -= 1
         if "top" in used_pos:
             self.yubound += 1
+
+        return True
 
 
     def findAdjPE(self, pos, _connTable):
@@ -319,7 +320,6 @@ class ConfDrawer():
                                 for x in range(self.width)]
         elif pos == "bottom":
             candidate_coord = [(x, 0) for x in range(self.width)]
-
 
         if pos in ["left", "right"]:
             forCoordSort = lambda pos: pos[1]
